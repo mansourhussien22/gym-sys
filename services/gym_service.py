@@ -7,9 +7,12 @@ from file_manager import FileManager
 try:
     from .qr_manager import QRManager
 except ImportError:
-    from qr_manager import QRManager
+    try:
+        from services.qr_manager import QRManager
+    except ImportError:
+        from qr_manager import QRManager
 
-# تعريف باقات الاشتراك الرسمية والأسعار وعدد الأيام والسيشنات[cite: 8]
+# تعريف باقات الاشتراك الرسمية والأسعار وعدد الأيام والسيشنات
 MEMBERSHIP_PLANS = {
     "Fitness (Full Month - 30 Days)": {
         "days": 30, "sessions": 24, "price": 600.0, "category": "Fitness Only"
@@ -28,7 +31,7 @@ MEMBERSHIP_PLANS = {
     },
 }
 
-TRAINER_TAX_RATE = 0.10  
+TRAINER_TAX_RATE = 0.10  # زيادة 10% رسوم مدرب خاص
 
 
 class Gym:
@@ -59,7 +62,7 @@ class Gym:
         }
         self.file_manager.save_data(data)
 
-  
+    # ---------------- توليد معرفات IDs فريدة ----------------
     def generate_member_id(self) -> int:
         existing = {m.person_id for m in self.members}
         while True:
@@ -74,7 +77,7 @@ class Gym:
             if new_id not in existing:
                 return new_id
 
-  
+    # ---------------- إدارة الأعضاء وفحوصات InBody ----------------
     def register_member(
         self,
         name: str,
@@ -100,14 +103,15 @@ class Gym:
             trainer_id=trainer_id
         )
 
+        # تسجيل فحص الـ InBody المبدئي
         if all(v is not None for v in [weight, height, fat_percentage, muscle_mass]):
             if hasattr(member, "add_inbody_record"):
-                member.add_inbody_record(weight, height, fat_percentage, muscle_mass, notes="Initial Registration InBody")
+                member.add_inbody_record(weight, height, fat_percentage, muscle_mass, notes="Initial InBody Registration")
 
         self.members.append(member)
         QRManager.generate_qr(member.person_id, member.qr_token)
 
-    
+        # إنشاء الاشتراك وسداد الرسوم
         self.create_membership_with_plan(member_id=member.person_id, plan_name=plan_name, payment_method=payment_method)
         self.save()
         return member
@@ -128,7 +132,6 @@ class Gym:
         if not member:
             raise ValueError(f"Member #{member_id} not found.")
 
-   
         for m in self.members:
             if m.phone == phone and m.person_id != member_id:
                 raise ValueError(f"Phone number '{phone}' is already registered to '{m.name}'.")
@@ -165,15 +168,20 @@ class Gym:
     def filter_members_by_status(self, active: bool = True) -> List[Member]:
         return [m for m in self.members if (self.get_active_membership(m.person_id) is not None) == active]
 
-  
+    # ---------------- إدارة الكباتن والـ QR الخاص بهم ----------------
     def add_trainer(self, trainer: Trainer) -> None:
         if any(t.person_id == trainer.person_id for t in self.trainers):
             raise ValueError(f"Trainer ID #{trainer.person_id} already exists.")
         self.trainers.append(trainer)
+        token = getattr(trainer, "qr_token", str(trainer.person_id))
+        QRManager.generate_qr(trainer.person_id, token)
         self.save()
 
     def find_trainer_by_id(self, trainer_id: int) -> Optional[Trainer]:
         return next((t for t in self.trainers if t.person_id == trainer_id), None)
+
+    def find_trainer_by_token(self, token: str) -> Optional[Trainer]:
+        return next((t for t in self.trainers if getattr(t, "qr_token", None) == token), None)
 
     def assign_trainer(self, member_id: int, trainer_id: int) -> None:
         member = self.find_member_by_id(member_id)
@@ -185,7 +193,71 @@ class Gym:
         member.trainer_id = trainer_id
         self.save()
 
- 
+    def get_trainer_full_profile(self, trainer_id: int) -> Dict[str, Any]:
+        """سحب بروفايل الكابتن الشامل والمحمي مع حالة تواجده وسجل حضوره"""
+        trainer = self.find_trainer_by_id(trainer_id)
+        if not trainer:
+            raise ValueError(f"Trainer #{trainer_id} not found.")
+
+        att_logs = [a for a in self.attendances if a.member_id == trainer_id]
+        last_checkin = att_logs[-1].timestamp if att_logs else "Never"
+
+        # هل الكابتن متواجد في الصالة حالياً؟
+        currently_in = any(
+            p["person_id"] == trainer_id for p in self.get_currently_in_gym() if p.get("role") == "Trainer"
+        )
+
+        trainees_report = self.get_trainer_trainees_report(trainer_id)
+
+        return {
+            "id": trainer.person_id,
+            "name": trainer.name,
+            "phone": trainer.phone,
+            "specialization": trainer.specialization,
+            "salary": trainer.salary,
+            "qr_token": getattr(trainer, "qr_token", ""),
+            "total_attendance_days": len(att_logs),
+            "last_checkin": last_checkin,
+            "is_present_now": currently_in,
+            "total_trainees": trainees_report["total_trainees"],
+            "trainees": trainees_report["trainees"]
+        }
+
+    def get_trainer_trainees_report(self, trainer_id: int) -> Dict[str, Any]:
+        trainer = self.find_trainer_by_id(trainer_id)
+        if not trainer:
+            raise ValueError(f"Trainer #{trainer_id} not found.")
+
+        trainees = [m for m in self.members if m.trainer_id == trainer_id]
+        now = datetime.now()
+        three_months_ago = now - timedelta(days=90)
+
+        report = []
+        for m in trainees:
+            att_3m = [
+                a for a in self.attendances
+                if a.member_id == m.person_id and datetime.strptime(a.timestamp[:10], "%Y-%m-%d") >= three_months_ago
+            ]
+            sub = self.get_latest_membership(m.person_id)
+            prog = m.get_progress_summary() if hasattr(m, "get_progress_summary") else {"status": "No InBody"}
+
+            report.append({
+                "member_id": m.person_id,
+                "name": m.name,
+                "phone": m.phone,
+                "attendance_last_3_months": len(att_3m),
+                "remaining_sessions": getattr(sub, "remaining_sessions", 0) if sub else 0,
+                "progress_before_and_after": prog
+            })
+
+        return {
+            "trainer_name": trainer.name,
+            "specialization": trainer.specialization,
+            "total_trainees": len(trainees),
+            "trainees": report
+        }
+
+    # ---------------- إدارة الباقات والاشتراكات والضرائب ----------------
     def calculate_plan_cost(self, plan_name: str, has_trainer: bool) -> float:
         if plan_name not in MEMBERSHIP_PLANS:
             raise ValueError(f"Invalid plan selected: '{plan_name}'")
@@ -319,7 +391,7 @@ class Gym:
     ) -> Membership:
         return self.renew_membership(member_id, new_plan_name, payment_method)
 
-
+    # ---------------- تجميد وفك تجميد الاشتراك (Freeze / Unfreeze) ----------------
     def freeze_member_membership(self, member_id: int) -> None:
         sub = self.get_active_membership(member_id)
         if not sub:
@@ -347,37 +419,46 @@ class Gym:
             setattr(sub, "freeze_date", None)
         self.save()
 
-    def record_attendance(self, member_id: int) -> Attendance:
-        member = self.find_member_by_id(member_id)
-        if not member:
-            raise ValueError(f"Access Denied: Member #{member_id} does not exist.")
+    # ---------------- نظام الحضور الذكي (أعضاء + كباتن) ----------------
+    def record_attendance(self, person_id: int) -> Attendance:
+        member = self.find_member_by_id(person_id)
+        trainer = self.find_trainer_by_id(person_id)
 
-        sub = self.get_active_membership(member_id)
-        if not sub:
-            raise ValueError(f"Access Denied: Member '{member.name}' subscription is Expired or Frozen.")
+        if not member and not trainer:
+            raise ValueError(f"Access Denied: ID #{person_id} does not exist in members or coaching staff.")
 
         today_str = datetime.now().strftime("%Y-%m-%d")
-        for a in self.attendances:
-            if a.member_id == member_id and a.timestamp.startswith(today_str):
-                raise ValueError(f"Duplicate Entry: Member '{member.name}' has already checked in today!")
 
-       
-        if hasattr(sub, "deduct_session"):
-            sub.deduct_session()
-        elif hasattr(sub, "remaining_sessions") and sub.remaining_sessions > 0:
-            sub.remaining_sessions -= 1
+        # التحقق من عدم التكرار في نفس اليوم
+        for a in self.attendances:
+            if a.member_id == person_id and a.timestamp.startswith(today_str):
+                name = member.name if member else trainer.name
+                raise ValueError(f"Duplicate Check-in: '{name}' has already checked in today ({today_str})!")
+
+        # إذا كان عضواً يتم فحص الصلاحية وخصم السيشن
+        if member:
+            sub = self.get_active_membership(person_id)
+            if not sub:
+                raise ValueError(f"Access Denied: Member '{member.name}' subscription is Expired or Frozen.")
+            if hasattr(sub, "deduct_session"):
+                sub.deduct_session()
+            elif hasattr(sub, "remaining_sessions") and sub.remaining_sessions > 0:
+                sub.remaining_sessions -= 1
 
         next_id = (max([a.attendance_id for a in self.attendances]) + 1) if self.attendances else 1
-        attendance = Attendance(next_id, member_id)
+        attendance = Attendance(next_id, person_id)
         self.attendances.append(attendance)
         self.save()
         return attendance
 
     def record_attendance_by_token(self, token: str) -> Attendance:
         member = self.find_member_by_token(token)
-        if not member:
-            raise ValueError("Unrecognized QR Pass: Token is invalid.")
-        return self.record_attendance(member.person_id)
+        trainer = self.find_trainer_by_token(token)
+        if member:
+            return self.record_attendance(member.person_id)
+        elif trainer:
+            return self.record_attendance(trainer.person_id)
+        raise ValueError("Unrecognized QR Pass: Token is invalid.")
 
     def delete_attendance(self, attendance_id: int) -> Attendance:
         target = next((a for a in self.attendances if a.attendance_id == attendance_id), None)
@@ -388,7 +469,7 @@ class Gym:
         return target
 
     def get_currently_in_gym(self) -> List[Dict[str, Any]]:
-        """يعرض فقط المتواجدين خلال آخر ساعتين ويختفون تلقائياً بعدها[cite: 8]"""
+        """يعرض المتواجدين خلال آخر ساعتين ويفرز دور كل شخص (كابتن / عضو)[cite: 8]"""
         now = datetime.now()
         two_hours_ago = now - timedelta(hours=2)
         active_now = []
@@ -398,10 +479,15 @@ class Gym:
                 t = datetime.strptime(a.timestamp, "%Y-%m-%d %H:%M:%S")
                 if two_hours_ago <= t <= now:
                     m = self.find_member_by_id(a.member_id)
+                    tr = self.find_trainer_by_id(a.member_id)
+                    role = "Member" if m else ("Trainer" if tr else "Unknown")
+                    name = m.name if m else (tr.name if tr else "Unknown")
+
                     active_now.append({
                         "attendance_id": a.attendance_id,
-                        "member_id": a.member_id,
-                        "member_name": m.name if m else "Unknown",
+                        "person_id": a.member_id,
+                        "name": name,
+                        "role": role,
                         "check_in_time": a.timestamp,
                         "duration_minutes": int((now - t).total_seconds() / 60)
                     })
@@ -410,21 +496,23 @@ class Gym:
         return active_now
 
     def get_daily_attendance_report(self, target_date: Optional[str] = None) -> List[Dict[str, Any]]:
-        """تقرير تدقيق كامل لمن حضر خلال 24 ساعة بدون إمكانية الحذف[cite: 8]"""
         date_str = target_date or datetime.now().strftime("%Y-%m-%d")
         daily_records = []
 
         for a in self.attendances:
             if a.timestamp.startswith(date_str):
                 m = self.find_member_by_id(a.member_id)
+                tr = self.find_trainer_by_id(a.member_id)
                 daily_records.append({
                     "attendance_id": a.attendance_id,
                     "member_id": a.member_id,
-                    "member_name": m.name if m else "Unknown",
+                    "name": m.name if m else (tr.name if tr else "Unknown"),
+                    "role": "Member" if m else ("Trainer" if tr else "Unknown"),
                     "time": a.timestamp.split(" ")[1] if " " in a.timestamp else a.timestamp
                 })
         return daily_records
 
+    # ---------------- إحصائيات الداشبورد اللحظية ----------------
     def get_dashboard_stats(self) -> Dict[str, Any]:
         total_members = len(self.members)
         active_members = len(self.filter_members_by_status(active=True))
@@ -435,18 +523,15 @@ class Gym:
         two_hours_ago = now - timedelta(hours=2)
         today_str = now.strftime("%Y-%m-%d")
 
-        in_gym_now = 0
-        today_att_members = set()
+        in_gym = self.get_currently_in_gym()
+        in_gym_now = len(in_gym)
+        trainers_in_gym_now = len([p for p in in_gym if p.get("role") == "Trainer"])
+        members_in_gym_now = len([p for p in in_gym if p.get("role") == "Member"])
 
+        today_att_members = set()
         for a in self.attendances:
             if a.timestamp.startswith(today_str):
                 today_att_members.add(a.member_id)
-            try:
-                t = datetime.strptime(a.timestamp, "%Y-%m-%d %H:%M:%S")
-                if two_hours_ago <= t <= now:
-                    in_gym_now += 1
-            except (ValueError, TypeError):
-                continue
 
         method_totals = {}
         for p in self.payments:
@@ -460,6 +545,8 @@ class Gym:
             "active_members": active_members,
             "expired_members": expired_members,
             "in_gym_now": in_gym_now,
+            "trainers_in_gym_now": trainers_in_gym_now,
+            "members_in_gym_now": members_in_gym_now,
             "today_attendance": len(today_att_members),
             "total_trainers": len(self.trainers),
             "total_revenue": total_revenue,
@@ -468,6 +555,7 @@ class Gym:
             "method_totals": method_totals
         }
 
+    # ---------------- بروفايل العضو الشامل ----------------
     def get_member_complete_profile(self, member_id: int) -> Dict[str, Any]:
         member = self.find_member_by_id(member_id)
         if not member:
@@ -508,41 +596,7 @@ class Gym:
             "inbody_history": history
         }
 
-    def get_trainer_trainees_report(self, trainer_id: int) -> Dict[str, Any]:
-        trainer = self.find_trainer_by_id(trainer_id)
-        if not trainer:
-            raise ValueError(f"Trainer #{trainer_id} not found.")
-
-        trainees = [m for m in self.members if m.trainer_id == trainer_id]
-        now = datetime.now()
-        three_months_ago = now - timedelta(days=90)
-
-        report = []
-        for m in trainees:
-            att_3m = [
-                a for a in self.attendances
-                if a.member_id == m.person_id and datetime.strptime(a.timestamp[:10], "%Y-%m-%d") >= three_months_ago
-            ]
-            sub = self.get_latest_membership(m.person_id)
-            prog = m.get_progress_summary() if hasattr(m, "get_progress_summary") else {"status": "No InBody"}
-
-            report.append({
-                "member_id": m.person_id,
-                "name": m.name,
-                "phone": m.phone,
-                "attendance_last_3_months": len(att_3m),
-                "remaining_sessions": getattr(sub, "remaining_sessions", 0) if sub else 0,
-                "progress_before_and_after": prog
-            })
-
-        return {
-            "trainer_name": trainer.name,
-            "specialization": trainer.specialization,
-            "total_trainees": len(trainees),
-            "trainees": report
-        }
-
-    
+    # ---------------- السجل المالي والمدفوعات ----------------
     def record_payment(self, member_id: int, amount: float, method: str = "Cash", ref: Optional[str] = None) -> Payment:
         if float(amount) <= 0:
             raise ValueError("Payment amount must be greater than zero.")
@@ -574,7 +628,7 @@ class Gym:
         self.save()
         return target
 
-  
+    # ---------------- دوال الاشتراكات المساعدة ----------------
     def get_active_membership(self, member_id: int) -> Optional[Membership]:
         for ms in self.memberships:
             if ms.member_id == member_id:

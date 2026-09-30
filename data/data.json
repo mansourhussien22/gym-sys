@@ -45,7 +45,8 @@
       "name": "cap mohand",
       "phone": "01028912998",
       "specialization": "Iron / Bodybuilding",
-      "salary": 6000.0
+      "salary": 6000.0,
+      "qr_token": "NYfHW2wAHqWZ3n90"
     }
   ],
   "memberships": [
@@ -56,7 +57,7 @@
       "end_date": "2026-10-31",
       "cost": 660.0,
       "total_sessions": 24,
-      "remaining_sessions": 23,
+      "remaining_sessions": 22,
       "is_frozen": false,
       "freeze_date": null,
       "status": "Active",
@@ -107,6 +108,16 @@
       "attendance_id": 1,
       "member_id": 33013,
       "timestamp": "2026-09-30 23:02:02"
+    },
+    {
+      "attendance_id": 2,
+      "member_id": 33013,
+      "timestamp": "2026-10-01 01:27:34"
+    },
+    {
+      "attendance_id": 3,
+      "member_id": 21434,
+      "timestamp": "2026-10-01 01:53:43"
     }
   ]
 }

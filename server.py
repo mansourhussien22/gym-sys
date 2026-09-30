@@ -1,22 +1,29 @@
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from services.gym_service import Gym, MEMBERSHIP_PLANS, TRAINER_TAX_RATE
+from models import Trainer
+from services.qr_manager import QRManager
 
 app = Flask(__name__, template_folder="templates")
 gym = Gym()
 
-# ---------------- الصفحة الرئيسية ----------------
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# ---------------- 1. إحصائيات الداشبورد اللحظية ----------------
+# ---------------- 1. الداشبورد والصالة الحية ----------------
 @app.route("/api/dashboard", methods=["GET"])
 def get_dashboard():
     stats = gym.get_dashboard_stats()
+    # إضافة عدد الكباتن المتواجدين حالياً بالصالة
+    in_gym = gym.get_currently_in_gym()
+    trainers_now = len([p for p in in_gym if p.get("role") == "Trainer"])
+    members_now = len([p for p in in_gym if p.get("role") == "Member"])
+    stats["trainers_in_gym_now"] = trainers_now
+    stats["members_in_gym_now"] = members_now
     return jsonify(stats)
 
-# ---------------- 2. إدارة الأعضاء والـ InBody ----------------
+# ---------------- 2. إدارة الأعضاء ----------------
 @app.route("/api/members", methods=["GET"])
 def list_members():
     data = []
@@ -58,27 +65,26 @@ def add_member():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 
-@app.route("/api/members/<int:member_id>", methods=["PUT"])
-def update_member(member_id):
+@app.route("/api/members/<int:member_id>/renew", methods=["POST"])
+def renew_member_endpoint(member_id):
     req = request.json or {}
     try:
-        name = req.get("name")
-        phone = req.get("phone")
         plan = req.get("plan")
-        trainer_id = req.get("trainer_id")
+        pay_method = req.get("payment_method", "Cash")
+        w = float(req["weight"]) if req.get("weight") else None
+        h = float(req["height"]) if req.get("height") else None
+        fat = float(req["fat"]) if req.get("fat") else None
+        mus = float(req["muscle"]) if req.get("muscle") else None
 
-        member = gym.find_member_by_id(member_id)
-        if not member:
-            return jsonify({"error": "Member not found"}), 404
-
-        gym.update_member(member_id, name or member.name, phone or member.phone, plan or member.membership_type)
-        if trainer_id is not None:
-            member.trainer_id = int(trainer_id) if trainer_id else None
-            gym.save()
-
-        return jsonify({"success": True})
+        sub = gym.renew_membership(
+            member_id=member_id,
+            plan_name=plan,
+            payment_method=pay_method,
+            weight=w, height=h, fat_percentage=fat, muscle_mass=mus
+        )
+        return jsonify({"success": True, "end_date": sub.end_date, "remaining_sessions": getattr(sub, "remaining_sessions", 0)})
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return jsonify({"success": False, "error": str(e)}), 400
 
 @app.route("/api/members/<int:member_id>/profile", methods=["GET"])
 def get_member_profile(member_id):
@@ -87,6 +93,14 @@ def get_member_profile(member_id):
         return jsonify(profile)
     except Exception as e:
         return jsonify({"error": str(e)}), 404
+
+@app.route("/api/members/<int:member_id>/qr", methods=["GET"])
+def get_member_qr(member_id):
+    member = gym.find_member_by_id(member_id)
+    if not member:
+        return jsonify({"error": "Member not found"}), 404
+    qr_path = QRManager.generate_qr(member.person_id, member.qr_token)
+    return send_file(qr_path, mimetype='image/png')
 
 @app.route("/api/members/<int:member_id>/freeze", methods=["POST"])
 def freeze_member(member_id):
@@ -112,70 +126,138 @@ def delete_member(member_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-# ---------------- 3. متابعة الكباتن والنتائج ----------------
+# ---------------- 3. الكباتن والبروفايل الكامل والـ QR ----------------
 @app.route("/api/trainers", methods=["GET"])
 def list_trainers():
     trainers = []
+    in_gym_ids = {p["person_id"] for p in gym.get_currently_in_gym() if p.get("role") == "Trainer"}
     for t in gym.trainers:
         cnt = len([m for m in gym.members if m.trainer_id == t.person_id])
         trainers.append({
             "id": t.person_id,
             "name": t.name,
-            "phone": t.phone,
             "specialty": t.specialization,
-            "salary": t.salary,
-            "trainees_count": cnt
+            "trainees_count": cnt,
+            "is_present_now": t.person_id in in_gym_ids
         })
     return jsonify(trainers)
 
-@app.route("/api/trainers/<int:trainer_id>/trainees", methods=["GET"])
-def get_trainer_trainees(trainer_id):
+@app.route("/api/trainers", methods=["POST"])
+def add_trainer_endpoint():
+    req = request.json or {}
     try:
-        report = gym.get_trainer_trainees_report(trainer_id)
-        return jsonify(report)
+        tid = gym.generate_trainer_id()
+        t = Trainer(
+            person_id=tid,
+            name=req["name"].strip(),
+            phone=req["phone"].strip(),
+            specialization=req["specialty"].strip(),
+            salary=float(req["salary"])
+        )
+        gym.add_trainer(t)
+        return jsonify({"success": True, "trainer_id": tid, "name": t.name})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route("/api/trainers/<int:trainer_id>/profile", methods=["GET"])
+def get_trainer_profile_endpoint(trainer_id):
+    try:
+        profile = gym.get_trainer_full_profile(trainer_id)
+        return jsonify(profile)
     except Exception as e:
         return jsonify({"error": str(e)}), 404
 
-# ---------------- 4. الحضور والصالة الحية (بالكاميرا أو الكود اليدوي) ----------------
+@app.route("/api/trainers/<int:trainer_id>/qr", methods=["GET"])
+def get_trainer_qr(trainer_id):
+    trainer = gym.find_trainer_by_id(trainer_id)
+    if not trainer:
+        return jsonify({"error": "Trainer not found"}), 404
+    token = getattr(trainer, "qr_token", str(trainer.person_id))
+    qr_path = QRManager.generate_qr(trainer.person_id, token)
+    return send_file(qr_path, mimetype='image/png')
+
+@app.route("/api/trainers/<int:trainer_id>/checkin", methods=["POST"])
+def trainer_checkin(trainer_id):
+    try:
+        att = gym.record_attendance(trainer_id)
+        t = gym.find_trainer_by_id(trainer_id)
+        return jsonify({"success": True, "trainer_name": t.name, "timestamp": att.timestamp})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+# ---------------- 4. سجل الاشتراكات المفصل ----------------
+@app.route("/api/memberships", methods=["GET"])
+def list_memberships():
+    data = []
+    for ms in reversed(gym.memberships):
+        m = gym.find_member_by_id(ms.member_id)
+        data.append({
+            "membership_id": ms.membership_id,
+            "member_id": ms.member_id,
+            "member_name": m.name if m else "Unknown",
+            "member_phone": m.phone if m else "N/A",
+            "plan_name": getattr(m, "membership_type", "Standard"),
+            "start_date": ms.start_date,
+            "end_date": ms.end_date,
+            "cost": ms.cost,
+            "total_sessions": getattr(ms, "total_sessions", 12),
+            "remaining_sessions": getattr(ms, "remaining_sessions", 0),
+            "status": getattr(ms, "status", "Active" if ms.is_active else "Expired")
+        })
+    return jsonify(data)
+
+# ---------------- 5. الحضور (أعضاء + كباتن) ----------------
 @app.route("/api/attendance/live", methods=["GET"])
 def get_live_attendance():
     return jsonify(gym.get_currently_in_gym())
 
 @app.route("/api/attendance/daily", methods=["GET"])
 def get_daily_attendance():
-    return jsonify(gym.get_daily_attendance_report())
+    records = gym.get_daily_attendance_report()
+    # تدعيم كل حركة باسم ورتبة الشخص (كابتن أو عضو)
+    for r in records:
+        pid = r["member_id"]
+        m = gym.find_member_by_id(pid)
+        tr = gym.find_trainer_by_id(pid)
+        r["role"] = "Member" if m else ("Trainer" if tr else "Unknown")
+        r["name"] = m.name if m else (tr.name if tr else "Unknown")
+    return jsonify(records)
 
 @app.route("/api/attendance/checkin", methods=["POST"])
 def checkin():
     req = request.json or {}
     try:
-        # فحص إذا كان التسجيل عن طريق مسح كاميرا QR أو كتابة Member ID
         if "token" in req and req["token"]:
             token = str(req["token"]).strip()
             att = gym.record_attendance_by_token(token)
             m = gym.find_member_by_token(token)
+            tr = gym.find_trainer_by_token(token)
+            person = m or tr
+            role = "Member" if m else "Trainer"
         elif "member_id" in req and req["member_id"]:
-            mid = int(req["member_id"])
-            att = gym.record_attendance(mid)
-            m = gym.find_member_by_id(mid)
+            pid = int(req["member_id"])
+            att = gym.record_attendance(pid)
+            m = gym.find_member_by_id(pid)
+            tr = gym.find_trainer_by_id(pid)
+            person = m or tr
+            role = "Member" if m else "Trainer"
         else:
-            return jsonify({"success": False, "error": "Member ID or QR code is required"}), 400
+            return jsonify({"success": False, "error": "ID or QR code is required"}), 400
 
-        if not m:
-            return jsonify({"success": False, "error": "Member not found"}), 404
+        sub = gym.get_active_membership(m.person_id) if m else None
+        rem = getattr(sub, "remaining_sessions", 0) if sub else "Staff"
 
-        sub = gym.get_active_membership(m.person_id)
-        rem = getattr(sub, "remaining_sessions", 0) if sub else 0
         return jsonify({
             "success": True,
-            "member_name": m.name,
+            "name": person.name,
+            "role": role,
             "timestamp": att.timestamp,
             "remaining_sessions": rem
         })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 
-# ---------------- 5. السجل المالي (عرض، تسجيل، تعديل، حذف) ----------------
+# ---------------- 6. السجل المالي ----------------
 @app.route("/api/payments", methods=["GET"])
 def list_payments():
     res = []
@@ -210,7 +292,7 @@ def add_payment():
         return jsonify({"success": False, "error": str(e)}), 400
 
 @app.route("/api/payments/<int:payment_id>", methods=["PUT"])
-def update_payment(payment_id):
+def update_payment_endpoint(payment_id):
     req = request.json or {}
     try:
         amt = float(req["amount"])
@@ -222,14 +304,13 @@ def update_payment(payment_id):
         return jsonify({"error": str(e)}), 400
 
 @app.route("/api/payments/<int:payment_id>", methods=["DELETE"])
-def delete_payment(payment_id):
+def delete_payment_endpoint(payment_id):
     try:
         gym.delete_payment(payment_id)
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-# ---------------- 6. الباقات والضرائب ----------------
 @app.route("/api/plans", methods=["GET"])
 def get_plans():
     return jsonify({"plans": MEMBERSHIP_PLANS, "tax_rate": TRAINER_TAX_RATE})

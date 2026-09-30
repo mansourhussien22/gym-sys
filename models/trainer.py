@@ -1,4 +1,5 @@
-from typing import Dict, Any
+import secrets
+from typing import Dict, Any, Optional
 from .person import Person
 
 
@@ -9,11 +10,14 @@ class Trainer(Person):
         name: str,
         phone: str,
         specialization: str,
-        salary: float
+        salary: float,
+        qr_token: Optional[str] = None,
+        **kwargs
     ):
         super().__init__(person_id, name, phone)
         self.specialization = specialization
         self.salary = float(salary)
+        self.qr_token = qr_token or secrets.token_urlsafe(12)
 
     @property
     def specialization(self) -> str:
@@ -44,5 +48,6 @@ class Trainer(Person):
             "name": self.name,
             "phone": self.phone,
             "specialization": self.specialization,
-            "salary": self.salary
+            "salary": self.salary,
+            "qr_token": self.qr_token
         }
