@@ -1,0 +1,33 @@
+============================================================
+Project 1 — Gym Management System: Test Scenarios
+============================================================
+
+Scenario 1: Business Rule - Member Must Exist Before Attendance
+---------------------------------------------------------------
+1. Try recording attendance for non-existing Member ID 9999.
+2. Expected Result: Raises ValueError ("Cannot record attendance: Member #9999 does not exist.").
+
+Scenario 2: Business Rule - Member Cannot Attend If Membership Expired
+---------------------------------------------------------------------
+1. Create Member ID 10001.
+2. Create Membership with end date in the past (e.g. 2025-01-01).
+3. Try recording attendance for Member 10001.
+4. Expected Result: Raises ValueError ("Access Denied: Member '...' has no active membership (Expired).").
+
+Scenario 3: Business Rule - Member Cannot Have Two Active Memberships
+---------------------------------------------------------------------
+1. Create Member ID 10002.
+2. Create an active Membership (e.g., today until +30 days).
+3. Try creating another active Membership for Member 10002.
+4. Expected Result: Raises ValueError ("Member #10002 already has an active membership.").
+
+Scenario 4: Business Rule - Payment Amount Must Be Greater Than Zero
+-------------------------------------------------------------------
+1. Try recording a payment with amount = 0 or -50.
+2. Expected Result: Raises ValueError ("Payment amount must be greater than zero.").
+
+Scenario 5: Assign Trainer
+--------------------------
+1. Add Trainer ID 20001.
+2. Assign Trainer 20001 to Member 10001.
+3. Expected Result: Member 10001 has trainer_id = 20001.

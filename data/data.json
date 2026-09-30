@@ -1,0 +1,112 @@
+{
+  "members": [
+    {
+      "person_id": 33013,
+      "name": "mansour",
+      "phone": "01203056622",
+      "membership_type": "Fitness (Full Month - 30 Days)",
+      "join_date": "2026-09-30",
+      "trainer_id": 21434,
+      "qr_token": "JYSEGuarSqy3Olku",
+      "inbody_history": [
+        {
+          "date": "2026-09-30",
+          "weight": 70.0,
+          "height": 180.0,
+          "fat_percentage": 10.0,
+          "muscle_mass": 23.0,
+          "notes": "Initial Registration"
+        }
+      ]
+    },
+    {
+      "person_id": 38015,
+      "name": "mohamed",
+      "phone": "01103056622",
+      "membership_type": "Fitness (Full Month - 30 Days)",
+      "join_date": "2026-09-30",
+      "trainer_id": null,
+      "qr_token": "ZleoA8tSdWyFaWOP",
+      "inbody_history": [
+        {
+          "date": "2026-09-30",
+          "weight": 70.0,
+          "height": 180.0,
+          "fat_percentage": 32.0,
+          "muscle_mass": 5.0,
+          "notes": "Initial Registration"
+        }
+      ]
+    }
+  ],
+  "trainers": [
+    {
+      "person_id": 21434,
+      "name": "cap mohand",
+      "phone": "01028912998",
+      "specialization": "Iron / Bodybuilding",
+      "salary": 6000.0
+    }
+  ],
+  "memberships": [
+    {
+      "membership_id": 1,
+      "member_id": 33013,
+      "start_date": "2026-09-30",
+      "end_date": "2026-10-30",
+      "cost": 660.0,
+      "total_sessions": 24,
+      "remaining_sessions": 23,
+      "is_frozen": true,
+      "freeze_date": "2026-09-30",
+      "is_active": false,
+      "status": "Frozen"
+    },
+    {
+      "membership_id": 2,
+      "member_id": 38015,
+      "start_date": "2026-09-30",
+      "end_date": "2026-10-30",
+      "cost": 600.0,
+      "total_sessions": 24,
+      "remaining_sessions": 24,
+      "is_frozen": false,
+      "freeze_date": null,
+      "is_active": true,
+      "status": "Active"
+    }
+  ],
+  "payments": [
+    {
+      "payment_id": 1,
+      "member_id": 33013,
+      "amount": 660.0,
+      "method": "Cash",
+      "reference_number": "Plan Enrollment",
+      "date": "2026-09-30 23:01:25"
+    },
+    {
+      "payment_id": 2,
+      "member_id": 33013,
+      "amount": 660.0,
+      "method": "Cash",
+      "reference_number": "Manual Payment",
+      "date": "2026-09-30 23:02:47"
+    },
+    {
+      "payment_id": 3,
+      "member_id": 38015,
+      "amount": 600.0,
+      "method": "Cash",
+      "reference_number": "Plan Enrollment",
+      "date": "2026-09-30 23:05:21"
+    }
+  ],
+  "attendances": [
+    {
+      "attendance_id": 1,
+      "member_id": 33013,
+      "timestamp": "2026-09-30 23:02:02"
+    }
+  ]
+}
