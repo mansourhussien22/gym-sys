@@ -28,7 +28,7 @@ MEMBERSHIP_PLANS = {
     },
 }
 
-TRAINER_TAX_RATE = 0.10  # زيادة 10% عند تعيين مدرب شخصي
+TRAINER_TAX_RATE = 0.10  
 
 
 class Gym:
@@ -59,7 +59,7 @@ class Gym:
         }
         self.file_manager.save_data(data)
 
-    # ---------------- توليد معرفات تسلسلية فريدة ----------------
+  
     def generate_member_id(self) -> int:
         existing = {m.person_id for m in self.members}
         while True:
@@ -74,7 +74,7 @@ class Gym:
             if new_id not in existing:
                 return new_id
 
-    # ---------------- إدارة الأعضاء (إضافة، تعديل، حذف، InBody) ----------------
+  
     def register_member(
         self,
         name: str,
@@ -100,7 +100,6 @@ class Gym:
             trainer_id=trainer_id
         )
 
-        # تسجيل فحص الـ InBody المبدئي في حال توفرت البيانات
         if all(v is not None for v in [weight, height, fat_percentage, muscle_mass]):
             if hasattr(member, "add_inbody_record"):
                 member.add_inbody_record(weight, height, fat_percentage, muscle_mass, notes="Initial Registration InBody")
@@ -108,7 +107,7 @@ class Gym:
         self.members.append(member)
         QRManager.generate_qr(member.person_id, member.qr_token)
 
-        # تفعيل الاشتراك مباشرة وحساب الضريبة
+    
         self.create_membership_with_plan(member_id=member.person_id, plan_name=plan_name, payment_method=payment_method)
         self.save()
         return member
@@ -129,7 +128,7 @@ class Gym:
         if not member:
             raise ValueError(f"Member #{member_id} not found.")
 
-        # التأكد أن رقم الهاتف الجديد لا يستخدمه عضو آخر
+   
         for m in self.members:
             if m.phone == phone and m.person_id != member_id:
                 raise ValueError(f"Phone number '{phone}' is already registered to '{m.name}'.")
@@ -166,7 +165,7 @@ class Gym:
     def filter_members_by_status(self, active: bool = True) -> List[Member]:
         return [m for m in self.members if (self.get_active_membership(m.person_id) is not None) == active]
 
-    # ---------------- إدارة الكباتن ----------------
+  
     def add_trainer(self, trainer: Trainer) -> None:
         if any(t.person_id == trainer.person_id for t in self.trainers):
             raise ValueError(f"Trainer ID #{trainer.person_id} already exists.")
@@ -186,7 +185,7 @@ class Gym:
         member.trainer_id = trainer_id
         self.save()
 
-    # ---------------- الاشتراكات وحساب الضرائب والتجديد ----------------
+ 
     def calculate_plan_cost(self, plan_name: str, has_trainer: bool) -> float:
         if plan_name not in MEMBERSHIP_PLANS:
             raise ValueError(f"Invalid plan selected: '{plan_name}'")
@@ -320,7 +319,7 @@ class Gym:
     ) -> Membership:
         return self.renew_membership(member_id, new_plan_name, payment_method)
 
-    # ---------------- تجميد وفك التجميد (Freeze / Unfreeze) ----------------
+
     def freeze_member_membership(self, member_id: int) -> None:
         sub = self.get_active_membership(member_id)
         if not sub:
@@ -348,7 +347,6 @@ class Gym:
             setattr(sub, "freeze_date", None)
         self.save()
 
-    # ---------------- نظام الحضور وسد الثغرات ----------------
     def record_attendance(self, member_id: int) -> Attendance:
         member = self.find_member_by_id(member_id)
         if not member:
@@ -363,7 +361,7 @@ class Gym:
             if a.member_id == member_id and a.timestamp.startswith(today_str):
                 raise ValueError(f"Duplicate Entry: Member '{member.name}' has already checked in today!")
 
-        # خصم سيشن فوري
+       
         if hasattr(sub, "deduct_session"):
             sub.deduct_session()
         elif hasattr(sub, "remaining_sessions") and sub.remaining_sessions > 0:
@@ -427,7 +425,6 @@ class Gym:
                 })
         return daily_records
 
-    # ---------------- إحصائيات الداشبورد التفاعلية ----------------
     def get_dashboard_stats(self) -> Dict[str, Any]:
         total_members = len(self.members)
         active_members = len(self.filter_members_by_status(active=True))
@@ -471,7 +468,6 @@ class Gym:
             "method_totals": method_totals
         }
 
-    # ---------------- تفاصيل العضو الشاملة وتطور المتدربين ----------------
     def get_member_complete_profile(self, member_id: int) -> Dict[str, Any]:
         member = self.find_member_by_id(member_id)
         if not member:
@@ -546,7 +542,7 @@ class Gym:
             "trainees": report
         }
 
-    # ---------------- المدفوعات والتحصيل (تسجيل، تعديل، حذف) ----------------
+    
     def record_payment(self, member_id: int, amount: float, method: str = "Cash", ref: Optional[str] = None) -> Payment:
         if float(amount) <= 0:
             raise ValueError("Payment amount must be greater than zero.")
@@ -578,7 +574,7 @@ class Gym:
         self.save()
         return target
 
-    # ---------------- دوال مساعدة ----------------
+  
     def get_active_membership(self, member_id: int) -> Optional[Membership]:
         for ms in self.memberships:
             if ms.member_id == member_id:

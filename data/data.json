@@ -53,14 +53,14 @@
       "membership_id": 1,
       "member_id": 33013,
       "start_date": "2026-09-30",
-      "end_date": "2026-10-30",
+      "end_date": "2026-10-31",
       "cost": 660.0,
       "total_sessions": 24,
       "remaining_sessions": 23,
-      "is_frozen": true,
-      "freeze_date": "2026-09-30",
-      "is_active": false,
-      "status": "Frozen"
+      "is_frozen": false,
+      "freeze_date": null,
+      "status": "Active",
+      "is_active": true
     },
     {
       "membership_id": 2,
@@ -72,8 +72,8 @@
       "remaining_sessions": 24,
       "is_frozen": false,
       "freeze_date": null,
-      "is_active": true,
-      "status": "Active"
+      "status": "Active",
+      "is_active": true
     }
   ],
   "payments": [

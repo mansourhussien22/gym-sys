@@ -15,8 +15,8 @@ class Membership:
         is_frozen: bool = False,
         freeze_date: Optional[str] = None,
         is_active: Optional[bool] = None,
-        status: Optional[str] = None,  # لمنع أي خطأ إذا كانت محفوظة بالـ JSON
-        **kwargs                       # لحماية السيستم من أي معاملات إضافية
+        status: Optional[str] = None,
+        **kwargs                      
     ):
         self._membership_id = int(membership_id)
         self._member_id = int(member_id)
