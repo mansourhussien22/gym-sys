@@ -4,6 +4,8 @@ from .person import Person
 
 
 class Trainer(Person):
+    ALLOWED_EXTRA = {"qr_token"}
+
     def __init__(
         self,
         person_id: int,
@@ -14,6 +16,9 @@ class Trainer(Person):
         qr_token: Optional[str] = None,
         **kwargs
     ):
+        for k in kwargs:
+            if k not in self.ALLOWED_EXTRA:
+                raise TypeError(f"Trainer.__init__() got an unexpected keyword argument '{k}'")
         super().__init__(person_id, name, phone)
         self.specialization = specialization
         self.salary = float(salary)

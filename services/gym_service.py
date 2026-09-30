@@ -1,4 +1,3 @@
-import random
 from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from models import Member, Trainer, Membership, Payment, Attendance
@@ -12,7 +11,6 @@ except ImportError:
     except ImportError:
         from qr_manager import QRManager
 
-# تعريف باقات الاشتراك الرسمية والأسعار وعدد الأيام والسيشنات
 MEMBERSHIP_PLANS = {
     "Fitness (Full Month - 30 Days)": {
         "days": 30, "sessions": 24, "price": 600.0, "category": "Fitness Only"
@@ -31,7 +29,7 @@ MEMBERSHIP_PLANS = {
     },
 }
 
-TRAINER_TAX_RATE = 0.10  # زيادة 10% رسوم مدرب خاص
+TRAINER_TAX_RATE = 0.10
 
 
 class Gym:
@@ -62,22 +60,12 @@ class Gym:
         }
         self.file_manager.save_data(data)
 
-    # ---------------- توليد معرفات IDs فريدة ----------------
     def generate_member_id(self) -> int:
-        existing = {m.person_id for m in self.members}
-        while True:
-            new_id = random.randint(10001, 99999)
-            if new_id not in existing:
-                return new_id
+        return max([m.person_id for m in self.members], default=10000) + 1
 
     def generate_trainer_id(self) -> int:
-        existing = {t.person_id for t in self.trainers}
-        while True:
-            new_id = random.randint(20001, 29999)
-            if new_id not in existing:
-                return new_id
+        return max([t.person_id for t in self.trainers], default=20000) + 1
 
-    # ---------------- إدارة الأعضاء وفحوصات InBody ----------------
     def register_member(
         self,
         name: str,
@@ -103,15 +91,11 @@ class Gym:
             trainer_id=trainer_id
         )
 
-        # تسجيل فحص الـ InBody المبدئي
         if all(v is not None for v in [weight, height, fat_percentage, muscle_mass]):
-            if hasattr(member, "add_inbody_record"):
-                member.add_inbody_record(weight, height, fat_percentage, muscle_mass, notes="Initial InBody Registration")
+            member.add_inbody_record(weight, height, fat_percentage, muscle_mass, notes="Initial Registration InBody")
 
         self.members.append(member)
-        QRManager.generate_qr(member.person_id, member.qr_token)
-
-        # إنشاء الاشتراك وسداد الرسوم
+        QRManager.generate_qr(member.person_id, member.qr_token, role="member")
         self.create_membership_with_plan(member_id=member.person_id, plan_name=plan_name, payment_method=payment_method)
         self.save()
         return member
@@ -124,7 +108,7 @@ class Gym:
             raise ValueError(f"Phone '{member.phone}' is already registered to '{phone_match.name}'.")
 
         self.members.append(member)
-        QRManager.generate_qr(member.person_id, member.qr_token)
+        QRManager.generate_qr(member.person_id, member.qr_token, role="member")
         self.save()
 
     def update_member(self, member_id: int, name: str, phone: str, membership_type: str) -> None:
@@ -168,13 +152,14 @@ class Gym:
     def filter_members_by_status(self, active: bool = True) -> List[Member]:
         return [m for m in self.members if (self.get_active_membership(m.person_id) is not None) == active]
 
-    # ---------------- إدارة الكباتن والـ QR الخاص بهم ----------------
     def add_trainer(self, trainer: Trainer) -> None:
         if any(t.person_id == trainer.person_id for t in self.trainers):
             raise ValueError(f"Trainer ID #{trainer.person_id} already exists.")
+        if any(t.phone == trainer.phone for t in self.trainers) or any(m.phone == trainer.phone for m in self.members):
+            raise ValueError(f"Phone '{trainer.phone}' is already registered in the system.")
         self.trainers.append(trainer)
         token = getattr(trainer, "qr_token", str(trainer.person_id))
-        QRManager.generate_qr(trainer.person_id, token)
+        QRManager.generate_qr(trainer.person_id, token, role="trainer")
         self.save()
 
     def find_trainer_by_id(self, trainer_id: int) -> Optional[Trainer]:
@@ -194,7 +179,6 @@ class Gym:
         self.save()
 
     def get_trainer_full_profile(self, trainer_id: int) -> Dict[str, Any]:
-        """سحب بروفايل الكابتن الشامل والمحمي مع حالة تواجده وسجل حضوره"""
         trainer = self.find_trainer_by_id(trainer_id)
         if not trainer:
             raise ValueError(f"Trainer #{trainer_id} not found.")
@@ -202,11 +186,9 @@ class Gym:
         att_logs = [a for a in self.attendances if a.member_id == trainer_id]
         last_checkin = att_logs[-1].timestamp if att_logs else "Never"
 
-        # هل الكابتن متواجد في الصالة حالياً؟
         currently_in = any(
             p["person_id"] == trainer_id for p in self.get_currently_in_gym() if p.get("role") == "Trainer"
         )
-
         trainees_report = self.get_trainer_trainees_report(trainer_id)
 
         return {
@@ -257,7 +239,6 @@ class Gym:
             "trainees": report
         }
 
-    # ---------------- إدارة الباقات والاشتراكات والضرائب ----------------
     def calculate_plan_cost(self, plan_name: str, has_trainer: bool) -> float:
         if plan_name not in MEMBERSHIP_PLANS:
             raise ValueError(f"Invalid plan selected: '{plan_name}'")
@@ -284,36 +265,28 @@ class Gym:
             raise ValueError(f"Member #{member_id} already has an active subscription. Use renew instead.")
 
         has_trainer = member.trainer_id is not None
-        expected_cost = self.calculate_plan_cost(plan_name, has_trainer)
-        final_cost = float(cost_entered) if cost_entered is not None else expected_cost
+        official_cost = self.calculate_plan_cost(plan_name, has_trainer)
 
+        if cost_entered is not None and round(float(cost_entered), 2) != official_cost:
+            raise ValueError(f"Invalid plan cost: entered ${cost_entered}, expected ${official_cost}")
+
+        final_cost = official_cost
         plan_info = MEMBERSHIP_PLANS[plan_name]
         start_date = datetime.now().date()
         end_date = start_date + timedelta(days=plan_info["days"])
         sessions = plan_info.get("sessions", 12)
 
-        next_id = (max([ms.membership_id for ms in self.memberships]) + 1) if self.memberships else 1
+        next_id = max([ms.membership_id for ms in self.memberships], default=0) + 1
         
-        try:
-            membership = Membership(
-                membership_id=next_id,
-                member_id=member_id,
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"),
-                cost=final_cost,
-                total_sessions=sessions,
-                remaining_sessions=sessions
-            )
-        except TypeError:
-            membership = Membership(
-                membership_id=next_id,
-                member_id=member_id,
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"),
-                cost=final_cost
-            )
-            setattr(membership, "total_sessions", sessions)
-            setattr(membership, "remaining_sessions", sessions)
+        membership = Membership(
+            membership_id=next_id,
+            member_id=member_id,
+            start_date=start_date.strftime("%Y-%m-%d"),
+            end_date=end_date.strftime("%Y-%m-%d"),
+            cost=final_cost,
+            total_sessions=sessions,
+            remaining_sessions=sessions
+        )
 
         member.membership_type = plan_name
         self.memberships.append(membership)
@@ -335,10 +308,8 @@ class Gym:
         if not member:
             raise ValueError(f"Member #{member_id} does not exist.")
 
-        # تسجيل InBody التجديد
         if all(v is not None for v in [weight, height, fat_percentage, muscle_mass]):
-            if hasattr(member, "add_inbody_record"):
-                member.add_inbody_record(weight, height, fat_percentage, muscle_mass, notes="Renewal InBody Progress")
+            member.add_inbody_record(weight, height, fat_percentage, muscle_mass, notes="Renewal InBody Progress")
 
         plan_info = MEMBERSHIP_PLANS[plan_name]
         has_trainer = member.trainer_id is not None
@@ -353,28 +324,17 @@ class Gym:
 
         end_date = start_date + timedelta(days=plan_info["days"])
         sessions = plan_info.get("sessions", 12)
-        next_id = (max([ms.membership_id for ms in self.memberships]) + 1) if self.memberships else 1
+        next_id = max([ms.membership_id for ms in self.memberships], default=0) + 1
 
-        try:
-            membership = Membership(
-                membership_id=next_id,
-                member_id=member_id,
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"),
-                cost=cost,
-                total_sessions=sessions,
-                remaining_sessions=sessions
-            )
-        except TypeError:
-            membership = Membership(
-                membership_id=next_id,
-                member_id=member_id,
-                start_date=start_date.strftime("%Y-%m-%d"),
-                end_date=end_date.strftime("%Y-%m-%d"),
-                cost=cost
-            )
-            setattr(membership, "total_sessions", sessions)
-            setattr(membership, "remaining_sessions", sessions)
+        membership = Membership(
+            membership_id=next_id,
+            member_id=member_id,
+            start_date=start_date.strftime("%Y-%m-%d"),
+            end_date=end_date.strftime("%Y-%m-%d"),
+            cost=cost,
+            total_sessions=sessions,
+            remaining_sessions=sessions
+        )
 
         member.membership_type = plan_name
         self.memberships.append(membership)
@@ -382,44 +342,20 @@ class Gym:
         self.save()
         return membership
 
-    def renew_membership_with_plan(
-        self,
-        member_id: int,
-        new_plan_name: str,
-        cost_entered: Optional[float] = None,
-        payment_method: str = "Cash"
-    ) -> Membership:
-        return self.renew_membership(member_id, new_plan_name, payment_method)
-
-    # ---------------- تجميد وفك تجميد الاشتراك (Freeze / Unfreeze) ----------------
     def freeze_member_membership(self, member_id: int) -> None:
         sub = self.get_active_membership(member_id)
         if not sub:
             raise ValueError(f"No active membership available for Member #{member_id} to freeze.")
-        if hasattr(sub, "freeze"):
-            sub.freeze()
-        else:
-            setattr(sub, "is_frozen", True)
-            setattr(sub, "freeze_date", datetime.now().strftime("%Y-%m-%d"))
+        sub.freeze()
         self.save()
 
     def unfreeze_member_membership(self, member_id: int) -> None:
         sub = next((ms for ms in self.memberships if ms.member_id == member_id and getattr(ms, "is_frozen", False)), None)
         if not sub:
             raise ValueError(f"No frozen membership found for Member #{member_id}.")
-        if hasattr(sub, "unfreeze"):
-            sub.unfreeze()
-        else:
-            freeze_start = datetime.strptime(getattr(sub, "freeze_date", datetime.now().strftime("%Y-%m-%d")), "%Y-%m-%d").date()
-            today = datetime.now().date()
-            frozen_days = max(1, (today - freeze_start).days)
-            curr_end = datetime.strptime(sub.end_date, "%Y-%m-%d").date()
-            sub._end_date = (curr_end + timedelta(days=frozen_days)).strftime("%Y-%m-%d")
-            setattr(sub, "is_frozen", False)
-            setattr(sub, "freeze_date", None)
+        sub.unfreeze()
         self.save()
 
-    # ---------------- نظام الحضور الذكي (أعضاء + كباتن) ----------------
     def record_attendance(self, person_id: int) -> Attendance:
         member = self.find_member_by_id(person_id)
         trainer = self.find_trainer_by_id(person_id)
@@ -429,23 +365,18 @@ class Gym:
 
         today_str = datetime.now().strftime("%Y-%m-%d")
 
-        # التحقق من عدم التكرار في نفس اليوم
         for a in self.attendances:
             if a.member_id == person_id and a.timestamp.startswith(today_str):
                 name = member.name if member else trainer.name
                 raise ValueError(f"Duplicate Check-in: '{name}' has already checked in today ({today_str})!")
 
-        # إذا كان عضواً يتم فحص الصلاحية وخصم السيشن
         if member:
             sub = self.get_active_membership(person_id)
             if not sub:
                 raise ValueError(f"Access Denied: Member '{member.name}' subscription is Expired or Frozen.")
-            if hasattr(sub, "deduct_session"):
-                sub.deduct_session()
-            elif hasattr(sub, "remaining_sessions") and sub.remaining_sessions > 0:
-                sub.remaining_sessions -= 1
+            sub.deduct_session()
 
-        next_id = (max([a.attendance_id for a in self.attendances]) + 1) if self.attendances else 1
+        next_id = max([a.attendance_id for a in self.attendances], default=0) + 1
         attendance = Attendance(next_id, person_id)
         self.attendances.append(attendance)
         self.save()
@@ -469,7 +400,6 @@ class Gym:
         return target
 
     def get_currently_in_gym(self) -> List[Dict[str, Any]]:
-        """يعرض المتواجدين خلال آخر ساعتين ويفرز دور كل شخص (كابتن / عضو)[cite: 8]"""
         now = datetime.now()
         two_hours_ago = now - timedelta(hours=2)
         active_now = []
@@ -512,7 +442,6 @@ class Gym:
                 })
         return daily_records
 
-    # ---------------- إحصائيات الداشبورد اللحظية ----------------
     def get_dashboard_stats(self) -> Dict[str, Any]:
         total_members = len(self.members)
         active_members = len(self.filter_members_by_status(active=True))
@@ -555,7 +484,6 @@ class Gym:
             "method_totals": method_totals
         }
 
-    # ---------------- بروفايل العضو الشامل ----------------
     def get_member_complete_profile(self, member_id: int) -> Dict[str, Any]:
         member = self.find_member_by_id(member_id)
         if not member:
@@ -574,7 +502,7 @@ class Gym:
         rem_sess = getattr(sub, "remaining_sessions", 0) if sub else 0
         tot_sess = getattr(sub, "total_sessions", 0) if sub else 0
 
-        prog = member.get_progress_summary() if hasattr(member, "get_progress_summary") else {"status": "No InBody"}
+        prog = member.get_progress_summary()
         history = getattr(member, "inbody_history", [])
 
         return {
@@ -596,18 +524,18 @@ class Gym:
             "inbody_history": history
         }
 
-    # ---------------- السجل المالي والمدفوعات ----------------
     def record_payment(self, member_id: int, amount: float, method: str = "Cash", ref: Optional[str] = None) -> Payment:
         if float(amount) <= 0:
             raise ValueError("Payment amount must be greater than zero.")
-        next_id = (max([p.payment_id for p in self.payments]) + 1) if self.payments else 1
+        next_id = max([p.payment_id for p in self.payments], default=0) + 1
         payment = Payment(next_id, member_id, float(amount), method=method, reference_number=ref)
         self.payments.append(payment)
         self.save()
         return payment
 
     def update_payment(self, payment_id: int, amount: float, method: str, ref: Optional[str] = None) -> Payment:
-        target = next((p for p in self.payments if p.payment_id == payment_id), None)
+        self.load()
+        target = next((p for p in self.payments if int(p.payment_id) == int(payment_id)), None)
         if not target:
             raise ValueError(f"Payment receipt #{payment_id} not found.")
         if float(amount) <= 0:
@@ -621,14 +549,14 @@ class Gym:
         return target
 
     def delete_payment(self, payment_id: int) -> Payment:
-        target = next((p for p in self.payments if p.payment_id == payment_id), None)
+        self.load()
+        target = next((p for p in self.payments if int(p.payment_id) == int(payment_id)), None)
         if not target:
             raise ValueError(f"Payment receipt #{payment_id} not found.")
-        self.payments = [p for p in self.payments if p.payment_id != payment_id]
+        self.payments = [p for p in self.payments if int(p.payment_id) != int(payment_id)]
         self.save()
         return target
 
-    # ---------------- دوال الاشتراكات المساعدة ----------------
     def get_active_membership(self, member_id: int) -> Optional[Membership]:
         for ms in self.memberships:
             if ms.member_id == member_id:

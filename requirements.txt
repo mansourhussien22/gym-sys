@@ -1,4 +1,6 @@
 Flask
+Flask-Cors
 Pillow
-qrcode
-opencv-python-headless
+qrcode[pil]
+opencv-python
+customtkinter

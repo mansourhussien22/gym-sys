@@ -14,7 +14,8 @@ class Member(Person):
         join_date: Optional[str] = None,
         trainer_id: Optional[int] = None,
         qr_token: Optional[str] = None,
-        inbody_history: Optional[List[Dict[str, Any]]] = None
+        inbody_history: Optional[List[Dict[str, Any]]] = None,
+        **kwargs
     ):
         super().__init__(person_id, name, phone)
         self.membership_type = membership_type
@@ -38,12 +39,16 @@ class Member(Person):
         return self._join_date
 
     def add_inbody_record(self, weight: float, height: float, fat_percentage: float, muscle_mass: float, notes: str = "") -> Dict[str, Any]:
+        w, h, f, m = float(weight), float(height), float(fat_percentage), float(muscle_mass)
+        if w <= 0 or h <= 0 or f < 0 or m <= 0:
+            raise ValueError("InBody metrics (weight, height, fat, muscle) must be positive values.")
+
         record = {
             "date": datetime.now().strftime("%Y-%m-%d"),
-            "weight": round(float(weight), 1),
-            "height": round(float(height), 1),
-            "fat_percentage": round(float(fat_percentage), 1),
-            "muscle_mass": round(float(muscle_mass), 1),
+            "weight": round(w, 1),
+            "height": round(h, 1),
+            "fat_percentage": round(f, 1),
+            "muscle_mass": round(m, 1),
             "notes": notes
         }
         self.inbody_history.append(record)
@@ -56,12 +61,19 @@ class Member(Person):
         initial = self.inbody_history[0]
         latest = self.inbody_history[-1]
 
+        w_init = initial.get("weight", 0.0)
+        w_late = latest.get("weight", 0.0)
+        f_init = initial.get("fat_percentage", 0.0)
+        f_late = latest.get("fat_percentage", 0.0)
+        m_init = initial.get("muscle_mass", 0.0)
+        m_late = latest.get("muscle_mass", 0.0)
+
         return {
             "initial_record": initial,
             "latest_record": latest,
-            "weight_change": round(latest["weight"] - initial["weight"], 1),
-            "fat_change": round(latest["fat_percentage"] - initial["fat_percentage"], 1),
-            "muscle_change": round(latest["muscle_mass"] - initial["muscle_mass"], 1),
+            "weight_change": round(w_late - w_init, 1),
+            "fat_change": round(f_late - f_init, 1),
+            "muscle_change": round(m_late - m_init, 1),
             "total_records": len(self.inbody_history)
         }
 

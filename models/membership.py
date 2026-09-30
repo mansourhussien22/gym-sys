@@ -16,13 +16,15 @@ class Membership:
         freeze_date: Optional[str] = None,
         is_active: Optional[bool] = None,
         status: Optional[str] = None,
-        **kwargs                      
+        **kwargs
     ):
         self._membership_id = int(membership_id)
         self._member_id = int(member_id)
         self.cost = float(cost)
-        self.total_sessions = int(total_sessions)
-        self.remaining_sessions = self.total_sessions if remaining_sessions is None else int(remaining_sessions)
+        total = int(total_sessions)
+        self.total_sessions = total
+        rem = total if remaining_sessions is None else int(remaining_sessions)
+        self.remaining_sessions = max(0, min(rem, total))
         self.is_frozen = bool(is_frozen)
         self.freeze_date = freeze_date
         self._validate_and_set_dates(start_date, end_date)
@@ -82,7 +84,7 @@ class Membership:
         
         freeze_start = datetime.strptime(self.freeze_date, "%Y-%m-%d").date()
         today = datetime.now().date()
-        frozen_days = max(1, (today - freeze_start).days)
+        frozen_days = max(0, (today - freeze_start).days)
 
         current_end = datetime.strptime(self._end_date, "%Y-%m-%d").date()
         new_end = current_end + timedelta(days=frozen_days)

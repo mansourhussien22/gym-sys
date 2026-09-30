@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any
 
 
 class Person(ABC):
@@ -20,7 +19,10 @@ class Person(ABC):
     def name(self, value: str) -> None:
         if not value or not value.strip():
             raise ValueError("Name cannot be empty.")
-        self._name = value.strip()
+        val = value.strip()
+        if len(val) > 100:
+            raise ValueError("Name cannot exceed 100 characters.")
+        self._name = val
 
     @property
     def phone(self) -> str:
@@ -28,15 +30,13 @@ class Person(ABC):
 
     @phone.setter
     def phone(self, value: str) -> None:
-        cleaned = value.strip() if value else ""
-        if len(cleaned) != 11 or not cleaned.isdigit() or not cleaned.startswith("01"):
-            raise ValueError("Phone number must be an 11-digit mobile number starting with '01'")
-        self._phone = cleaned
+        if not value or not value.strip():
+            raise ValueError("Phone number cannot be empty.")
+        val = value.strip()
+        if not (val.isdigit() and len(val) == 11 and val.startswith("01")):
+            raise ValueError("Phone number must be exactly 11 digits and start with '01'.")
+        self._phone = val
 
     @abstractmethod
     def get_details(self) -> str:
-        pass
-
-    @abstractmethod
-    def to_dict(self) -> Dict[str, Any]:
         pass

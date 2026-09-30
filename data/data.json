@@ -88,19 +88,11 @@
     },
     {
       "payment_id": 2,
-      "member_id": 33013,
-      "amount": 660.0,
-      "method": "Cash",
-      "reference_number": "Manual Payment",
-      "date": "2026-09-30 23:02:47"
-    },
-    {
-      "payment_id": 3,
       "member_id": 38015,
       "amount": 600.0,
       "method": "Cash",
       "reference_number": "Plan Enrollment",
-      "date": "2026-09-30 23:05:21"
+      "date": "2026-09-30 23:15:00"
     }
   ],
   "attendances": [
@@ -118,6 +110,8 @@
       "attendance_id": 3,
       "member_id": 21434,
       "timestamp": "2026-10-01 01:53:43"
+      
     }
-  ]
+  ],
+  "body_metrics": []
 }

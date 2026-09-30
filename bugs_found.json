@@ -1,0 +1,50 @@
+[
+  {
+    "code": "BUG-057",
+    "severity": "Major",
+    "file": "data/data.json",
+    "location": "Full file",
+    "description": "Sensitive data (payments, salaries) not encrypted",
+    "fix": "Encrypt file or use a database"
+  },
+  {
+    "code": "BUG-058",
+    "severity": "Major",
+    "file": "server.py",
+    "location": "/api/members, /api/payments",
+    "description": "No pagination - all data returned at once",
+    "fix": "Add ?page=N&limit=M"
+  },
+  {
+    "code": "BUG-033",
+    "severity": "Major",
+    "file": "templates/index.html",
+    "location": "exitApplication()",
+    "description": "Wipes body.innerHTML - loses event listeners",
+    "fix": "Use a modal overlay instead"
+  },
+  {
+    "code": "BUG-030/031",
+    "severity": "Critical",
+    "file": "templates/index.html",
+    "location": "Template literals",
+    "description": "Names placed in '...' inside onclick - breaks on quotes",
+    "fix": "Use JSON.stringify() or escape"
+  },
+  {
+    "code": "BUG-014",
+    "severity": "Minor",
+    "file": "models/person.py",
+    "location": "name.setter",
+    "description": "No max length - 100k chars stored",
+    "fix": "Limit to 100 chars"
+  },
+  {
+    "code": "BUG-016",
+    "severity": "Major",
+    "file": "services/qr_manager.py",
+    "location": "scan_from_webcam()",
+    "description": "Uses cv2.imshow - fails on headless servers",
+    "fix": "Separate desktop GUI from server code"
+  }
+]
