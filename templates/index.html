@@ -1,1240 +1,1189 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="dark">
+<html lang="ar" dir="rtl" data-lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FitZone Pro — Gym Management Platform</title>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Cairo', 'sans-serif'] },
-          colors: { brand: { orange: '#f97316', amber: '#f59e0b', dark: '#090d16' } }
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitZone Pro — Gym Management Platform</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: { sans: ['var(--font-ui)', 'sans-serif'] },
+        colors: { brand: { orange: '#f97316', amber: '#f59e0b', dark: '#080b12' } }
       }
     }
-  </script>
+  }
+</script>
 
-  <style>
-    body { font-family: 'Cairo', sans-serif; }
-    #mainViewport {
-      transition: background-image 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-    }
-    .tab-content:not(.hidden) {
-      animation: tabFadeSlide 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    @keyframes tabFadeSlide {
-      from { opacity: 0; transform: translateY(10px) scale(0.995); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
-    }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #090d16; }
-    ::-webkit-scrollbar-thumb { background: #263346; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #f97316; }
-  </style>
+<style>
+/* ==========================================================
+   DESIGN TOKENS
+   ========================================================== */
+:root {
+  --bg: #080b12;
+  --surface: #0e1320;
+  --surface-2: #141a2a;
+  --surface-3: #1a2135;
+  --border: #232b40;
+  --border-soft: #1b2233;
+  --text: #f2f4f9;
+  --muted: #8892a8;
+  --muted-dim: #5c6478;
+
+  --orange: #f97316;
+  --orange-soft: rgba(249,115,22,.14);
+  --amber: #f59e0b;
+  --emerald: #22c55e;
+  --emerald-soft: rgba(34,197,94,.14);
+  --rose: #f43f5e;
+  --rose-soft: rgba(244,63,94,.14);
+  --blue: #3b82f6;
+  --blue-soft: rgba(59,130,246,.14);
+  --purple: #8b5cf6;
+  --purple-soft: rgba(139,92,246,.14);
+  --cyan: #22d3ee;
+
+  --r-lg: 22px;
+  --r-md: 16px;
+  --r-sm: 11px;
+
+  --ease: cubic-bezier(.22,1,.36,1);
+  --font-ui: 'Cairo', sans-serif;
+}
+:root[data-lang="en"] { --font-ui: 'Inter', 'Cairo', sans-serif; }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* subtle ambient glow instead of heavy photo backgrounds — keeps it light & fast */
+.ambient {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(700px 420px at 85% -10%, rgba(249,115,22,.10), transparent 60%),
+    radial-gradient(600px 380px at -10% 30%, rgba(139,92,246,.07), transparent 60%),
+    radial-gradient(500px 500px at 50% 120%, rgba(34,197,94,.05), transparent 60%);
+}
+
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #263049; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+
+::selection { background: var(--orange); color: #1a0d02; }
+
+/* ==========================================================
+   MOTION PRIMITIVES
+   ========================================================== */
+@keyframes fadeSlideUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
+@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+@keyframes popIn { from { opacity:0; transform: scale(.94) translateY(6px);} to { opacity:1; transform:none; } }
+@keyframes shimmer { 0% { background-position: -300px 0; } 100% { background-position: 300px 0; } }
+@keyframes pulseDot { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.55);} 70%{box-shadow:0 0 0 9px rgba(34,197,94,0);} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0);} }
+@keyframes countGlow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
+@keyframes toastIn { from { opacity:0; transform: translateY(16px) scale(.96); } to { opacity:1; transform:none; } }
+@keyframes barShrink { from { width: 100%; } to { width: 0%; } }
+
+.tab-content { animation: fadeSlideUp .45s var(--ease) both; }
+@media (prefers-reduced-motion: reduce) {
+  .tab-content, .modal-panel, .toast-item { animation: none !important; }
+}
+
+/* ==========================================================
+   LAYOUT SHELL
+   ========================================================== */
+.glass {
+  background: linear-gradient(180deg, rgba(20,26,42,.7), rgba(14,19,32,.7));
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-soft);
+}
+
+#topbar { position: sticky; top:0; z-index:40; }
+
+.sidebar-nav-item {
+  position: relative; z-index: 1;
+  display:flex; align-items:center; gap:.7rem;
+  padding: .72rem .95rem; border-radius: 13px;
+  font-weight:700; font-size:.86rem; color: var(--muted);
+  transition: color .25s var(--ease);
+  cursor: pointer; width:100%; background:transparent; border:none; text-align: inherit;
+}
+.sidebar-nav-item:hover { color: #e7ebf3; }
+.sidebar-nav-item.is-active { color: #fff; }
+.sidebar-nav-item svg { width:19px; height:19px; flex-shrink:0; }
+
+#navIndicator {
+  position:absolute; right:0; left:0; z-index:0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, var(--orange), #ea6a0a);
+  box-shadow: 0 8px 20px -6px rgba(249,115,22,.55);
+  transition: transform .38s var(--ease), height .38s var(--ease);
+  will-change: transform, height;
+}
+
+/* ==========================================================
+   CARDS / SURFACES
+   ========================================================== */
+.panel {
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+}
+
+.stat-card {
+  position: relative; overflow:hidden;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: 1.15rem 1.25rem;
+  transition: transform .3s var(--ease), border-color .3s var(--ease), box-shadow .3s var(--ease);
+}
+.stat-card:hover { transform: translateY(-3px); border-color: var(--accent, var(--orange)); box-shadow: 0 16px 30px -18px var(--accent, var(--orange)); }
+.stat-card .icon-badge {
+  width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+  background: var(--accent-soft, var(--orange-soft)); color: var(--accent, var(--orange));
+}
+.stat-card .icon-badge svg { width:19px; height:19px; }
+.stat-value { font-weight:900; font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+.stat-value.is-glowing { animation: countGlow .5s var(--ease); }
+
+.table-wrap { border-radius: var(--r-lg); overflow:hidden; border:1px solid var(--border-soft); background: var(--surface-2); }
+table { width:100%; font-size:.86rem; }
+thead th { font-size:.68rem; letter-spacing:.03em; color: var(--muted); font-weight:700; padding: .85rem 1rem; background: var(--surface-3); }
+tbody tr { transition: background .2s var(--ease); animation: fadeSlideUp .4s var(--ease) both; animation-delay: calc(var(--i,0) * 35ms); }
+tbody tr:hover { background: rgba(255,255,255,.025); }
+tbody td { padding: .8rem 1rem; }
+
+.badge { display:inline-flex; align-items:center; gap:.32rem; padding:.28rem .68rem; border-radius:999px; font-size:.68rem; font-weight:800; white-space:nowrap; }
+.badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+
+/* ==========================================================
+   FORM CONTROLS
+   ========================================================== */
+.field-label { display:block; font-size:.72rem; font-weight:700; color: var(--muted); margin-bottom:.4rem; }
+.input, select.input {
+  width:100%; background: var(--bg); border:1px solid var(--border); color: var(--text);
+  border-radius: var(--r-sm); padding:.62rem .8rem; font-size:.86rem; font-family: inherit;
+  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+}
+.input::placeholder { color: var(--muted-dim); }
+.input:focus { outline:none; border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
+
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+  font-weight:800; font-size:.82rem; border-radius: var(--r-sm);
+  padding:.62rem 1.1rem; cursor:pointer; border:1px solid transparent;
+  transition: transform .15s var(--ease), filter .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease);
+  font-family: inherit; white-space: nowrap;
+}
+.btn:active { transform: scale(.96); }
+.btn-primary { background: linear-gradient(135deg, var(--orange), #ea6a0a); color:#fff; box-shadow: 0 10px 24px -12px rgba(249,115,22,.7); }
+.btn-primary:hover { filter: brightness(1.08); }
+.btn-blue { background: linear-gradient(135deg, var(--blue), #2563eb); color:#fff; box-shadow: 0 10px 24px -12px rgba(59,130,246,.65); }
+.btn-blue:hover { filter: brightness(1.08); }
+.btn-emerald { background: linear-gradient(135deg, var(--emerald), #16a34a); color:#fff; box-shadow: 0 10px 24px -12px rgba(34,197,94,.6); }
+.btn-emerald:hover { filter: brightness(1.08); }
+.btn-ghost { background: var(--surface-3); color: var(--text); border-color: var(--border); }
+.btn-ghost:hover { background: #212a41; }
+.btn-danger { background: var(--rose-soft); color: #fda4b5; border-color: rgba(244,63,94,.28); }
+.btn-danger:hover { background: rgba(244,63,94,.22); }
+.btn-xs { padding:.4rem .68rem; font-size:.68rem; border-radius:9px; }
+.btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+
+/* ==========================================================
+   MODALS
+   ========================================================== */
+.modal-backdrop {
+  position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:1rem;
+  background: rgba(4,6,11,.72); backdrop-filter: blur(6px);
+  animation: fadeIn .2s var(--ease);
+}
+.modal-panel {
+  animation: popIn .28s var(--ease);
+  background: var(--surface-2); border:1px solid var(--border-soft); border-radius: var(--r-lg);
+}
+
+/* ==========================================================
+   TOASTS
+   ========================================================== */
+#toastStack {
+  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
+  z-index: 100; display:flex; flex-direction:column; gap:.55rem; width: min(92vw, 380px);
+}
+.toast-item {
+  position: relative; overflow:hidden;
+  background: var(--surface-3); border:1px solid var(--border); border-radius: 13px;
+  padding: .8rem 1rem; display:flex; align-items:center; gap:.65rem;
+  font-size:.82rem; font-weight:700; box-shadow: 0 14px 30px -14px rgba(0,0,0,.6);
+  animation: toastIn .3s var(--ease);
+}
+.toast-item svg { width:18px; height:18px; flex-shrink:0; }
+.toast-item.success { border-color: rgba(34,197,94,.35); }
+.toast-item.success svg { color: var(--emerald); }
+.toast-item.error { border-color: rgba(244,63,94,.35); }
+.toast-item.error svg { color: var(--rose); }
+.toast-item.info svg { color: var(--blue); }
+.toast-bar { position:absolute; bottom:0; right:0; left:0; height:2px; background: currentColor; opacity:.5; animation: barShrink linear forwards; }
+
+/* ==========================================================
+   SKELETON LOADERS
+   ========================================================== */
+.skel {
+  background: linear-gradient(90deg, var(--surface-3) 25%, #232b42 37%, var(--surface-3) 63%);
+  background-size: 400px 100%; animation: shimmer 1.4s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* ==========================================================
+   LIVE / PRESENCE
+   ========================================================== */
+.dot-live { width:9px; height:9px; border-radius:50%; background: var(--emerald); animation: pulseDot 2.2s infinite; }
+
+/* ==========================================================
+   LANG SWITCH
+   ========================================================== */
+.lang-switch { display:flex; background: var(--surface-3); border:1px solid var(--border); border-radius: 999px; padding: 3px; }
+.lang-switch button {
+  padding: .38rem .85rem; border-radius:999px; font-size:.72rem; font-weight:800; color: var(--muted);
+  background:transparent; border:none; cursor:pointer; transition: all .25s var(--ease); font-family: inherit;
+}
+.lang-switch button.is-active { background: var(--orange); color:#1a0d02; }
+
+/* ==========================================================
+   MISC
+   ========================================================== */
+.qr-frame { background:#fff; border-radius: var(--r-md); padding: 14px; display:inline-block; box-shadow: 0 20px 40px -20px rgba(0,0,0,.6); }
+.chip-search-suggest { animation: fadeSlideUp .25s var(--ease) both; }
+.hairline { border-color: var(--border-soft); }
+
+@media (max-width: 900px) {
+  #sidebar { display:none; }
+}
+</style>
 </head>
-<body class="bg-[#090d16] text-slate-100 min-h-screen flex flex-col select-none overflow-x-hidden">
 
-  <!-- ================= الشريط العلوي ================= -->
-  <header class="border-b border-slate-800/80 bg-[#111827]/95 backdrop-blur-md sticky top-0 z-50 px-6 py-3.5 flex justify-between items-center shadow-lg">
-    <div class="flex items-center gap-3.5">
-      <span class="p-2.5 rounded-2xl bg-gradient-to-br from-orange-500/20 to-amber-500/10 text-orange-500 border border-orange-500/20 font-black text-2xl shadow-inner">⚡</span>
-      <div>
-        <h1 class="font-black text-xl tracking-wide bg-gradient-to-r from-orange-500 via-amber-400 to-yellow-500 bg-clip-text text-transparent">FitZone Pro</h1>
-        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="sub_title">بوابة الإدارة والتتبع الرياضي الشامل</p>
-      </div>
+<body class="min-h-screen flex flex-col">
+<div class="ambient"></div>
+
+<!-- ================= TOASTS ================= -->
+<div id="toastStack"></div>
+
+<!-- ================= GENERIC CONFIRM DIALOG ================= -->
+<div id="confirmBackdrop" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-sm p-6 text-center space-y-4">
+    <div class="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-400 mx-auto flex items-center justify-center">
+      <i data-lucide="alert-triangle" class="w-6 h-6"></i>
     </div>
+    <p id="confirmMessage" class="text-sm text-slate-200 font-bold leading-relaxed"></p>
+    <div class="flex gap-3">
+      <button id="confirmCancelBtn" class="btn btn-ghost flex-1"></button>
+      <button id="confirmOkBtn" class="btn btn-danger flex-1"></button>
+    </div>
+  </div>
+</div>
 
-    <div class="flex items-center gap-4">
-      <div class="flex items-center gap-2.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-4 py-1.5 rounded-full text-xs font-bold shadow-sm">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-        <span data-i18n="live_floor">الصالة الحية:</span> 
-        <span id="liveCountText" class="font-black text-sm">0</span>
+<!-- ================= TOPBAR ================= -->
+<header id="topbar" class="glass border-b px-5 py-3 flex justify-between items-center relative z-10">
+  <div class="flex items-center gap-3">
+    <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500/25 to-amber-500/10 text-orange-500 border border-orange-500/25 flex items-center justify-center font-black text-xl shadow-inner">⚡</span>
+    <div>
+      <h1 class="font-black text-lg tracking-wide bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent">FitZone Pro</h1>
+      <p class="text-[11px] text-slate-400 font-semibold" data-i18n="sub_title"></p>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <div class="hidden sm:flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-3.5 py-1.5 rounded-full text-xs font-bold">
+      <span class="dot-live"></span>
+      <span data-i18n="live_floor"></span>
+      <span id="liveCountText" class="font-black">0</span>
+    </div>
+    <div class="lang-switch">
+      <button id="langBtnAr" data-lang-btn="ar">AR</button>
+      <button id="langBtnEn" data-lang-btn="en">EN</button>
+    </div>
+  </div>
+</header>
+
+<div class="flex-1 flex overflow-hidden relative z-10">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside id="sidebar" class="w-64 border-l hairline glass flex flex-col justify-between p-4">
+    <nav id="navList" class="relative space-y-1.5">
+      <div id="navIndicator" style="height:0"></div>
+      <button class="sidebar-nav-item is-active" data-tab="dashboard">
+        <i data-lucide="layout-dashboard"></i><span data-i18n="nav_dashboard"></span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="members">
+        <i data-lucide="users"></i><span data-i18n="nav_members"></span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="trainers">
+        <i data-lucide="trophy"></i><span data-i18n="nav_trainers"></span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="memberships">
+        <i data-lucide="file-text"></i><span data-i18n="nav_memberships"></span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="attendance">
+        <i data-lucide="scan-line"></i><span data-i18n="nav_attendance"></span>
+      </button>
+      <button class="sidebar-nav-item" data-tab="payments">
+        <i data-lucide="credit-card"></i><span data-i18n="nav_payments"></span>
+      </button>
+    </nav>
+
+    <button id="exitBtn" class="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl font-bold text-sm bg-rose-950/40 hover:bg-rose-900/70 border border-rose-800/70 text-rose-300 transition">
+      <i data-lucide="log-out" class="w-4 h-4"></i><span data-i18n="nav_exit"></span>
+    </button>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <main class="flex-1 overflow-y-auto p-6 md:p-8">
+
+    <!-- ============ 1. DASHBOARD ============ -->
+    <section id="tab-dashboard" class="tab-content space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 panel p-6">
+        <div>
+          <h2 class="text-2xl font-black" data-i18n="dash_title"></h2>
+          <p class="text-sm text-slate-400 mt-1" data-i18n="dash_sub"></p>
+        </div>
+        <span class="px-4 py-2 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl text-xs font-extrabold" id="retentionText"></span>
       </div>
 
-      <button onclick="toggleLanguage()" class="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-700 bg-[#1f2937]/90 hover:bg-slate-700 text-orange-400 font-bold text-xs transition duration-200 shadow-md">
-        <i data-lucide="languages" class="w-4 h-4"></i>
-        <span id="langBtnText">English</span>
-      </button>
-    </div>
-  </header>
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="statCardsGrid"></div>
 
-  <div class="flex-1 flex overflow-hidden">
-    <!-- السايدبار -->
-    <aside class="w-64 border-l border-slate-800/80 bg-[#111827]/95 flex flex-col justify-between p-4 z-20 backdrop-blur-md shadow-2xl">
-      <nav class="space-y-1.5">
-        <button onclick="switchTab('dashboard')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition bg-orange-600 text-white shadow-lg shadow-orange-600/20" data-tab="dashboard">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i> <span data-i18n="nav_dashboard">لوحة التحكم</span>
-        </button>
-        <button onclick="switchTab('members')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition" data-tab="members">
-          <i data-lucide="users" class="w-5 h-5"></i> <span data-i18n="nav_members">الأعضاء (Member)</span>
-        </button>
-        <button onclick="switchTab('trainers')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition" data-tab="trainers">
-          <i data-lucide="trophy" class="w-5 h-5"></i> <span data-i18n="nav_trainers">الكباتن (Trainer)</span>
-        </button>
-        <button onclick="switchTab('memberships')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition" data-tab="memberships">
-          <i data-lucide="file-text" class="w-5 h-5"></i> <span data-i18n="nav_memberships">الاشتراكات (Membership)</span>
-        </button>
-        <button onclick="switchTab('attendance')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition" data-tab="attendance">
-          <i data-lucide="scan-line" class="w-5 h-5"></i> <span data-i18n="nav_attendance">الحضور (Attendance)</span>
-        </button>
-        <button onclick="switchTab('payments')" class="tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm text-slate-400 hover:bg-slate-800 hover:text-white transition" data-tab="payments">
-          <i data-lucide="credit-card" class="w-5 h-5"></i> <span data-i18n="nav_payments">الخزينة (Payment)</span>
-        </button>
-      </nav>
-
-      <button onclick="exitApplication()" class="w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl font-bold text-sm transition bg-red-950/40 hover:bg-red-900/80 border border-red-800/80 text-red-300 shadow-md">
-        <i data-lucide="log-out" class="w-4 h-4"></i> <span data-i18n="nav_exit">إغلاق النظام (خروج)</span>
-      </button>
-    </aside>
-
-    <!-- منطقة المحتوى -->
-    <main id="mainViewport" class="flex-1 overflow-y-auto p-8 relative">
-      
-      <!-- ================= 1. الداشبورد ================= -->
-      <section id="tab-dashboard" class="tab-content space-y-6">
-        <div class="flex justify-between items-center bg-[#111827]/85 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl">
-          <div>
-            <h2 class="text-2xl font-black text-white" data-i18n="dash_title">نظرة عامة على نشاط الصالة</h2>
-            <p class="text-sm text-slate-400 mt-1" data-i18n="dash_sub">متابعة فورية للحضور، الإيرادات والالتزام الرياضي</p>
-          </div>
-          <span class="px-4 py-2 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl text-xs font-extrabold shadow-inner" id="retentionText">معدل الاستمرارية: 0%</span>
-        </div>
-
-        <!-- كروت الإحصائيات (شاملة الكباتن والأعضاء) -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-          <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md p-5 shadow-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 left-0 h-1 bg-amber-500"></div>
-            <p class="text-xs font-bold text-slate-400" data-i18n="card_in_gym">في الجيم الآن (ساعتان)</p>
-            <div class="flex items-baseline gap-2 mt-2">
-              <h3 class="text-3xl font-black text-amber-400 tracking-tight" id="dash_in_gym">0</h3>
-              <span class="text-xs font-semibold text-slate-400" id="dash_in_gym_breakdown">(0 متدرب | 0 كابتن)</span>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-1.5 font-medium" data-i18n="card_in_gym_sub">يختفي الشخص تلقائياً بعد ساعتين</p>
-          </div>
-
-          <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md p-5 shadow-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 left-0 h-1 bg-blue-500"></div>
-            <p class="text-xs font-bold text-slate-400" data-i18n="card_today_att">حضور اليوم بالكامل</p>
-            <h3 class="text-3xl font-black mt-2 text-blue-400 tracking-tight" id="dash_today_att">0</h3>
-            <p class="text-[11px] text-slate-500 mt-1.5 font-medium" data-i18n="card_today_att_sub">سجل غير مكرر على مدار 24 ساعة</p>
-          </div>
-
-          <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md p-5 shadow-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 left-0 h-1 bg-emerald-500"></div>
-            <p class="text-xs font-bold text-slate-400" data-i18n="card_active_mem">المشتركين النشطين</p>
-            <h3 class="text-3xl font-black mt-2 text-emerald-400 tracking-tight" id="dash_active">0</h3>
-            <p class="text-[11px] text-slate-500 mt-1.5 font-medium" data-i18n="card_active_mem_sub">صلاحية سارية وحصص متبقية</p>
-          </div>
-
-          <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md p-5 shadow-xl relative overflow-hidden group">
-            <div class="absolute top-0 right-0 left-0 h-1 bg-orange-500"></div>
-            <p class="text-xs font-bold text-slate-400" data-i18n="card_total_rev">إجمالي الدخل المحصل</p>
-            <h3 class="text-3xl font-black mt-2 text-orange-400 tracking-tight" id="dash_revenue">$0.00</h3>
-            <p class="text-[11px] text-slate-500 mt-1.5 font-medium" data-i18n="card_total_rev_sub">شامل الاشتراكات ونسبة المدربين</p>
-          </div>
-        </div>
-
-        <!-- جدول الصالة الحية (يُميّز بين الكابتن والمتدرب) -->
-        <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md p-6 shadow-xl">
-          <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-800">
-            <h3 class="font-black text-lg flex items-center gap-2.5">
-              <i data-lucide="flame" class="text-orange-500 w-5 h-5"></i> 
-              <span data-i18n="live_gym_list">المتواجدون بالصالة حالياً (كباتن وأعضاء)</span>
-            </h3>
-            <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span data-i18n="live_refresh_badge">تحديث تلقائي لحظي</span>
-            </span>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-right">
-              <thead class="text-xs text-slate-400 border-b border-slate-800/80">
-                <tr>
-                  <th class="py-3 px-4" data-i18n="th_member_id">الكود</th>
-                  <th class="py-3 px-4" data-i18n="th_name">الاسم</th>
-                  <th class="py-3 px-4 text-center">الصفة (الرتبة)</th>
-                  <th class="py-3 px-4" data-i18n="th_checkin_time">وقت الدخول</th>
-                  <th class="py-3 px-4" data-i18n="th_duration">المدة بالداخل</th>
-                  <th class="py-3 px-4 text-center" data-i18n="th_status">الحالة</th>
-                </tr>
-              </thead>
-              <tbody id="live_floor_table" class="divide-y divide-slate-800/60"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================= 2. الأعضاء (Member) ================= -->
-      <section id="tab-members" class="tab-content hidden space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-[#111827]/85 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl">
-          <div>
-            <h2 class="text-2xl font-black" data-i18n="mem_title">إدارة الأعضاء وفحوصات الـ InBody</h2>
-            <p class="text-sm text-slate-400 mt-1" data-i18n="mem_sub">سجل المشتركين، التجميد، التجديد، ومتابعة تطور الجسم</p>
-          </div>
-          <button onclick="openRegisterModal()" class="px-5 py-3 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white rounded-xl font-bold flex items-center gap-2.5 shadow-lg shadow-orange-600/20 transition">
-            <i data-lucide="user-plus" class="w-4 h-4"></i> <span data-i18n="btn_add_member">تسجيل عضو جديد مع InBody</span>
-          </button>
-        </div>
-
-        <div class="flex gap-4">
-          <div class="flex-1 relative">
-            <i data-lucide="search" class="w-5 h-5 absolute right-3.5 top-3.5 text-slate-400"></i>
-            <input type="text" id="memberSearchInput" oninput="handleSearchWithSuggestions(this.value)" placeholder="ابحث بالاسم، الهاتف، أو الكود..." data-i18n-ph="search_placeholder" 
-                   class="w-full pl-4 pr-11 py-3 rounded-xl border border-slate-800 bg-[#111827]/90 text-sm focus:outline-none focus:border-orange-500 backdrop-blur-md transition">
-            <div id="searchSuggestionsDropdown" class="absolute right-0 left-0 top-14 bg-[#111827]/95 border border-slate-700/80 rounded-2xl shadow-2xl z-30 max-h-72 overflow-y-auto hidden divide-y divide-slate-800/70 backdrop-blur-md"></div>
-          </div>
-
-          <select id="memberFilterSelect" onchange="applyMemberFilter()" class="py-3 px-4 rounded-xl border border-slate-800 bg-[#111827]/90 text-sm font-bold focus:outline-none focus:border-orange-500 transition">
-            <option value="all" data-i18n="filter_all">جميع الأعضاء</option>
-            <option value="active" data-i18n="filter_active">النشطين فقط</option>
-            <option value="expired" data-i18n="filter_expired">المنتهية اشتراكاتهم</option>
-            <option value="frozen" data-i18n="filter_frozen">المجمدين فقط</option>
-          </select>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md overflow-hidden shadow-xl">
-          <table class="w-full text-sm text-right">
-            <thead class="bg-slate-800/50 text-xs text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-3.5 px-4" data-i18n="th_code">الكود</th>
-                <th class="py-3.5 px-4" data-i18n="th_member_name">اسم العضو</th>
-                <th class="py-3.5 px-4" data-i18n="th_phone">الهاتف</th>
-                <th class="py-3.5 px-4" data-i18n="th_plan">الخطة</th>
-                <th class="py-3.5 px-4" data-i18n="th_rem_sessions">الحصص المتبقية</th>
-                <th class="py-3.5 px-4" data-i18n="th_coach">الكابتن</th>
-                <th class="py-3.5 px-4" data-i18n="th_status">الحالة</th>
-                <th class="py-3.5 px-4 text-center" data-i18n="th_actions">الإجراءات الشاملة</th>
-              </tr>
-            </thead>
-            <tbody id="members_table" class="divide-y divide-slate-800/70"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ================= 3. الكباتن (Trainer) - كروت نظيفة بدون تفاصيل حساسة ================= -->
-      <section id="tab-trainers" class="tab-content hidden space-y-6">
-        <div class="flex justify-between items-center bg-[#111827]/85 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl">
-          <div>
-            <h2 class="text-2xl font-black" data-i18n="coach_title">فريق تدريب FitZone Pro</h2>
-            <p class="text-sm text-slate-400 mt-1">كروت مختصرة للكباتن مع إمكانية الدخول للبروفايل الكامل لكل كابتن</p>
-          </div>
-          <button onclick="openAddTrainerModal()" class="px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-bold flex items-center gap-2.5 shadow-lg shadow-blue-600/20 transition">
-            <i data-lucide="plus" class="w-4 h-4"></i> <span data-i18n="btn_add_trainer">إضافة كابتن جديد</span>
-          </button>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="trainers_cards"></div>
-      </section>
-
-      <!-- ================= 4. سجل الاشتراكات (Membership) ================= -->
-      <section id="tab-memberships" class="tab-content hidden space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-[#111827]/85 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl">
-          <div>
-            <h2 class="text-2xl font-black" data-i18n="ms_title">سجل الاشتراكات وتتبع الصلاحيات الكامل</h2>
-            <p class="text-sm text-slate-400 mt-1" data-i18n="ms_sub">جميع اشتراكات الأعضاء مسحوبة بالتاريخ والوقت والحصص والمبالغ</p>
-          </div>
-          <input type="text" id="membershipSearchInput" oninput="filterMemberships()" placeholder="بحث في الاشتراكات (اسم، كود، هاتف)..." 
-                 class="py-2.5 px-4 rounded-xl border border-slate-800 bg-[#090d16] text-sm w-72 focus:outline-none focus:border-orange-500">
-        </div>
-
-        <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md overflow-hidden shadow-xl">
-          <table class="w-full text-sm text-right">
-            <thead class="bg-slate-800/50 text-xs text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-3.5 px-4" data-i18n="th_sub_id">رقم الاشتراك</th>
-                <th class="py-3.5 px-4" data-i18n="th_member_name">اسم العضو</th>
-                <th class="py-3.5 px-4">رقم الهاتف</th>
-                <th class="py-3.5 px-4">الخطة المختارة</th>
-                <th class="py-3.5 px-4" data-i18n="th_start_d">تاريخ البدء</th>
-                <th class="py-3.5 px-4" data-i18n="th_end_d">تاريخ الانتهاء</th>
-                <th class="py-3.5 px-4" data-i18n="th_sessions_left">الحصص (متبقية/إجمالي)</th>
-                <th class="py-3.5 px-4" data-i18n="th_cost">التكلفة</th>
-                <th class="py-3.5 px-4 text-center" data-i18n="th_status">الحالة</th>
-              </tr>
-            </thead>
-            <tbody id="memberships_table" class="divide-y divide-slate-800/70"></tbody>
-          </table>
-        </div>
-      </section>
-
-      <!-- ================= 5. الحضور والكاميرا (Attendance) ================= -->
-      <section id="tab-attendance" class="tab-content hidden space-y-6">
-        <div class="max-w-xl mx-auto rounded-2xl border border-slate-800/80 bg-[#111827]/95 backdrop-blur-md p-8 text-center space-y-6 shadow-2xl">
-          <div class="w-16 h-16 rounded-2xl bg-orange-600/20 text-orange-500 mx-auto flex items-center justify-center font-bold text-2xl shadow-inner">
-            <i data-lucide="qr-code" class="w-8 h-8"></i>
-          </div>
-          <div>
-            <h2 class="text-2xl font-black" data-i18n="att_title">تسجيل حضور المشتركين والكباتن</h2>
-            <p class="text-xs text-slate-400 mt-1">سجل بالكود (عضو أو كابتن)، افتح الكاميرا، أو ارفع صورة الـ QR</p>
-          </div>
-
-          <div class="flex flex-wrap gap-3.5 justify-center">
-            <button id="btnToggleCamera" onclick="toggleWebcamScan()" class="px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl flex items-center gap-2 shadow-lg transition">
-              <i data-lucide="camera" class="w-5 h-5"></i> <span id="cameraBtnText" data-i18n="btn_open_cam">تشغيل كاميرا مسح الـ QR</span>
-            </button>
-            <label class="px-5 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl flex items-center gap-2 shadow-lg transition cursor-pointer">
-              <i data-lucide="image" class="w-5 h-5"></i> <span data-i18n="btn_scan_file">مسح من صورة QR</span>
-              <input type="file" id="qrFileInput" accept="image/*" class="hidden" onchange="scanQRFromFile(event)">
-            </label>
-          </div>
-
-          <div id="cameraScannerBox" class="hidden rounded-2xl border-2 border-orange-500 overflow-hidden bg-black p-2 relative shadow-2xl">
-            <div id="qr-reader" class="w-full"></div>
-            <p class="text-xs text-orange-400 font-bold mt-2 animate-pulse" data-i18n="cam_prompt">وجّه كود الـ QR داخل الإطار للمسح التلقائي...</p>
-          </div>
-
-          <div class="border-t border-slate-800 pt-5 space-y-4">
-            <input type="number" id="checkinMemberId" placeholder="ادخل كود العضو أو الكابتن..." 
-                   class="w-full text-center py-3.5 px-4 rounded-xl border border-slate-800 bg-[#090d16] text-xl font-black text-orange-400 focus:outline-none focus:border-orange-500 transition">
-            <button onclick="handleCheckin()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl transition shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2">
-              <i data-lucide="check-circle" class="w-5 h-5"></i> <span data-i18n="btn_checkin">تأكيد الحضور بالكود</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md p-6 shadow-xl">
-          <h3 class="font-black text-lg mb-4 flex items-center gap-2.5 text-blue-400">
-            <i data-lucide="history" class="w-5 h-5"></i> <span data-i18n="audit_24h_title">سجل تدقيق الحضور على مدار الـ 24 ساعة (اليوم)</span>
+      <div class="panel p-6">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b hairline">
+          <h3 class="font-black text-base flex items-center gap-2.5">
+            <i data-lucide="flame" class="text-orange-500 w-5 h-5"></i>
+            <span data-i18n="live_gym_list"></span>
           </h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm text-right">
-              <thead class="text-xs text-slate-400 border-b border-slate-800">
-                <tr>
-                  <th class="py-3 px-4" data-i18n="th_log_id">رقم الحركة</th>
-                  <th class="py-3 px-4">الكود</th>
-                  <th class="py-3 px-4" data-i18n="th_name">الاسم</th>
-                  <th class="py-3 px-4 text-center">الرتبة</th>
-                  <th class="py-3 px-4" data-i18n="th_time">ساعة الحضور</th>
-                </tr>
-              </thead>
-              <tbody id="daily_att_table" class="divide-y divide-slate-800"></tbody>
-            </table>
-          </div>
+          <span class="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+            <span class="dot-live" style="animation-duration:1.6s"></span>
+            <span data-i18n="live_refresh_badge"></span>
+          </span>
         </div>
-      </section>
-
-      <!-- ================= 6. الخزينة والمدفوعات (Payment) ================= -->
-      <section id="tab-payments" class="tab-content hidden space-y-6">
-        <div class="bg-[#111827]/85 backdrop-blur-md p-6 rounded-2xl border border-slate-800/80 shadow-xl">
-          <h2 class="text-2xl font-black" data-i18n="pay_title">سجل المعاملات المالية</h2>
-          <p class="text-sm text-slate-400 mt-1" data-i18n="pay_sub">تسجيل، تعديل، وحذف الحركات المالية والتحصيل</p>
-        </div>
-
-        <div class="bg-[#111827]/90 backdrop-blur-md p-5 rounded-2xl border border-slate-800/80 space-y-3 shadow-xl">
-          <h3 class="text-sm font-bold text-orange-400" data-i18n="pay_new_header">تسجيل حركة تحصيل جديدة</h3>
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-3.5 items-center">
-            <div class="relative">
-              <input type="number" id="pay_new_mid" oninput="verifyPayMember(this.value)" placeholder="كود العضو" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-sm">
-              <span id="pay_verify_badge" class="absolute left-2.5 top-3 text-[11px] font-bold text-slate-500"></span>
-            </div>
-            <input type="number" id="pay_new_amt" placeholder="المبلغ ($)" class="py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-sm">
-            <select id="pay_new_method" class="py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-sm font-semibold">
-              <option value="Cash">Cash (كاش)</option>
-              <option value="Visa">Visa (فيزا)</option>
-              <option value="Instapay">Instapay (انستاباي)</option>
-              <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
-            </select>
-            <input type="text" id="pay_new_ref" placeholder="البيان / ملاحظات" class="py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-sm">
-            <button onclick="submitNewPayment()" class="py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition text-sm flex items-center justify-center gap-1.5 shadow-md">
-              <i data-lucide="plus-circle" class="w-4 h-4"></i> <span data-i18n="btn_record_pay">تسجيل الدفعة</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md overflow-hidden shadow-xl">
-          <table class="w-full text-sm text-right">
-            <thead class="bg-slate-800/50 text-xs text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-3.5 px-4" data-i18n="th_receipt_id">رقم الإيصال</th>
-                <th class="py-3.5 px-4" data-i18n="th_trainee">اسم المشترك</th>
-                <th class="py-3.5 px-4" data-i18n="th_amount">المبلغ</th>
-                <th class="py-3.5 px-4" data-i18n="th_method">وسيلة الدفع</th>
-                <th class="py-3.5 px-4" data-i18n="th_desc">البيان</th>
-                <th class="py-3.5 px-4" data-i18n="th_date">التاريخ</th>
-                <th class="py-3.5 px-4 text-center" data-i18n="th_actions">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="payments_table" class="divide-y divide-slate-800/70"></tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <!-- ================= مودال بروفايل الكابتن الشامل ================= -->
-  <div id="trainerProfileModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#111827] border border-slate-800 rounded-3xl w-full max-w-2xl p-7 max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
-      <div class="flex justify-between items-start border-b border-slate-800 pb-4">
-        <div class="flex items-center gap-4">
-          <div class="w-14 h-14 rounded-2xl bg-orange-600/20 text-orange-500 font-black flex items-center justify-center text-2xl border border-orange-500/20 shadow-inner">🏋️</div>
-          <div>
-            <h3 class="text-xl font-black text-white" id="tr_prof_name">الكابتن</h3>
-            <p class="text-xs text-orange-400 font-bold mt-0.5" id="tr_prof_spec">التخصص</p>
-          </div>
-        </div>
-        <button onclick="closeModal('trainerProfileModal')" class="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800">✕</button>
-      </div>
-
-      <!-- شبكة تفاصيل الكابتن (مخفية عن العامة ومحمية بالبروفايل) -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-        <div class="p-3 rounded-2xl bg-[#090d16] border border-slate-800">
-          <p class="text-[11px] text-slate-400 font-semibold">كود الكابتن (ID)</p>
-          <p class="text-sm font-black text-orange-400 mt-1" id="tr_prof_id">#00000</p>
-        </div>
-        <div class="p-3 rounded-2xl bg-[#090d16] border border-slate-800">
-          <p class="text-[11px] text-slate-400 font-semibold">رقم الهاتف</p>
-          <p class="text-xs font-bold text-slate-200 mt-1" id="tr_prof_phone">-</p>
-        </div>
-        <div class="p-3 rounded-2xl bg-[#090d16] border border-slate-800">
-          <p class="text-[11px] text-slate-400 font-semibold">الراتب الشهري</p>
-          <p class="text-sm font-black text-emerald-400 mt-1" id="tr_prof_salary">$0.00</p>
-        </div>
-        <div class="p-3 rounded-2xl bg-[#090d16] border border-slate-800">
-          <p class="text-[11px] text-slate-400 font-semibold">حضور الصالة</p>
-          <p class="text-sm font-black text-blue-400 mt-1" id="tr_prof_att_days">0 يوم</p>
-        </div>
-      </div>
-
-      <!-- حالة الكابتن الحالية بالصالة + زر الحضور السريع -->
-      <div class="flex items-center justify-between p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
-        <div>
-          <span class="text-xs text-slate-400 font-semibold">الحالة الحالية بالصالة:</span>
-          <span id="tr_prof_presence_badge" class="ml-2 font-black text-xs"></span>
-        </div>
-        <button id="tr_prof_checkin_btn" onclick="checkinCurrentTrainer()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md">
-          تسجيل حضور الكابتن الآن
-        </button>
-      </div>
-
-      <!-- قائمة المتدربين المسجلين مع الكابتن وتطورهم -->
-      <div class="space-y-3">
-        <h4 class="text-sm font-bold text-slate-200 flex items-center gap-2">
-          <i data-lucide="users" class="w-4 h-4 text-orange-400"></i> قائمة المتدربين مع الكابتن ونتائجهم (قبل وبعد)
-        </h4>
-        <div class="overflow-x-auto rounded-xl border border-slate-800 bg-[#090d16]">
-          <table class="w-full text-xs text-right">
-            <thead class="bg-slate-800/60 text-slate-400 border-b border-slate-800">
-              <tr>
-                <th class="py-2.5 px-3">المتدرب</th>
-                <th class="py-2.5 px-3">الهاتف</th>
-                <th class="py-2.5 px-3">التزام 3 أشهر</th>
-                <th class="py-2.5 px-3">الوزن</th>
-                <th class="py-2.5 px-3">الدهون</th>
-                <th class="py-2.5 px-3">العضلات</th>
-              </tr>
-            </thead>
-            <tbody id="tr_prof_trainees_table" class="divide-y divide-slate-800/80"></tbody>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-i18n="th_member_id"></th><th data-i18n="th_name"></th>
+              <th class="text-center" data-i18n="th_role"></th><th data-i18n="th_checkin_time"></th>
+              <th data-i18n="th_duration"></th><th class="text-center" data-i18n="th_status"></th>
+            </tr></thead>
+            <tbody id="live_floor_table"></tbody>
           </table>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- المودالات الأخرى (تسجيل العضو، التجديد، تعديل العضو، QR العضو، إضافة كابتن، تعديل الدفع) -->
-  <div id="registerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-black text-white" data-i18n="modal_reg_title">تسجيل مشترك جديد مع قياسات InBody</h3>
-        <button onclick="closeModal('registerModal')" class="text-slate-400 hover:text-white">✕</button>
+    <!-- ============ 2. MEMBERS ============ -->
+    <section id="tab-members" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 panel p-6">
+        <div>
+          <h2 class="text-2xl font-black" data-i18n="mem_title"></h2>
+          <p class="text-sm text-slate-400 mt-1" data-i18n="mem_sub"></p>
+        </div>
+        <button id="btnOpenRegister" class="btn btn-primary">
+          <i data-lucide="user-plus" class="w-4 h-4"></i><span data-i18n="btn_add_member"></span>
+        </button>
       </div>
 
-      <div class="space-y-3.5 text-sm">
+      <div class="flex gap-3">
+        <div class="flex-1 relative">
+          <i data-lucide="search" class="w-4 h-4 absolute top-1/2 -translate-y-1/2 right-3.5 text-slate-500"></i>
+          <input type="text" id="memberSearchInput" class="input pr-10" data-i18n-ph="search_placeholder">
+          <div id="searchSuggestionsDropdown" class="absolute right-0 left-0 top-[110%] bg-[#141a2a] border hairline rounded-2xl shadow-2xl z-30 max-h-72 overflow-y-auto hidden divide-y divide-white/5"></div>
+        </div>
+        <select id="memberFilterSelect" class="input w-48">
+          <option value="all" data-i18n="filter_all"></option>
+          <option value="active" data-i18n="filter_active"></option>
+          <option value="expired" data-i18n="filter_expired"></option>
+          <option value="frozen" data-i18n="filter_frozen"></option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th data-i18n="th_code"></th><th data-i18n="th_member_name"></th><th data-i18n="th_phone"></th>
+            <th data-i18n="th_plan"></th><th data-i18n="th_rem_sessions"></th><th data-i18n="th_coach"></th>
+            <th data-i18n="th_status"></th><th class="text-center" data-i18n="th_actions"></th>
+          </tr></thead>
+          <tbody id="members_table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 3. TRAINERS ============ -->
+    <section id="tab-trainers" class="tab-content hidden space-y-6">
+      <div class="flex justify-between items-center panel p-6">
         <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_name">الاسم بالكامل</label>
-          <input type="text" id="reg_name" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
+          <h2 class="text-2xl font-black" data-i18n="coach_title"></h2>
+          <p class="text-sm text-slate-400 mt-1" data-i18n="coach_sub"></p>
+        </div>
+        <button id="btnOpenAddTrainer" class="btn btn-blue">
+          <i data-lucide="plus" class="w-4 h-4"></i><span data-i18n="btn_add_trainer"></span>
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="trainers_cards"></div>
+    </section>
+
+    <!-- ============ 4. MEMBERSHIPS ============ -->
+    <section id="tab-memberships" class="tab-content hidden space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 panel p-6">
+        <div>
+          <h2 class="text-2xl font-black" data-i18n="ms_title"></h2>
+          <p class="text-sm text-slate-400 mt-1" data-i18n="ms_sub"></p>
+        </div>
+        <input type="text" id="membershipSearchInput" class="input w-72" data-i18n-ph="ms_search_ph">
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th data-i18n="th_sub_id"></th><th data-i18n="th_member_name"></th><th data-i18n="th_phone"></th>
+            <th data-i18n="th_plan_chosen"></th><th data-i18n="th_start_d"></th><th data-i18n="th_end_d"></th>
+            <th data-i18n="th_sessions_left"></th><th data-i18n="th_cost"></th><th class="text-center" data-i18n="th_status"></th>
+          </tr></thead>
+          <tbody id="memberships_table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ 5. ATTENDANCE ============ -->
+    <section id="tab-attendance" class="tab-content hidden space-y-6">
+      <div class="max-w-xl mx-auto panel p-8 text-center space-y-6">
+        <div class="w-16 h-16 rounded-2xl bg-orange-600/15 text-orange-500 mx-auto flex items-center justify-center">
+          <i data-lucide="qr-code" class="w-8 h-8"></i>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_phone">رقم الهاتف (11 رقم)</label>
-          <input type="text" id="reg_phone" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_plan">باقة الاشتراك</label>
-          <select id="reg_plan" onchange="calculatePricePreview()" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white"></select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_coach">تعيين مدرب (+10% ضريبة كابتن)</label>
-          <select id="reg_trainer" onchange="calculatePricePreview()" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
-            <option value="">بدون مدرب شخصي</option>
-          </select>
+          <h2 class="text-2xl font-black" data-i18n="att_title"></h2>
+          <p class="text-xs text-slate-400 mt-1" data-i18n="att_sub"></p>
         </div>
 
-        <div class="p-4 bg-slate-900/80 border border-slate-800 rounded-xl space-y-2.5">
-          <p class="text-xs font-black text-orange-400" data-i18n="inbody_box_title">قياسات الـ InBody المبدئية</p>
-          <div class="grid grid-cols-2 gap-2.5">
-            <input type="number" id="reg_weight" placeholder="الوزن (kg)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
-            <input type="number" id="reg_height" placeholder="الطول (cm)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
-            <input type="number" id="reg_fat" placeholder="الدهون (%)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
-            <input type="number" id="reg_muscle" placeholder="العضلات (kg)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
+        <div class="flex flex-wrap gap-3 justify-center">
+          <button id="btnToggleCamera" class="btn btn-blue">
+            <i data-lucide="camera" class="w-4 h-4"></i><span id="cameraBtnText"></span>
+          </button>
+          <label class="btn" style="background:var(--purple-soft); color:#c9b6fb; border:1px solid rgba(139,92,246,.3); cursor:pointer;">
+            <i data-lucide="image" class="w-4 h-4"></i><span data-i18n="btn_scan_file"></span>
+            <input type="file" id="qrFileInput" accept="image/*" class="hidden">
+          </label>
+        </div>
+
+        <div id="cameraScannerBox" class="hidden rounded-2xl border-2 border-orange-500/70 overflow-hidden bg-black p-2 relative">
+          <div id="qr-reader" class="w-full"></div>
+          <p class="text-xs text-orange-400 font-bold mt-2 animate-pulse" data-i18n="cam_prompt"></p>
+        </div>
+
+        <div class="border-t hairline pt-5 space-y-3.5">
+          <input type="number" id="checkinMemberId" data-i18n-ph="checkin_ph"
+                 class="input text-center text-xl font-black text-orange-400" style="padding:.85rem;">
+          <button id="btnManualCheckin" class="btn btn-emerald w-full">
+            <i data-lucide="check-circle" class="w-4 h-4"></i><span data-i18n="btn_checkin"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel p-6">
+        <h3 class="font-black text-base mb-4 flex items-center gap-2.5 text-blue-400">
+          <i data-lucide="history" class="w-5 h-5"></i><span data-i18n="audit_24h_title"></span>
+        </h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th data-i18n="th_log_id"></th><th data-i18n="th_code"></th><th data-i18n="th_name"></th>
+              <th class="text-center" data-i18n="th_role"></th><th data-i18n="th_time"></th>
+            </tr></thead>
+            <tbody id="daily_att_table"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 6. PAYMENTS ============ -->
+    <section id="tab-payments" class="tab-content hidden space-y-6">
+      <div class="panel p-6">
+        <h2 class="text-2xl font-black" data-i18n="pay_title"></h2>
+        <p class="text-sm text-slate-400 mt-1" data-i18n="pay_sub"></p>
+      </div>
+
+      <div class="panel p-5 space-y-3">
+        <h3 class="text-sm font-bold text-orange-400" data-i18n="pay_new_header"></h3>
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+          <div class="relative">
+            <input type="number" id="pay_new_mid" class="input" data-i18n-ph="pay_member_id_ph">
+            <span id="pay_verify_badge" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold"></span>
           </div>
+          <input type="number" id="pay_new_amt" class="input" data-i18n-ph="pay_amount_ph">
+          <select id="pay_new_method" class="input font-semibold"></select>
+          <input type="text" id="pay_new_ref" class="input" data-i18n-ph="pay_ref_ph">
+          <button id="btnSubmitPayment" class="btn btn-emerald">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i><span data-i18n="btn_record_pay"></span>
+          </button>
         </div>
+      </div>
 
-        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
-          <p class="text-xs text-slate-400" data-i18n="lbl_total_price">المبلغ المطلوب سداده</p>
-          <span id="pricePreviewText" class="text-lg font-black text-emerald-400">$0.00</span>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th data-i18n="th_receipt_id"></th><th data-i18n="th_trainee"></th><th data-i18n="th_amount"></th>
+            <th data-i18n="th_method"></th><th data-i18n="th_desc"></th><th data-i18n="th_date"></th>
+            <th class="text-center" data-i18n="th_actions"></th>
+          </tr></thead>
+          <tbody id="payments_table"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================= MODAL: TRAINER PROFILE ================= -->
+<div id="trainerProfileModal" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-2xl p-7 max-h-[90vh] overflow-y-auto space-y-6">
+    <div class="flex justify-between items-start border-b hairline pb-4">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-orange-600/15 text-orange-500 font-black flex items-center justify-center text-2xl border border-orange-500/20">🏋️</div>
+        <div>
+          <h3 class="text-xl font-black" id="tr_prof_name"></h3>
+          <p class="text-xs text-orange-400 font-bold mt-0.5" id="tr_prof_spec"></p>
         </div>
+      </div>
+      <button data-close-modal="trainerProfileModal" class="p-2 text-slate-400 hover:text-white rounded-xl bg-white/5">✕</button>
+    </div>
 
-        <button onclick="submitRegisterMember()" class="w-full py-3 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl transition shadow-lg shadow-orange-600/20" data-i18n="btn_confirm_reg">
-          حفظ وتفعيل الاشتراك
-        </button>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+      <div class="p-3 rounded-2xl bg-black/25 border hairline">
+        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_id_label"></p>
+        <p class="text-sm font-black text-orange-400 mt-1" id="tr_prof_id"></p>
+      </div>
+      <div class="p-3 rounded-2xl bg-black/25 border hairline">
+        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_phone_label"></p>
+        <p class="text-xs font-bold mt-1" id="tr_prof_phone"></p>
+      </div>
+      <div class="p-3 rounded-2xl bg-black/25 border hairline">
+        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_salary_label"></p>
+        <p class="text-sm font-black text-emerald-400 mt-1" id="tr_prof_salary"></p>
+      </div>
+      <div class="p-3 rounded-2xl bg-black/25 border hairline">
+        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_att_days_label"></p>
+        <p class="text-sm font-black text-blue-400 mt-1" id="tr_prof_att_days"></p>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between p-4 rounded-2xl bg-black/25 border hairline">
+      <div>
+        <span class="text-xs text-slate-400 font-semibold" data-i18n="tr_current_status_label"></span>
+        <span id="tr_prof_presence_badge" class="ms-2 font-black text-xs"></span>
+      </div>
+      <button id="tr_prof_checkin_btn" class="btn btn-emerald btn-xs" data-i18n="tr_checkin_btn"></button>
+    </div>
+
+    <div class="space-y-3">
+      <h4 class="text-sm font-bold flex items-center gap-2">
+        <i data-lucide="users" class="w-4 h-4 text-orange-400"></i><span data-i18n="tr_trainees_title"></span>
+      </h4>
+      <div class="overflow-x-auto rounded-xl border hairline bg-black/25">
+        <table class="text-xs">
+          <thead><tr>
+            <th data-i18n="tr_trainee_col"></th><th data-i18n="th_phone"></th><th data-i18n="tr_commitment_col"></th>
+            <th data-i18n="tr_weight_col"></th><th data-i18n="tr_fat_col"></th><th data-i18n="tr_muscle_col"></th>
+          </tr></thead>
+          <tbody id="tr_prof_trainees_table"></tbody>
+        </table>
       </div>
     </div>
   </div>
+</div>
 
-  <div id="renewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-black text-white" id="renewModalTitle">تجديد الاشتراك</h3>
-        <button onclick="closeModal('renewModal')" class="text-slate-400 hover:text-white">✕</button>
-      </div>
-      <input type="hidden" id="renew_mid">
-      <div class="space-y-3.5 text-sm">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_choose_plan">اختر الباقة الجديدة</label>
-          <select id="renew_plan" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white"></select>
+<!-- ================= MODAL: REGISTER MEMBER ================= -->
+<div id="registerModal" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto space-y-4">
+    <div class="flex justify-between items-center border-b hairline pb-3">
+      <h3 class="text-lg font-black" data-i18n="modal_reg_title"></h3>
+      <button data-close-modal="registerModal" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+    <div class="space-y-3.5 text-sm">
+      <div><label class="field-label" data-i18n="lbl_name"></label><input type="text" id="reg_name" class="input"></div>
+      <div><label class="field-label" data-i18n="lbl_phone"></label><input type="text" id="reg_phone" class="input"></div>
+      <div><label class="field-label" data-i18n="lbl_plan"></label><select id="reg_plan" class="input"></select></div>
+      <div><label class="field-label" data-i18n="lbl_coach"></label><select id="reg_trainer" class="input"></select></div>
+
+      <div class="p-4 bg-black/25 border hairline rounded-xl space-y-2.5">
+        <p class="text-xs font-black text-orange-400" data-i18n="inbody_box_title"></p>
+        <div class="grid grid-cols-2 gap-2.5">
+          <input type="number" id="reg_weight" data-i18n-ph="ph_weight" class="input text-xs">
+          <input type="number" id="reg_height" data-i18n-ph="ph_height" class="input text-xs">
+          <input type="number" id="reg_fat" data-i18n-ph="ph_fat" class="input text-xs">
+          <input type="number" id="reg_muscle" data-i18n-ph="ph_muscle" class="input text-xs">
         </div>
-        <div class="p-3.5 bg-slate-900/80 border border-slate-800 rounded-xl space-y-2.5">
-          <p class="text-xs font-black text-emerald-400" data-i18n="renew_inbody_title">قياسات InBody التجديد لمتابعة التطور</p>
-          <div class="grid grid-cols-2 gap-2.5">
-            <input type="number" id="renew_w" placeholder="الوزن الحالي (kg)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
-            <input type="number" id="renew_h" placeholder="الطول (cm)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
-            <input type="number" id="renew_fat" placeholder="نسبة الدهون (%)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
-            <input type="number" id="renew_mus" placeholder="الكتلة العضلية (kg)" class="py-2 px-3 rounded-lg border border-slate-800 bg-[#090d16] text-xs">
-          </div>
-        </div>
-        <button onclick="submitRenewMember()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition shadow-md" data-i18n="btn_confirm_renew">
-          تأكيد التجديد ودفع الاشتراك
-        </button>
       </div>
+
+      <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-center">
+        <p class="text-xs text-slate-400" data-i18n="lbl_total_price"></p>
+        <span id="pricePreviewText" class="text-lg font-black text-emerald-400">$0.00</span>
+      </div>
+
+      <button id="btnSubmitRegister" class="btn btn-primary w-full" data-i18n="btn_confirm_reg"></button>
     </div>
   </div>
+</div>
 
-  <div id="qrModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-sm p-6 text-center space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-base font-black text-white" id="qrModalTitle">كود الـ QR</h3>
-        <button onclick="closeModal('qrModal')" class="text-slate-400 hover:text-white">✕</button>
+<!-- ================= MODAL: RENEW ================= -->
+<div id="renewModal" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-md p-6 space-y-4">
+    <div class="flex justify-between items-center border-b hairline pb-3">
+      <h3 class="text-lg font-black" id="renewModalTitle"></h3>
+      <button data-close-modal="renewModal" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+    <input type="hidden" id="renew_mid">
+    <div class="space-y-3.5 text-sm">
+      <div><label class="field-label" data-i18n="lbl_choose_plan"></label><select id="renew_plan" class="input"></select></div>
+      <div class="p-3.5 bg-black/25 border hairline rounded-xl space-y-2.5">
+        <p class="text-xs font-black text-emerald-400" data-i18n="renew_inbody_title"></p>
+        <div class="grid grid-cols-2 gap-2.5">
+          <input type="number" id="renew_w" data-i18n-ph="ph_weight_now" class="input text-xs">
+          <input type="number" id="renew_h" data-i18n-ph="ph_height" class="input text-xs">
+          <input type="number" id="renew_fat" data-i18n-ph="ph_fat_pct" class="input text-xs">
+          <input type="number" id="renew_mus" data-i18n-ph="ph_muscle_mass" class="input text-xs">
+        </div>
       </div>
-      <div class="bg-white p-4 rounded-2xl inline-block shadow-2xl mx-auto border border-slate-300">
-        <img id="qrModalImg" src="" alt="QR Code" class="w-48 h-48">
-      </div>
-      <p class="text-xs text-slate-400" data-i18n="qr_modal_sub">امسح الكود عبر كاميرا الصالة لتسجيل الدخول السريع</p>
+      <button id="btnSubmitRenew" class="btn btn-emerald w-full" data-i18n="btn_confirm_renew"></button>
     </div>
   </div>
+</div>
 
-  <div id="addTrainerModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-md p-6 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-lg font-black text-white" data-i18n="modal_add_tr_title">إضافة كابتن جديد للفريق</h3>
-        <button onclick="closeModal('addTrainerModal')" class="text-slate-400 hover:text-white">✕</button>
-      </div>
-      <div class="space-y-3.5 text-sm">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_tr_name">اسم الكابتن</label>
-          <input type="text" id="tr_new_name" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_phone">رقم الهاتف</label>
-          <input type="text" id="tr_new_phone" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_spec">التخصص الرياضي</label>
-          <select id="tr_new_spec" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white font-semibold">
-            <option value="Iron / Bodybuilding">Iron / حديد وبناء أجسام</option>
-            <option value="Fitness">Fitness / لياقة بدنية</option>
-            <option value="Cardio">Cardio / كارديو وتخسيس</option>
-            <option value="Crossfit">Crossfit / كروس فيت</option>
-            <option value="Boxing">Boxing / ملاكمة وفنون قتال</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_salary">الراتب الشهري ($)</label>
-          <input type="number" id="tr_new_salary" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
-        </div>
-        <button onclick="submitAddTrainer()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-md" data-i18n="btn_confirm_add_tr">
-          حفظ وتعيين الكابتن
-        </button>
-      </div>
+<!-- ================= MODAL: QR ================= -->
+<div id="qrModal" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-sm p-6 text-center space-y-4">
+    <div class="flex justify-between items-center border-b hairline pb-3">
+      <h3 class="text-base font-black" id="qrModalTitle"></h3>
+      <button data-close-modal="qrModal" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+    <div class="qr-frame mx-auto"><img id="qrModalImg" src="" alt="QR" class="w-48 h-48"></div>
+    <p class="text-xs text-slate-400" data-i18n="qr_modal_sub"></p>
+  </div>
+</div>
+
+<!-- ================= MODAL: ADD TRAINER ================= -->
+<div id="addTrainerModal" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-md p-6 space-y-4">
+    <div class="flex justify-between items-center border-b hairline pb-3">
+      <h3 class="text-lg font-black" data-i18n="modal_add_tr_title"></h3>
+      <button data-close-modal="addTrainerModal" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+    <div class="space-y-3.5 text-sm">
+      <div><label class="field-label" data-i18n="lbl_tr_name"></label><input type="text" id="tr_new_name" class="input"></div>
+      <div><label class="field-label" data-i18n="lbl_phone"></label><input type="text" id="tr_new_phone" class="input"></div>
+      <div><label class="field-label" data-i18n="lbl_spec"></label><select id="tr_new_spec" class="input font-semibold"></select></div>
+      <div><label class="field-label" data-i18n="lbl_salary"></label><input type="number" id="tr_new_salary" class="input"></div>
+      <button id="btnSubmitAddTrainer" class="btn btn-blue w-full" data-i18n="btn_confirm_add_tr"></button>
     </div>
   </div>
+</div>
 
-  <div id="editPaymentModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-[#111827] border border-slate-800 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 class="text-base font-black text-white" id="editPayModalTitle">تعديل الإيصال</h3>
-        <button onclick="closeModal('editPaymentModal')" class="text-slate-400 hover:text-white">✕</button>
-      </div>
-      <input type="hidden" id="edit_pay_id">
-      <div class="space-y-3.5 text-sm">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_amt">المبلغ المحصل ($)</label>
-          <input type="number" id="edit_pay_amt" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_method">وسيلة الدفع</label>
-          <select id="edit_pay_method" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white font-semibold">
-            <option value="Cash">Cash (كاش)</option>
-            <option value="Visa">Visa (فيزا)</option>
-            <option value="Instapay">Instapay (انستاباي)</option>
-            <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-400 mb-1" data-i18n="lbl_desc">البيان / ملاحظات</label>
-          <input type="text" id="edit_pay_ref" class="w-full py-2.5 px-3 rounded-xl border border-slate-800 bg-[#090d16] text-white">
-        </div>
-        <button onclick="submitEditPayment()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition shadow-md" data-i18n="btn_save_pay">
-          حفظ التعديلات المالية
-        </button>
-      </div>
+<!-- ================= MODAL: EDIT PAYMENT ================= -->
+<div id="editPaymentModal" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-sm p-6 space-y-4">
+    <div class="flex justify-between items-center border-b hairline pb-3">
+      <h3 class="text-base font-black" id="editPayModalTitle"></h3>
+      <button data-close-modal="editPaymentModal" class="text-slate-400 hover:text-white">✕</button>
+    </div>
+    <input type="hidden" id="edit_pay_id">
+    <div class="space-y-3.5 text-sm">
+      <div><label class="field-label" data-i18n="lbl_amt"></label><input type="number" id="edit_pay_amt" class="input"></div>
+      <div><label class="field-label" data-i18n="lbl_method"></label><select id="edit_pay_method" class="input font-semibold"></select></div>
+      <div><label class="field-label" data-i18n="lbl_desc"></label><input type="text" id="edit_pay_ref" class="input"></div>
+      <button id="btnSubmitEditPayment" class="btn btn-blue w-full" data-i18n="btn_save_pay"></button>
     </div>
   </div>
+</div>
 
-  <!-- السكريبت التفاعلي -->
-  <script>
-    const TAB_BACKGROUNDS = {
-      dashboard: "linear-gradient(rgba(9, 13, 22, 0.88), rgba(9, 13, 22, 0.94)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop')",
-      members: "linear-gradient(rgba(9, 13, 22, 0.88), rgba(9, 13, 22, 0.94)), url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1600&auto=format&fit=crop')",
-      trainers: "linear-gradient(rgba(9, 13, 22, 0.88), rgba(9, 13, 22, 0.94)), url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1600&auto=format&fit=crop')",
-      memberships: "linear-gradient(rgba(9, 13, 22, 0.88), rgba(9, 13, 22, 0.94)), url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1600&auto=format&fit=crop')",
-      attendance: "linear-gradient(rgba(9, 13, 22, 0.88), rgba(9, 13, 22, 0.94)), url('https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=1600&auto=format&fit=crop')",
-      payments: "linear-gradient(rgba(9, 13, 22, 0.88), rgba(9, 13, 22, 0.94)), url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1600&auto=format&fit=crop')"
-    };
+<script>
+/* ==========================================================================================
+   FitZone Pro — app.js (inline)
+   منظّمة كـ namespace واحد (App) بأقسام واضحة لكل ميزة، عشان أي تعديل مستقبلي
+   (إضافة endpoint، تغيير شكل بيانات، ميزة جديدة) يبقى معزول في قسمه من غير
+   ما يكسر باقي الأقسام. كل نص ظاهر للمستخدم بييجي من قاموس I18N — مفيش نص
+   عربي وإنجليزي مخلوطين في نفس السطر.
+   ========================================================================================== */
 
-    let currentLang = 'ar';
-    let globalMembers = [];
-    let globalTrainers = [];
-    let globalMemberships = [];
-    let globalPlans = {};
-    let globalTaxRate = 0.10;
-    let html5QrScanner = null;
-    let isCameraRunning = false;
-    let currentSelectedTrainerId = null;
+/* ---------------------------------------------------------
+   1) I18N — قاموس الترجمة الكامل (كل نص ظاهر، ثابت أو متولّد)
+   --------------------------------------------------------- */
+const I18N = {
+  ar: {
+    sub_title: "بوابة الإدارة والتتبع الرياضي الشامل",
+    live_floor: "الصالة الحية:",
+    nav_dashboard: "لوحة التحكم", nav_members: "الأعضاء", nav_trainers: "الكباتن",
+    nav_memberships: "الاشتراكات", nav_attendance: "الحضور", nav_payments: "الخزينة", nav_exit: "إغلاق النظام",
 
-    lucide.createIcons();
+    dash_title: "نظرة عامة على نشاط الصالة", dash_sub: "متابعة فورية للحضور والإيرادات والالتزام الرياضي",
+    stat_in_gym: "في الجيم الآن (ساعتان)", stat_in_gym_sub: "يختفي الشخص تلقائياً بعد ساعتين",
+    stat_today_att: "حضور اليوم بالكامل", stat_today_att_sub: "سجل غير مكرر على مدار 24 ساعة",
+    stat_active: "المشتركين النشطين", stat_active_sub: "صلاحية سارية وحصص متبقية",
+    stat_revenue: "إجمالي الدخل المحصل", stat_revenue_sub: "شامل الاشتراكات ونسبة المدربين",
+    retention_label: "معدل الاستمرارية",
+    live_gym_list: "المتواجدون بالصالة حالياً (كباتن وأعضاء)", live_refresh_badge: "تحديث تلقائي لحظي",
+    minutes_suffix: "دقيقة", days_suffix: "يوم", none_in_gym: "لا يوجد أحد داخل الصالة حالياً",
 
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('mainViewport').style.backgroundImage = TAB_BACKGROUNDS['dashboard'];
-      loadDashboard();
-      loadMembers();
-      loadTrainers();
-      loadMemberships();
-      loadDailyAttendance();
-      loadPayments();
-      loadPlans();
+    th_member_id: "الكود", th_name: "الاسم", th_role: "الصفة (الرتبة)", th_checkin_time: "وقت الدخول",
+    th_duration: "المدة بالداخل", th_status: "الحالة", th_code: "الكود", th_member_name: "اسم العضو",
+    th_phone: "الهاتف", th_plan: "الخطة", th_rem_sessions: "الحصص المتبقية", th_coach: "الكابتن",
+    th_actions: "الإجراءات", th_sub_id: "رقم الاشتراك", th_plan_chosen: "الخطة المختارة",
+    th_start_d: "تاريخ البدء", th_end_d: "تاريخ الانتهاء", th_sessions_left: "الحصص (متبقية/إجمالي)",
+    th_cost: "التكلفة", th_log_id: "رقم الحركة", th_time: "ساعة الحضور", th_receipt_id: "رقم الإيصال",
+    th_trainee: "اسم المشترك", th_amount: "المبلغ", th_method: "وسيلة الدفع", th_desc: "البيان", th_date: "التاريخ",
 
-      setInterval(() => { loadDashboard(); }, 15000);
-    });
+    mem_title: "إدارة الأعضاء وفحوصات الـ InBody", mem_sub: "سجل المشتركين، التجميد، التجديد، ومتابعة تطور الجسم",
+    btn_add_member: "تسجيل عضو جديد", search_placeholder: "ابحث بالاسم، الهاتف، أو الكود…",
+    filter_all: "جميع الأعضاء", filter_active: "النشطين فقط", filter_expired: "المنتهية اشتراكاتهم", filter_frozen: "المجمدين فقط",
+    no_members_found: "لا يوجد أعضاء مطابقين", no_suggestions: "لا توجد نتائج مقترحة مطابقة",
+    status_active: "نشط", status_frozen: "مجمد", status_expired: "منتهي",
+    btn_renew: "تجديد", btn_unfreeze: "فك التجميد", btn_freeze: "تجميد", btn_inbody: "InBody",
+    btn_qr: "QR", btn_delete: "حذف", btn_edit: "تعديل",
 
-    function toggleLanguage() {
-      currentLang = currentLang === 'ar' ? 'en' : 'ar';
-      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-      document.documentElement.lang = currentLang;
-      document.getElementById('langBtnText').textContent = currentLang === 'ar' ? 'English' : 'عربي';
-      renderMembers(globalMembers);
-      loadMemberships();
-      loadTrainers();
-      loadDashboard();
-      lucide.createIcons();
+    coach_title: "فريق تدريب FitZone Pro", coach_sub: "كروت مختصرة للكباتن مع إمكانية الدخول للبروفايل الكامل",
+    btn_add_trainer: "إضافة كابتن جديد", present_now: "حاضر بالصالة الآن", not_present: "غير متواجد",
+    trainer_code_label: "الكود:", trainees_label: "المتدربين:", champ_suffix: "بطل",
+    btn_view_full_profile: "عرض البروفايل الكامل", btn_qr_code: "QR كود",
+
+    ms_title: "سجل الاشتراكات وتتبع الصلاحيات الكامل", ms_sub: "جميع اشتراكات الأعضاء بالتاريخ والوقت والحصص والمبالغ",
+    ms_search_ph: "بحث في الاشتراكات (اسم، كود، هاتف)…", no_memberships: "لا توجد اشتراكات مسجلة",
+
+    att_title: "تسجيل حضور المشتركين والكباتن", att_sub: "سجل بالكود، افتح الكاميرا، أو ارفع صورة الـ QR",
+    btn_open_cam: "تشغيل كاميرا مسح الـ QR", btn_close_cam: "إغلاق الكاميرا", btn_scan_file: "مسح من صورة QR",
+    cam_prompt: "وجّه كود الـ QR داخل الإطار للمسح التلقائي…", checkin_ph: "ادخل كود العضو أو الكابتن…",
+    btn_checkin: "تأكيد الحضور بالكود", audit_24h_title: "سجل تدقيق الحضور على مدار الـ 24 ساعة (اليوم)",
+    no_attendance_today: "لا يوجد حضور مسجل اليوم حتى الآن", role_trainer: "كابتن", role_member: "عضو",
+
+    pay_title: "سجل المعاملات المالية", pay_sub: "تسجيل، تعديل، وحذف الحركات المالية والتحصيل",
+    pay_new_header: "تسجيل حركة تحصيل جديدة", pay_member_id_ph: "كود العضو", pay_amount_ph: "المبلغ ($)",
+    pay_ref_ph: "البيان / ملاحظات", btn_record_pay: "تسجيل الدفعة",
+    method_cash: "نقدي", method_visa: "فيزا", method_instapay: "إنستاباي", method_vodafone: "فودافون كاش",
+
+    modal_reg_title: "تسجيل مشترك جديد مع قياسات InBody", lbl_name: "الاسم بالكامل", lbl_phone: "رقم الهاتف (11 رقم)",
+    lbl_plan: "باقة الاشتراك", lbl_coach: "تعيين مدرب (رسوم إضافية)", no_trainer_opt: "بدون مدرب شخصي",
+    inbody_box_title: "قياسات الـ InBody المبدئية", ph_weight: "الوزن (kg)", ph_height: "الطول (cm)",
+    ph_fat: "الدهون (%)", ph_muscle: "العضلات (kg)", lbl_total_price: "المبلغ المطلوب سداده",
+    btn_confirm_reg: "حفظ وتفعيل الاشتراك", trainer_fee_note: "شامل نسبة كابتن",
+
+    renew_title_prefix: "تجديد اشتراك:", lbl_choose_plan: "اختر الباقة الجديدة",
+    renew_inbody_title: "قياسات InBody التجديد لمتابعة التطور", ph_weight_now: "الوزن الحالي (kg)",
+    ph_fat_pct: "نسبة الدهون (%)", ph_muscle_mass: "الكتلة العضلية (kg)", btn_confirm_renew: "تأكيد التجديد ودفع الاشتراك",
+
+    qr_pass_title: "QR Pass —", qr_modal_sub: "امسح الكود عبر كاميرا الصالة لتسجيل الدخول السريع",
+
+    modal_add_tr_title: "إضافة كابتن جديد للفريق", lbl_tr_name: "اسم الكابتن", lbl_spec: "التخصص الرياضي",
+    lbl_salary: "الراتب الشهري ($)", btn_confirm_add_tr: "حفظ وتعيين الكابتن",
+    spec_iron: "حديد وبناء أجسام", spec_fitness: "لياقة بدنية", spec_cardio: "كارديو وتخسيس",
+    spec_crossfit: "كروس فيت", spec_boxing: "ملاكمة وفنون قتال",
+
+    tr_id_label: "كود الكابتن (ID)", tr_phone_label: "رقم الهاتف", tr_salary_label: "الراتب الشهري",
+    tr_att_days_label: "حضور الصالة", tr_current_status_label: "الحالة الحالية بالصالة:",
+    tr_checkin_btn: "تسجيل حضور الكابتن الآن", tr_trainees_title: "قائمة المتدربين مع الكابتن ونتائجهم (قبل وبعد)",
+    tr_trainee_col: "المتدرب", tr_commitment_col: "التزام 3 أشهر", tr_weight_col: "الوزن",
+    tr_fat_col: "الدهون", tr_muscle_col: "العضلات", no_trainees_yet: "لا يوجد متدربين لهذا الكابتن حالياً",
+
+    edit_pay_title_prefix: "تعديل إيصال الدفع #", lbl_amt: "المبلغ المحصل ($)", lbl_method: "وسيلة الدفع",
+    lbl_desc: "البيان / ملاحظات", btn_save_pay: "حفظ التعديلات المالية",
+
+    exit_confirm: "هل أنت متأكد من رغبتك في إغلاق الجلسة والخروج؟",
+    exit_title: "FitZone Pro Offline", exit_sub: "تم إغلاق الجلسة بنجاح. يمكنك إغلاق نافذة المتصفح بأمان.",
+    confirm_cancel: "إلغاء", confirm_ok: "تأكيد الحذف",
+    confirm_delete_member: "هل أنت متأكد من حذف هذا العضو نهائياً؟ لا يمكن التراجع عن هذا الإجراء.",
+    confirm_delete_payment: "هل أنت متأكد من حذف حركة الدفع هذه نهائياً؟",
+
+    toast_member_registered: "تم تسجيل العضو بنجاح", toast_member_updated: "تم تحديث بيانات العضو",
+    toast_member_deleted: "تم حذف العضو", toast_renewed: "تم تجديد الاشتراك بنجاح",
+    toast_frozen: "تم تجميد اشتراك العضو", toast_unfrozen: "تم فك تجميد الاشتراك",
+    toast_trainer_added: "تمت إضافة الكابتن بنجاح", toast_trainer_checkin: "تم تسجيل حضور الكابتن",
+    toast_checkin_success: "تم تسجيل الحضور بنجاح", toast_payment_recorded: "تم تسجيل الدفعة في الخزينة",
+    toast_payment_updated: "تم تعديل الإيصال بنجاح", toast_payment_deleted: "تم حذف حركة الدفع",
+    toast_generic_error: "حدث خطأ، حاول مرة أخرى", toast_enter_id: "يرجى إدخال الكود أولاً",
+    toast_fill_required: "يرجى ملء جميع الحقول المطلوبة", toast_no_qr_in_image: "لم يتم العثور على كود QR صالح في الصورة",
+    toast_camera_error: "تعذر تشغيل الكاميرا، تحقق من صلاحيات المتصفح",
+    member_verify_found: "موجود", member_verify_missing: "غير موجود",
+  },
+  en: {
+    sub_title: "Complete gym management & tracking platform",
+    live_floor: "Live floor:",
+    nav_dashboard: "Dashboard", nav_members: "Members", nav_trainers: "Trainers",
+    nav_memberships: "Memberships", nav_attendance: "Attendance", nav_payments: "Payments", nav_exit: "Exit system",
+
+    dash_title: "Gym activity overview", dash_sub: "Real-time tracking of attendance, revenue and retention",
+    stat_in_gym: "Currently in gym (2h)", stat_in_gym_sub: "Auto-clears after two hours",
+    stat_today_att: "Today's total check-ins", stat_today_att_sub: "Unique record over the last 24 hours",
+    stat_active: "Active members", stat_active_sub: "Valid plan with sessions remaining",
+    stat_revenue: "Total collected revenue", stat_revenue_sub: "Including memberships & trainer fees",
+    retention_label: "Retention rate",
+    live_gym_list: "Currently on the floor (coaches & members)", live_refresh_badge: "Live auto-refresh",
+    minutes_suffix: "min", days_suffix: "days", none_in_gym: "No one is currently in the gym",
+
+    th_member_id: "ID", th_name: "Name", th_role: "Role", th_checkin_time: "Check-in time",
+    th_duration: "Duration inside", th_status: "Status", th_code: "ID", th_member_name: "Member name",
+    th_phone: "Phone", th_plan: "Plan", th_rem_sessions: "Sessions left", th_coach: "Trainer",
+    th_actions: "Actions", th_sub_id: "Subscription #", th_plan_chosen: "Chosen plan",
+    th_start_d: "Start date", th_end_d: "End date", th_sessions_left: "Sessions (left/total)",
+    th_cost: "Cost", th_log_id: "Record #", th_time: "Time", th_receipt_id: "Receipt #",
+    th_trainee: "Member name", th_amount: "Amount", th_method: "Method", th_desc: "Note", th_date: "Date",
+
+    mem_title: "Member management & InBody checks", mem_sub: "Registration, freezing, renewal, and body progress tracking",
+    btn_add_member: "Register new member", search_placeholder: "Search by name, phone, or ID…",
+    filter_all: "All members", filter_active: "Active only", filter_expired: "Expired only", filter_frozen: "Frozen only",
+    no_members_found: "No matching members found", no_suggestions: "No matching results",
+    status_active: "Active", status_frozen: "Frozen", status_expired: "Expired",
+    btn_renew: "Renew", btn_unfreeze: "Unfreeze", btn_freeze: "Freeze", btn_inbody: "InBody",
+    btn_qr: "QR", btn_delete: "Delete", btn_edit: "Edit",
+
+    coach_title: "FitZone Pro training team", coach_sub: "Compact trainer cards — open any for the full profile",
+    btn_add_trainer: "Add new trainer", present_now: "On the floor now", not_present: "Not present",
+    trainer_code_label: "Code:", trainees_label: "Trainees:", champ_suffix: "",
+    btn_view_full_profile: "View full profile", btn_qr_code: "QR code",
+
+    ms_title: "Membership records & validity tracking", ms_sub: "Every membership with dates, sessions and amounts",
+    ms_search_ph: "Search memberships (name, ID, phone)…", no_memberships: "No memberships recorded yet",
+
+    att_title: "Member & trainer check-in", att_sub: "Enter an ID, open the camera, or upload a QR image",
+    btn_open_cam: "Start QR camera scan", btn_close_cam: "Close camera", btn_scan_file: "Scan from image",
+    cam_prompt: "Point the QR code inside the frame to scan automatically…", checkin_ph: "Enter member or trainer ID…",
+    btn_checkin: "Confirm check-in", audit_24h_title: "24-hour attendance log (today)",
+    no_attendance_today: "No check-ins recorded yet today", role_trainer: "Trainer", role_member: "Member",
+
+    pay_title: "Financial transactions", pay_sub: "Record, edit, and delete payment transactions",
+    pay_new_header: "Record a new payment", pay_member_id_ph: "Member ID", pay_amount_ph: "Amount ($)",
+    pay_ref_ph: "Note / reference", btn_record_pay: "Record payment",
+    method_cash: "Cash", method_visa: "Visa", method_instapay: "InstaPay", method_vodafone: "Vodafone Cash",
+
+    modal_reg_title: "Register a new member with InBody", lbl_name: "Full name", lbl_phone: "Phone (11 digits)",
+    lbl_plan: "Membership plan", lbl_coach: "Assign a trainer (extra fee)", no_trainer_opt: "No personal trainer",
+    inbody_box_title: "Initial InBody measurements", ph_weight: "Weight (kg)", ph_height: "Height (cm)",
+    ph_fat: "Fat (%)", ph_muscle: "Muscle (kg)", lbl_total_price: "Amount due",
+    btn_confirm_reg: "Save & activate membership", trainer_fee_note: "incl. trainer fee",
+
+    renew_title_prefix: "Renew membership:", lbl_choose_plan: "Choose a new plan",
+    renew_inbody_title: "Renewal InBody measurements", ph_weight_now: "Current weight (kg)",
+    ph_fat_pct: "Body fat (%)", ph_muscle_mass: "Muscle mass (kg)", btn_confirm_renew: "Confirm renewal & pay",
+
+    qr_pass_title: "QR Pass —", qr_modal_sub: "Scan at the gym camera for quick check-in",
+
+    modal_add_tr_title: "Add a new trainer", lbl_tr_name: "Trainer name", lbl_spec: "Specialization",
+    lbl_salary: "Monthly salary ($)", btn_confirm_add_tr: "Save trainer",
+    spec_iron: "Iron / Bodybuilding", spec_fitness: "Fitness", spec_cardio: "Cardio",
+    spec_crossfit: "Crossfit", spec_boxing: "Boxing",
+
+    tr_id_label: "Trainer ID", tr_phone_label: "Phone", tr_salary_label: "Monthly salary",
+    tr_att_days_label: "Gym attendance", tr_current_status_label: "Current floor status:",
+    tr_checkin_btn: "Check in trainer now", tr_trainees_title: "Trainees & their results (before / after)",
+    tr_trainee_col: "Trainee", tr_commitment_col: "3-month commitment", tr_weight_col: "Weight",
+    tr_fat_col: "Fat", tr_muscle_col: "Muscle", no_trainees_yet: "No trainees assigned to this trainer yet",
+
+    edit_pay_title_prefix: "Edit receipt #", lbl_amt: "Collected amount ($)", lbl_method: "Payment method",
+    lbl_desc: "Note / reference", btn_save_pay: "Save changes",
+
+    exit_confirm: "Are you sure you want to close this session and exit?",
+    exit_title: "FitZone Pro Offline", exit_sub: "Session closed successfully. You can safely close this window.",
+    confirm_cancel: "Cancel", confirm_ok: "Confirm delete",
+    confirm_delete_member: "Are you sure you want to permanently delete this member? This can't be undone.",
+    confirm_delete_payment: "Are you sure you want to permanently delete this payment?",
+
+    toast_member_registered: "Member registered successfully", toast_member_updated: "Member details updated",
+    toast_member_deleted: "Member deleted", toast_renewed: "Membership renewed successfully",
+    toast_frozen: "Membership frozen", toast_unfrozen: "Membership unfrozen",
+    toast_trainer_added: "Trainer added successfully", toast_trainer_checkin: "Trainer checked in",
+    toast_checkin_success: "Check-in recorded successfully", toast_payment_recorded: "Payment recorded",
+    toast_payment_updated: "Receipt updated successfully", toast_payment_deleted: "Payment deleted",
+    toast_generic_error: "Something went wrong, please try again", toast_enter_id: "Please enter an ID first",
+    toast_fill_required: "Please fill in all required fields", toast_no_qr_in_image: "No valid QR code found in the image",
+    toast_camera_error: "Couldn't access the camera — check browser permissions",
+    member_verify_found: "Found", member_verify_missing: "Not found",
+  }
+};
+
+/* ---------------------------------------------------------
+   2) APP NAMESPACE
+   --------------------------------------------------------- */
+const App = (() => {
+
+  const state = {
+    lang: localStorage.getItem('fz_lang') || 'ar',
+    members: [], trainers: [], memberships: [], plans: {}, taxRate: 0.10,
+    isCameraRunning: false, html5QrScanner: null, currentTrainerId: null,
+  };
+
+  /* ----- i18n ----- */
+  const i18n = {
+    t(key) { return I18N[state.lang][key] ?? key; },
+    setLang(lang) {
+      state.lang = lang;
+      localStorage.setItem('fz_lang', lang);
+      document.documentElement.setAttribute('data-lang', lang);
+      document.documentElement.setAttribute('lang', lang);
+      this.apply();
+      ui.rebuildIcons();
+      // إعادة رسم أي محتوى متولّد ديناميكيًا كان معروض بلغة قديمة
+      members.render(members.currentList());
+      trainers.render();
+      memberships.render(memberships.currentList());
+      attendance.loadDaily();
+      payments.render(payments.currentList());
+      plans.rebuildLocalizedSelects();
+      document.getElementById('langBtnAr').classList.toggle('is-active', lang === 'ar');
+      document.getElementById('langBtnEn').classList.toggle('is-active', lang === 'en');
+    },
+    apply() {
+      document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = this.t(el.dataset.i18n); });
+      document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = this.t(el.dataset.i18nPh); });
     }
+  };
 
-    function switchTab(tabId) {
-      if (isCameraRunning && tabId !== 'attendance') {
-        stopWebcamScan();
+  /* ----- API helpers ----- */
+  const api = {
+    async get(url) {
+      const res = await fetch(url);
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error) throw new Error(data.error || i18n.t('toast_generic_error'));
+      return data;
+    },
+    async send(url, method, body) {
+      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error || data.success === false) throw new Error(data.error || i18n.t('toast_generic_error'));
+      return data;
+    },
+    async del(url) {
+      const res = await fetch(url, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.error || data.success === false) throw new Error(data.error || i18n.t('toast_generic_error'));
+      return data;
+    }
+  };
+
+  /* ----- UI helpers: toast / confirm / modal / skeleton ----- */
+  const ui = {
+    rebuildIcons() { if (window.lucide) lucide.createIcons(); },
+
+    toast(message, type = 'info', duration = 3200) {
+      const icons = { success: 'check-circle-2', error: 'x-circle', info: 'info' };
+      const el = document.createElement('div');
+      el.className = `toast-item ${type}`;
+      el.innerHTML = `<i data-lucide="${icons[type]}"></i><span>${message}</span><div class="toast-bar" style="animation-duration:${duration}ms"></div>`;
+      document.getElementById('toastStack').appendChild(el);
+      this.rebuildIcons();
+      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; setTimeout(() => el.remove(), 250); }, duration);
+    },
+
+    confirm(message) {
+      return new Promise(resolve => {
+        const backdrop = document.getElementById('confirmBackdrop');
+        document.getElementById('confirmMessage').textContent = message;
+        document.getElementById('confirmCancelBtn').textContent = i18n.t('confirm_cancel');
+        document.getElementById('confirmOkBtn').textContent = i18n.t('confirm_ok');
+        backdrop.classList.remove('hidden');
+        const cleanup = (result) => { backdrop.classList.add('hidden'); okBtn.onclick = null; cancelBtn.onclick = null; resolve(result); };
+        const okBtn = document.getElementById('confirmOkBtn');
+        const cancelBtn = document.getElementById('confirmCancelBtn');
+        okBtn.onclick = () => cleanup(true);
+        cancelBtn.onclick = () => cleanup(false);
+      });
+    },
+
+    openModal(id) { document.getElementById(id).classList.remove('hidden'); },
+    closeModal(id) { document.getElementById(id).classList.add('hidden'); },
+
+    skeletonRows(tbodyId, cols, rows = 4) {
+      const tbody = document.getElementById(tbodyId);
+      tbody.innerHTML = Array.from({ length: rows }).map(() => `
+        <tr>${Array.from({ length: cols }).map(() => `<td><div class="skel" style="height:14px;width:${60 + Math.random()*30}%"></div></td>`).join('')}</tr>
+      `).join('');
+    },
+
+    skeletonCards(containerId, count = 4) {
+      const el = document.getElementById(containerId);
+      el.innerHTML = Array.from({ length: count }).map(() => `
+        <div class="stat-card"><div class="skel" style="height:12px;width:60%;margin-bottom:10px"></div><div class="skel" style="height:28px;width:40%"></div></div>
+      `).join('');
+    },
+
+    animateValue(el, to, formatter = (v) => Math.round(v)) {
+      const from = Number(el.dataset.raw || 0);
+      const duration = 550;
+      const start = performance.now();
+      function step(now) {
+        const progress = Math.min(1, (now - start) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const value = from + (to - from) * eased;
+        el.textContent = formatter(value);
+        if (progress < 1) requestAnimationFrame(step);
+        else { el.dataset.raw = to; el.classList.add('is-glowing'); setTimeout(() => el.classList.remove('is-glowing'), 500); }
       }
+      requestAnimationFrame(step);
+    }
+  };
+
+  /* ----- Navigation ----- */
+  const nav = {
+    init() {
+      document.querySelectorAll('.sidebar-nav-item').forEach(btn => btn.addEventListener('click', () => this.switchTab(btn.dataset.tab)));
+      window.addEventListener('resize', () => this.moveIndicator());
+      this.moveIndicator();
+    },
+    switchTab(tabName) {
+      if (state.isCameraRunning && tabName !== 'attendance') attendance.stopScan();
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-      if (TAB_BACKGROUNDS[tabId]) {
-        document.getElementById('mainViewport').style.backgroundImage = TAB_BACKGROUNDS[tabId];
-      }
-
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        const isCurrent = btn.dataset.tab === tabId;
-        btn.className = `tab-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-sm transition ${
-          isCurrent ? 'bg-orange-600 text-white shadow-lg shadow-orange-600/20' : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-        }`;
-      });
-      lucide.createIcons();
+      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+      document.querySelectorAll('.sidebar-nav-item').forEach(btn => btn.classList.toggle('is-active', btn.dataset.tab === tabName));
+      this.moveIndicator();
+      ui.rebuildIcons();
+      const loaders = { dashboard: dashboard.load, members: members.load, trainers: trainers.load, memberships: memberships.load, attendance: attendance.loadDaily, payments: payments.load };
+      loaders[tabName] && loaders[tabName].call(loaders[tabName] === members.load ? members : loaders[tabName] === trainers.load ? trainers : loaders[tabName] === memberships.load ? memberships : loaders[tabName] === attendance.loadDaily ? attendance : loaders[tabName] === payments.load ? payments : dashboard);
+    },
+    moveIndicator() {
+      const active = document.querySelector('.sidebar-nav-item.is-active');
+      const indicator = document.getElementById('navIndicator');
+      if (!active) return;
+      indicator.style.height = active.offsetHeight + 'px';
+      indicator.style.transform = `translateY(${active.offsetTop}px)`;
     }
+  };
 
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-
-    // ================= 1. الداشبورد =================
-    async function loadDashboard() {
-      try {
-        const res = await fetch('/api/dashboard');
-        const data = await res.json();
-        document.getElementById('dash_in_gym').textContent = data.in_gym_now || 0;
-        document.getElementById('liveCountText').textContent = data.in_gym_now || 0;
-        document.getElementById('dash_in_gym_breakdown').textContent = `(${data.members_in_gym_now || 0} متدرب | ${data.trainers_in_gym_now || 0} كابتن)`;
-        document.getElementById('dash_today_att').textContent = data.today_attendance || 0;
-        document.getElementById('dash_active').textContent = data.active_members || 0;
-        document.getElementById('dash_revenue').textContent = `$${(data.total_revenue || 0).toLocaleString()}`;
-        document.getElementById('retentionText').textContent = `معدل الاستمرارية: ${data.retention_rate}%`;
-
-        const liveRes = await fetch('/api/attendance/live');
-        const liveData = await liveRes.json();
-        const tbody = document.getElementById('live_floor_table');
-        if (liveData.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-bold">لا يوجد أحد داخل الصالة حالياً</td></tr>`;
-        } else {
-          tbody.innerHTML = liveData.map(p => {
-            const roleBadge = p.role === 'Trainer' 
-              ? `<span class="px-2.5 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-lg text-xs font-black">كابتن (Coach)</span>`
-              : `<span class="px-2.5 py-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 rounded-lg text-xs font-black">متدرب (Member)</span>`;
-
-            return `
-              <tr class="hover:bg-slate-800/40">
-                <td class="py-3 px-4 font-bold text-orange-400">#${p.person_id}</td>
-                <td class="py-3 px-4 font-bold text-white">${p.name}</td>
-                <td class="py-3 px-4 text-center">${roleBadge}</td>
-                <td class="py-3 px-4 text-slate-400">${p.check_in_time}</td>
-                <td class="py-3 px-4 text-emerald-400 font-bold">${p.duration_minutes} دقيقة</td>
-                <td class="py-3 px-4 text-center"><span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-bold">نشط بالداخل</span></td>
-              </tr>
-            `;
-          }).join('');
-        }
-      } catch (err) { console.error(err); }
-    }
-
-    // ================= 2. الأعضاء (Member) =================
-    async function loadMembers() {
-      try {
-        const res = await fetch('/api/members');
-        globalMembers = await res.json();
-        renderMembers(globalMembers);
-      } catch (e) { console.error(e); }
-    }
-
-    function renderMembers(members) {
-      const tbody = document.getElementById('members_table');
-      if (members.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500 font-bold">لا يوجد أعضاء مطابقين</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = members.map(m => {
-        let statusBadge = m.status === 'Active' 
-          ? `<span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-lg text-xs font-bold">نشط</span>`
-          : (m.status === 'Frozen' 
-             ? `<span class="px-2.5 py-1 bg-amber-500/10 text-amber-400 rounded-lg text-xs font-bold">مجمد</span>`
-             : `<span class="px-2.5 py-1 bg-rose-500/10 text-rose-400 rounded-lg text-xs font-bold">منتهي</span>`);
-
-        return `
-          <tr class="hover:bg-slate-800/40 transition">
-            <td class="py-3 px-4 font-bold text-orange-400">#${m.id}</td>
-            <td class="py-3 px-4 font-bold text-white">${m.name}</td>
-            <td class="py-3 px-4 text-slate-400">${m.phone}</td>
-            <td class="py-3 px-4 text-xs font-semibold text-slate-300">${m.plan}</td>
-            <td class="py-3 px-4 font-black text-cyan-400">${m.remaining_sessions}</td>
-            <td class="py-3 px-4 text-slate-400 text-xs">${m.trainer}</td>
-            <td class="py-3 px-4">${statusBadge}</td>
-            <td class="py-3 px-4 text-center space-x-1.5 space-x-reverse">
-              <button onclick="openRenewModal(${m.id}, '${m.name}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold">تجديد</button>
-              ${m.is_frozen 
-                ? `<button onclick="unfreezeMember(${m.id})" class="px-2.5 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold">فك التجميد</button>`
-                : `<button onclick="freezeMember(${m.id})" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold">تجميد</button>`
-              }
-              <button onclick="viewProfile(${m.id})" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold">InBody</button>
-              <button onclick="showMemberQR(${m.id}, '${m.name}')" class="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-xs font-bold">QR</button>
-              <button onclick="deleteMember(${m.id})" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold">حذف</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function handleSearchWithSuggestions(query) {
-      const q = query.trim().toLowerCase();
-      const dropdown = document.getElementById('searchSuggestionsDropdown');
-      if (!q) {
-        dropdown.classList.add('hidden');
-        applyMemberFilter();
-        return;
-      }
-      const matches = globalMembers.filter(m => 
-        m.name.toLowerCase().includes(q) || m.phone.includes(q) || String(m.id).includes(q)
-      );
-      renderMembers(matches);
-
-      if (matches.length > 0) {
-        dropdown.innerHTML = matches.slice(0, 5).map(m => `
-          <div onclick="selectSuggestion(${m.id})" class="p-3.5 hover:bg-slate-800/90 cursor-pointer flex justify-between items-center transition">
-            <div class="flex items-center gap-3">
-              <span class="w-8 h-8 rounded-full bg-orange-600/20 text-orange-500 font-bold flex items-center justify-center text-xs">#${m.id}</span>
-              <div>
-                <p class="font-black text-sm text-white">${m.name}</p>
-                <p class="text-xs text-slate-400">📞 ${m.phone} | ${m.plan}</p>
-              </div>
-            </div>
-            <span class="px-2.5 py-1 rounded text-xs font-bold ${m.status === 'Active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
-              ${m.status} (${m.remaining_sessions} S)
-            </span>
+  /* ----- Dashboard ----- */
+  const dashboard = {
+    cardsMeta: [
+      { key: 'in_gym_now', accent: 'var(--amber)', accentSoft: 'rgba(245,158,11,.14)', icon: 'flame', titleKey: 'stat_in_gym', subKey: 'stat_in_gym_sub' },
+      { key: 'today_attendance', accent: 'var(--blue)', accentSoft: 'var(--blue-soft)', icon: 'calendar-check', titleKey: 'stat_today_att', subKey: 'stat_today_att_sub' },
+      { key: 'active_members', accent: 'var(--emerald)', accentSoft: 'var(--emerald-soft)', icon: 'users', titleKey: 'stat_active', subKey: 'stat_active_sub' },
+      { key: 'total_revenue', accent: 'var(--orange)', accentSoft: 'var(--orange-soft)', icon: 'wallet', titleKey: 'stat_revenue', subKey: 'stat_revenue_sub', isMoney: true },
+    ],
+    renderShell() {
+      const grid = document.getElementById('statCardsGrid');
+      grid.innerHTML = this.cardsMeta.map(c => `
+        <div class="stat-card" style="--accent:${c.accent}; --accent-soft:${c.accentSoft}">
+          <div class="flex items-center justify-between mb-3">
+            <span class="icon-badge"><i data-lucide="${c.icon}"></i></span>
           </div>
-        `).join('');
-        dropdown.classList.remove('hidden');
-      } else {
-        dropdown.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">لا توجد نتائج مقترحة مطابقة</div>`;
-        dropdown.classList.remove('hidden');
-      }
-    }
-
-    function selectSuggestion(id) {
-      document.getElementById('searchSuggestionsDropdown').classList.add('hidden');
-      viewProfile(id);
-    }
-
-    function applyMemberFilter() {
-      const val = document.getElementById('memberFilterSelect').value;
-      if (val === 'active') renderMembers(globalMembers.filter(m => m.status === 'Active'));
-      else if (val === 'expired') renderMembers(globalMembers.filter(m => m.status === 'Expired'));
-      else if (val === 'frozen') renderMembers(globalMembers.filter(m => m.status === 'Frozen'));
-      else renderMembers(globalMembers);
-    }
-
-    // ================= 3. الكباتن (كروت نظيفة + بروفايل شامل محمي) =================
-    async function loadTrainers() {
+          <p class="text-xs font-bold text-slate-400">${i18n.t(c.titleKey)}</p>
+          <h3 class="text-3xl stat-value mt-1.5" id="stat-${c.key}" data-raw="0" style="color:${c.accent}">0</h3>
+          <p class="text-[11px] text-slate-500 mt-1.5 font-medium">${i18n.t(c.subKey)}</p>
+        </div>
+      `).join('');
+      ui.rebuildIcons();
+    },
+    async load() {
+      this.renderShell();
       try {
-        const res = await fetch('/api/trainers');
-        globalTrainers = await res.json();
-        const container = document.getElementById('trainers_cards');
-        const regTrainerSel = document.getElementById('reg_trainer');
+        const data = await api.get('/api/dashboard');
+        document.getElementById('liveCountText').textContent = data.in_gym_now ?? 0;
+        document.getElementById('retentionText').textContent = `${i18n.t('retention_label')}: ${data.retention_rate ?? 0}%`;
 
-        container.innerHTML = globalTrainers.map(t => {
-          const presentBadge = t.is_present_now 
-            ? `<span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-black">حاضر بالصالة الآن</span>`
-            : `<span class="px-2.5 py-1 bg-slate-800 text-slate-400 rounded-full text-xs font-semibold">غير متواجد</span>`;
-
-          return `
-            <div class="rounded-3xl border border-slate-800/80 bg-[#111827]/90 backdrop-blur-md p-6 space-y-4 shadow-xl hover:border-orange-500/30 transition">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3.5">
-                  <div class="w-12 h-12 rounded-2xl bg-orange-600/20 text-orange-500 font-black flex items-center justify-center text-xl border border-orange-500/20">🏋️</div>
-                  <div>
-                    <h4 class="font-black text-lg text-white">${t.name}</h4>
-                    <p class="text-xs text-orange-400 font-bold">${t.specialty}</p>
-                  </div>
-                </div>
-                ${presentBadge}
-              </div>
-
-              <div class="flex items-center justify-between text-xs text-slate-400 border-t border-b border-slate-800/80 py-3">
-                <span>الكود: <strong class="text-orange-400">#${t.id}</strong></span>
-                <span>المتدربين: <strong class="text-cyan-400">${t.trainees_count} بطل</strong></span>
-              </div>
-
-              <div class="grid grid-cols-3 gap-2">
-                <button onclick="openTrainerProfile(${t.id})" class="col-span-2 py-2.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs rounded-xl shadow-md transition">
-                  عرض البروفايل الكامل
-                </button>
-                <button onclick="showTrainerQR(${t.id}, '${t.name}')" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl transition">
-                  QR كود
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-
-        regTrainerSel.innerHTML = `<option value="">بدون مدرب شخصي</option>` + globalTrainers.map(t => `
-          <option value="${t.id}">${t.name} (${t.specialty})</option>
-        `).join('');
-      } catch (e) { console.error(e); }
-    }
-
-    async function openTrainerProfile(id) {
-      currentSelectedTrainerId = id;
-      try {
-        const res = await fetch(`/api/trainers/${id}/profile`);
-        const p = await res.json();
-
-        document.getElementById('tr_prof_name').textContent = `الكابتن ${p.name}`;
-        document.getElementById('tr_prof_spec').textContent = `التخصص: ${p.specialization}`;
-        document.getElementById('tr_prof_id').textContent = `#${p.id}`;
-        document.getElementById('tr_prof_phone').textContent = p.phone;
-        document.getElementById('tr_prof_salary').textContent = `$${p.salary.toFixed(2)}`;
-        document.getElementById('tr_prof_att_days').textContent = `${p.total_attendance_days} يوم`;
-
-        const badge = document.getElementById('tr_prof_presence_badge');
-        const btn = document.getElementById('tr_prof_checkin_btn');
-        if (p.is_present_now) {
-          badge.className = 'ml-2 px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-black';
-          badge.textContent = 'حاضر في الصالة حالياً';
-          btn.classList.add('hidden');
-        } else {
-          badge.className = 'ml-2 px-3 py-1 bg-slate-800 text-slate-400 rounded-full text-xs font-semibold';
-          badge.textContent = 'غير متواجد';
-          btn.classList.remove('hidden');
-        }
-
-        const tbody = document.getElementById('tr_prof_trainees_table');
-        if (!p.trainees || p.trainees.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500">لا يوجد متدربين لهذا الكابتن حالياً</td></tr>`;
-        } else {
-          tbody.innerHTML = p.trainees.map(tr => {
-            const prog = tr.progress_before_and_after || {};
-            return `
-              <tr class="hover:bg-slate-800/40">
-                <td class="py-2.5 px-3 font-bold text-white">${tr.name}</td>
-                <td class="py-2.5 px-3 text-slate-400">${tr.phone}</td>
-                <td class="py-2.5 px-3 text-emerald-400 font-bold">${tr.attendance_last_3_months} يوم</td>
-                <td class="py-2.5 px-3 font-bold">${prog.weight_change !== undefined ? `${prog.weight_change} kg` : '-'}</td>
-                <td class="py-2.5 px-3 font-bold text-amber-400">${prog.fat_change !== undefined ? `${prog.fat_change} %` : '-'}</td>
-                <td class="py-2.5 px-3 font-bold text-emerald-400">${prog.muscle_change !== undefined ? `${prog.muscle_change} kg` : '-'}</td>
-              </tr>
-            `;
-          }).join('');
-        }
-
-        openModal('trainerProfileModal');
-        lucide.createIcons();
-      } catch (err) { alert("Error fetching trainer profile: " + err); }
-    }
-
-    async function checkinCurrentTrainer() {
-      if (!currentSelectedTrainerId) return;
-      try {
-        const res = await fetch(`/api/trainers/${currentSelectedTrainerId}/checkin`, { method: 'POST' });
-        const data = await res.json();
-        if (data.success) {
-          alert(`تم تسجيل حضور الكابتن ${data.trainer_name} في الصالة بنجاح!`);
-          closeModal('trainerProfileModal');
-          loadDashboard();
-          loadTrainers();
-          loadDailyAttendance();
-        } else {
-          alert(data.error);
-        }
-      } catch (err) { alert(err); }
-    }
-
-    function showTrainerQR(id, name) {
-      document.getElementById('qrModalTitle').textContent = `QR Pass الكابتن — ${name} (#${id})`;
-      document.getElementById('qrModalImg').src = `/api/trainers/${id}/qr?t=${new Date().getTime()}`;
-      openModal('qrModal');
-    }
-
-    function openAddTrainerModal() { openModal('addTrainerModal'); }
-
-    async function submitAddTrainer() {
-      const payload = {
-        name: document.getElementById('tr_new_name').value.trim(),
-        phone: document.getElementById('tr_new_phone').value.trim(),
-        specialty: document.getElementById('tr_new_spec').value,
-        salary: document.getElementById('tr_new_salary').value
-      };
-      if (!payload.name || !payload.phone || !payload.salary) { alert('يرجى ملء جميع الحقول'); return; }
-
-      const res = await fetch('/api/trainers', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`تمت إضافة الكابتن ${data.name} وتوليد كود الـ QR الخاص به!`);
-        closeModal('addTrainerModal');
-        loadTrainers();
-      } else alert(data.error);
-    }
-
-    // ================= 4. سجل الاشتراكات (Membership) =================
-    async function loadMemberships() {
-      try {
-        const res = await fetch('/api/memberships');
-        globalMemberships = await res.json();
-        renderMemberships(globalMemberships);
-      } catch (e) { console.error(e); }
-    }
-
-    function renderMemberships(list) {
-      const tbody = document.getElementById('memberships_table');
-      if (list.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-500 font-bold">لا توجد اشتراكات مسجلة</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = list.map(ms => {
-        let sColor = ms.status === 'Active' ? 'bg-emerald-500/20 text-emerald-400' : (ms.status === 'Frozen' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400');
-        return `
-          <tr class="hover:bg-slate-800/40">
-            <td class="py-3.5 px-4 font-bold text-orange-400">#${ms.membership_id}</td>
-            <td class="py-3.5 px-4 font-bold text-white">${ms.member_name} (#${ms.member_id})</td>
-            <td class="py-3.5 px-4 text-slate-400">${ms.member_phone}</td>
-            <td class="py-3.5 px-4 text-xs font-semibold text-slate-300">${ms.plan_name}</td>
-            <td class="py-3.5 px-4 text-xs text-slate-300 font-mono">${ms.start_date}</td>
-            <td class="py-3.5 px-4 text-xs text-slate-300 font-mono">${ms.end_date}</td>
-            <td class="py-3.5 px-4 font-black text-cyan-400">${ms.remaining_sessions} / ${ms.total_sessions}</td>
-            <td class="py-3.5 px-4 font-black text-emerald-400">$${ms.cost.toFixed(2)}</td>
-            <td class="py-3.5 px-4 text-center"><span class="px-2.5 py-1 rounded-md text-xs font-bold ${sColor}">${ms.status}</span></td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    function filterMemberships() {
-      const q = document.getElementById('membershipSearchInput').value.trim().toLowerCase();
-      const filtered = globalMemberships.filter(ms => 
-        ms.member_name.toLowerCase().includes(q) || ms.member_phone.includes(q) || String(ms.member_id).includes(q)
-      );
-      renderMemberships(filtered);
-    }
-
-    // ================= 5. الحضور والكاميرا والـ QR =================
-    function toggleWebcamScan() {
-      if (isCameraRunning) stopWebcamScan();
-      else startWebcamScan();
-    }
-
-    function startWebcamScan() {
-      const box = document.getElementById('cameraScannerBox');
-      box.classList.remove('hidden');
-      document.getElementById('cameraBtnText').textContent = 'إغلاق الكاميرا';
-
-      if (!html5QrScanner) {
-        html5QrScanner = new Html5Qrcode("qr-reader");
-      }
-
-      html5QrScanner.start(
-        { facingMode: "environment" },
-        { fps: 15, qrbox: { width: 250, height: 250 } },
-        async (decodedText) => {
-          stopWebcamScan();
-          await processAttendanceScan(decodedText);
-        },
-        (error) => {}
-      ).then(() => { isCameraRunning = true; }).catch(err => {
-        alert("تعذر تشغيل الكاميرا: " + err);
-        box.classList.add('hidden');
-        document.getElementById('cameraBtnText').textContent = 'تشغيل كاميرا مسح الـ QR';
-        isCameraRunning = false;
-      });
-    }
-
-    function stopWebcamScan() {
-      if (html5QrScanner && isCameraRunning) {
-        html5QrScanner.stop().then(() => {
-          document.getElementById('cameraScannerBox').classList.add('hidden');
-          document.getElementById('cameraBtnText').textContent = 'تشغيل كاميرا مسح الـ QR';
-          isCameraRunning = false;
-        }).catch(err => console.error(err));
-      } else {
-        document.getElementById('cameraScannerBox').classList.add('hidden');
-        isCameraRunning = false;
-      }
-    }
-
-    async function scanQRFromFile(e) {
-      if (!e.target.files || e.target.files.length === 0) return;
-      const file = e.target.files[0];
-      const scanner = new Html5Qrcode("qr-reader");
-      try {
-        const text = await scanner.scanFile(file, true);
-        await processAttendanceScan(text);
-      } catch (err) {
-        alert("لم يتم العثور على كود QR صالح في الصورة.");
-      }
-    }
-
-    async function handleCheckin() {
-      const input = document.getElementById('checkinMemberId');
-      const val = input.value.trim();
-      if (!val) { alert('يرجى إدخال الكود'); return; }
-      await processAttendanceScan(val);
-      input.value = '';
-    }
-
-    async function processAttendanceScan(code) {
-      let payload = /^\d+$/.test(code.trim()) ? { member_id: parseInt(code.trim()) } : { token: code.trim() };
-      try {
-        const res = await fetch('/api/attendance/checkin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        this.cardsMeta.forEach(c => {
+          const el = document.getElementById(`stat-${c.key}`);
+          const raw = data[c.key] || 0;
+          ui.animateValue(el, raw, v => c.isMoney ? `$${Math.round(v).toLocaleString()}` : Math.round(v).toLocaleString());
         });
-        const data = await res.json();
-        if (data.success) {
-          const roleLabel = data.role === 'Trainer' ? 'الكابتن' : 'المتدرب';
-          const sessMsg = data.role === 'Trainer' ? 'تسجيل حضور طاقم التدريب' : `الحصص المتبقية: ${data.remaining_sessions}`;
-          alert(`🎯 تم الحضور بنجاح!\n${roleLabel}: ${data.name}\n${sessMsg}`);
-          loadDashboard();
-          loadDailyAttendance();
-          loadMembers();
-          loadTrainers();
-        } else {
-          alert(`❌ ${data.error}`);
+
+        const live = await api.get('/api/attendance/live');
+        const tbody = document.getElementById('live_floor_table');
+        if (!live.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 font-bold">${i18n.t('none_in_gym')}</td></tr>`;
+          return;
         }
-      } catch (e) { alert("Server Error: " + e); }
-    }
-
-    async function loadDailyAttendance() {
-      const res = await fetch('/api/attendance/daily');
-      const data = await res.json();
-      const tbody = document.getElementById('daily_att_table');
-      if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-bold">لا يوجد حضور مسجل اليوم حتى الآن</td></tr>`;
-        return;
-      }
-      tbody.innerHTML = data.map(r => {
-        const rBadge = r.role === 'Trainer'
-          ? `<span class="px-2 py-0.5 bg-orange-500/20 text-orange-400 rounded text-[11px] font-bold">كابتن</span>`
-          : `<span class="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded text-[11px] font-bold">عضو</span>`;
-
-        return `
-          <tr class="hover:bg-slate-800/40">
-            <td class="py-3 px-4 text-slate-500">#${r.attendance_id}</td>
-            <td class="py-3 px-4 font-bold text-orange-400">#${r.member_id}</td>
-            <td class="py-3 px-4 font-semibold text-white">${r.name}</td>
-            <td class="py-3 px-4 text-center">${rBadge}</td>
-            <td class="py-3 px-4 text-emerald-400 font-bold">${r.time}</td>
+        tbody.innerHTML = live.map((p, i) => `
+          <tr style="--i:${i}">
+            <td class="font-bold text-orange-400">#${p.person_id}</td>
+            <td class="font-bold">${esc(p.name)}</td>
+            <td class="text-center">${roleBadge(p.role)}</td>
+            <td class="text-slate-400">${esc(p.check_in_time)}</td>
+            <td class="text-emerald-400 font-bold">${p.duration_minutes} ${i18n.t('minutes_suffix')}</td>
+            <td class="text-center"><span class="badge" style="background:var(--emerald-soft);color:#6ee7a0"><span class="badge-dot"></span>${i18n.t('status_active')}</span></td>
           </tr>
-        `;
-      }).join('');
+        `).join('');
+      } catch (e) { ui.toast(e.message, 'error'); }
     }
+  };
 
-    // ================= 6. الخزينة والمدفوعات =================
-    async function loadPayments() {
-      const res = await fetch('/api/payments');
-      const data = await res.json();
-      const tbody = document.getElementById('payments_table');
-      tbody.innerHTML = data.map(p => `
-        <tr class="hover:bg-slate-800/40">
-          <td class="py-3 px-4 text-slate-400">#${p.id}</td>
-          <td class="py-3 px-4 font-bold text-white">${p.member_name} (#${p.member_id})</td>
-          <td class="py-3 px-4 font-black text-emerald-400">$${p.amount.toFixed(2)}</td>
-          <td class="py-3 px-4 text-xs"><span class="px-2.5 py-1 bg-slate-800 rounded-md font-semibold text-slate-300">${p.method}</span></td>
-          <td class="py-3 px-4 text-slate-400 text-xs">${p.ref || '-'}</td>
-          <td class="py-3 px-4 text-slate-400 text-xs font-mono">${p.date}</td>
-          <td class="py-3 px-4 text-center space-x-1.5 space-x-reverse">
-            <button onclick="openEditPaymentModal(${p.id}, ${p.amount}, '${p.method}', '${p.ref || ''}')" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold">تعديل</button>
-            <button onclick="deletePayment(${p.id})" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold">حذف</button>
+  /* ----- Members ----- */
+  const members = {
+    _lastRendered: [],
+    currentList() { return this._lastRendered; },
+    async load() {
+      ui.skeletonRows('members_table', 8, 5);
+      try {
+        const res = await api.get('/api/members');
+        state.members = res;
+        this.render(res);
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    render(list) {
+      this._lastRendered = list;
+      const tbody = document.getElementById('members_table');
+      if (!list.length) { tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 font-bold">${i18n.t('no_members_found')}</td></tr>`; return; }
+      tbody.innerHTML = list.map((m, i) => `
+        <tr style="--i:${i}">
+          <td class="font-bold text-orange-400">#${m.id}</td>
+          <td class="font-bold">${esc(m.name)}</td>
+          <td class="text-slate-400">${esc(m.phone)}</td>
+          <td class="text-xs font-semibold text-slate-300">${esc(m.plan)}</td>
+          <td class="font-black text-cyan-400">${m.remaining_sessions}</td>
+          <td class="text-slate-400 text-xs">${esc(m.trainer || '—')}</td>
+          <td>${statusBadge(m.status)}</td>
+          <td class="text-center">
+            <div class="flex gap-1.5 justify-center flex-wrap">
+              <button class="btn btn-emerald btn-xs" data-act="renew" data-id="${m.id}" data-name="${escAttr(m.name)}">${i18n.t('btn_renew')}</button>
+              ${m.is_frozen
+                ? `<button class="btn btn-xs" style="background:var(--blue-soft);color:#93c5fd" data-act="unfreeze" data-id="${m.id}">${i18n.t('btn_unfreeze')}</button>`
+                : `<button class="btn btn-xs" style="background:var(--amber);color:#1a0d02" data-act="freeze" data-id="${m.id}">${i18n.t('btn_freeze')}</button>`}
+              <button class="btn btn-xs" style="background:var(--purple-soft);color:#d8c8fc" data-act="profile" data-id="${m.id}">${i18n.t('btn_inbody')}</button>
+              <button class="btn btn-ghost btn-xs" data-act="qr" data-id="${m.id}" data-name="${escAttr(m.name)}">${i18n.t('btn_qr')}</button>
+              <button class="btn btn-danger btn-xs" data-act="delete" data-id="${m.id}">${i18n.t('btn_delete')}</button>
+            </div>
           </td>
         </tr>
       `).join('');
-    }
-
-    function verifyPayMember(val) {
-      const badge = document.getElementById('pay_verify_badge');
-      if (!val) { badge.textContent = ''; return; }
-      const m = globalMembers.find(x => x.id == val);
-      if (m) {
-        badge.textContent = `✓ ${m.name}`;
-        badge.className = 'absolute left-2.5 top-3 text-[11px] font-bold text-emerald-400';
-      } else {
-        badge.textContent = '✗ غير موجود';
-        badge.className = 'absolute left-2.5 top-3 text-[11px] font-bold text-rose-400';
-      }
-    }
-
-    async function submitNewPayment() {
-      const payload = {
-        member_id: document.getElementById('pay_new_mid').value,
-        amount: document.getElementById('pay_new_amt').value,
-        method: document.getElementById('pay_new_method').value,
-        ref: document.getElementById('pay_new_ref').value
-      };
-      if (!payload.member_id || !payload.amount) { alert('يرجى إدخال كود العضو والمبلغ'); return; }
-
-      const res = await fetch('/api/payments', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('تم تسجيل الدفعة في الخزينة بنجاح!');
-        document.getElementById('pay_new_mid').value = '';
-        document.getElementById('pay_new_amt').value = '';
-        document.getElementById('pay_new_ref').value = '';
-        document.getElementById('pay_verify_badge').textContent = '';
-        loadPayments();
-        loadDashboard();
-      } else alert(data.error);
-    }
-
-    function openEditPaymentModal(id, amt, method, ref) {
-      document.getElementById('edit_pay_id').value = id;
-      document.getElementById('editPayModalTitle').textContent = `تعديل إيصال الدفع #${id}`;
-      document.getElementById('edit_pay_amt').value = amt;
-      document.getElementById('edit_pay_method').value = method;
-      document.getElementById('edit_pay_ref').value = ref;
-      openModal('editPaymentModal');
-    }
-
-    async function submitEditPayment() {
-      const id = document.getElementById('edit_pay_id').value;
-      const res = await fetch(`/api/payments/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount: document.getElementById('edit_pay_amt').value,
-          method: document.getElementById('edit_pay_method').value,
-          ref: document.getElementById('edit_pay_ref').value
-        })
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert('تم تعديل الإيصال بنجاح.');
-        closeModal('editPaymentModal');
-        loadPayments();
-        loadDashboard();
-      } else alert(data.error);
-    }
-
-    async function deletePayment(id) {
-      if (!confirm(`حذف حركة الدفع #${id} نهائياً؟`)) return;
-      const res = await fetch(`/api/payments/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) { alert('تم الحذف.'); loadPayments(); loadDashboard(); }
-      else alert(data.error);
-    }
-
-    // ================= 7. الباقات والأسعار =================
-    async function loadPlans() {
-      const res = await fetch('/api/plans');
-      const data = await res.json();
-      globalPlans = data.plans;
-      globalTaxRate = data.tax_rate;
-      const select = document.getElementById('reg_plan');
-      select.innerHTML = Object.keys(globalPlans).map(k => `
-        <option value="${k}">${k} - $${globalPlans[k].price}</option>
-      `).join('');
-      calculatePricePreview();
-    }
-
-    function calculatePricePreview() {
-      const planName = document.getElementById('reg_plan').value;
-      const hasTrainer = !!document.getElementById('reg_trainer').value;
-      if (!globalPlans[planName]) return;
-      let price = globalPlans[planName].price;
-      if (hasTrainer) price = price * (1 + globalTaxRate);
-      document.getElementById('pricePreviewText').textContent = `$${price.toFixed(2)} ${hasTrainer ? '(شامل 10% ضريبة كابتن)' : ''}`;
-    }
-
-    function openRegisterModal() { openModal('registerModal'); }
-    function openRenewModal(id, name) {
-      document.getElementById('renew_mid').value = id;
-      document.getElementById('renewModalTitle').textContent = `تجديد اشتراك: ${name} (#${id})`;
-      const sel = document.getElementById('renew_plan');
-      sel.innerHTML = Object.keys(globalPlans).map(k => `
-        <option value="${k}">${k} - $${globalPlans[k].price}</option>
-      `).join('');
-      openModal('renewModal');
-    }
-
-    async function submitRegisterMember() {
+      ui.rebuildIcons();
+    },
+    search(query) {
+      const q = query.trim().toLowerCase();
+      const dropdown = document.getElementById('searchSuggestionsDropdown');
+      if (!q) { dropdown.classList.add('hidden'); this.applyFilter(); return; }
+      const matches = state.members.filter(m => m.name.toLowerCase().includes(q) || m.phone.includes(q) || String(m.id).includes(q));
+      this.render(matches);
+      dropdown.innerHTML = matches.length
+        ? matches.slice(0, 5).map(m => `
+            <div class="chip-search-suggest p-3 hover:bg-white/5 cursor-pointer flex justify-between items-center" data-suggest="${m.id}">
+              <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-orange-600/15 text-orange-500 font-bold flex items-center justify-center text-xs">#${m.id}</span>
+                <div><p class="font-black text-sm">${esc(m.name)}</p><p class="text-xs text-slate-400">${esc(m.phone)} · ${esc(m.plan)}</p></div>
+              </div>
+              ${statusBadge(m.status)}
+            </div>`).join('')
+        : `<div class="p-4 text-center text-xs text-slate-500">${i18n.t('no_suggestions')}</div>`;
+      dropdown.classList.remove('hidden');
+      dropdown.querySelectorAll('[data-suggest]').forEach(d => d.addEventListener('click', () => { dropdown.classList.add('hidden'); this.openProfile(d.dataset.suggest); }));
+    },
+    applyFilter() {
+      const val = document.getElementById('memberFilterSelect').value;
+      const map = { active: 'Active', expired: 'Expired', frozen: 'Frozen' };
+      this.render(val === 'all' ? state.members : state.members.filter(m => m.status === map[val]));
+    },
+    openRegister() { ui.openModal('registerModal'); },
+    async submitRegister() {
       const payload = {
         name: document.getElementById('reg_name').value.trim(),
         phone: document.getElementById('reg_phone').value.trim(),
@@ -1245,24 +1194,22 @@
         fat: document.getElementById('reg_fat').value,
         muscle: document.getElementById('reg_muscle').value
       };
-      if (!payload.name || !payload.phone) { alert('يرجى إدخال الاسم ورقم الهاتف'); return; }
-
-      const res = await fetch('/api/members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`تم تسجيل العضو ${data.name} بنجاح برقم كود #${data.member_id}!`);
-        closeModal('registerModal');
-        loadMembers();
-        loadMemberships();
-        loadDashboard();
-      } else alert(data.error);
-    }
-
-    async function submitRenewMember() {
+      if (!payload.name || !payload.phone) { ui.toast(i18n.t('toast_fill_required'), 'error'); return; }
+      try {
+        await api.send('/api/members', 'POST', payload);
+        ui.toast(i18n.t('toast_member_registered'), 'success');
+        ui.closeModal('registerModal');
+        ['reg_name','reg_phone','reg_weight','reg_height','reg_fat','reg_muscle'].forEach(id => document.getElementById(id).value = '');
+        this.load(); memberships.load(); dashboard.load();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    openRenew(id, name) {
+      document.getElementById('renew_mid').value = id;
+      document.getElementById('renewModalTitle').textContent = `${i18n.t('renew_title_prefix')} ${name} (#${id})`;
+      plans.fillSelect('renew_plan');
+      ui.openModal('renewModal');
+    },
+    async submitRenew() {
       const id = document.getElementById('renew_mid').value;
       const payload = {
         plan: document.getElementById('renew_plan').value,
@@ -1271,55 +1218,482 @@
         fat: document.getElementById('renew_fat').value,
         muscle: document.getElementById('renew_mus').value
       };
-      const res = await fetch(`/api/members/${id}/renew`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`تم التجديد بنجاح حتى ${data.end_date}!\nالحصص: ${data.remaining_sessions}`);
-        closeModal('renewModal');
-        loadMembers();
-        loadMemberships();
-        loadDashboard();
-      } else alert(data.error);
+      try {
+        await api.send(`/api/members/${id}/renew`, 'POST', payload);
+        ui.toast(i18n.t('toast_renewed'), 'success');
+        ui.closeModal('renewModal');
+        this.load(); memberships.load(); dashboard.load();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    async freeze(id) {
+      try { await api.send(`/api/members/${id}/freeze`, 'POST'); ui.toast(i18n.t('toast_frozen'), 'success'); this.load(); }
+      catch (e) { ui.toast(e.message, 'error'); }
+    },
+    async unfreeze(id) {
+      try { await api.send(`/api/members/${id}/unfreeze`, 'POST'); ui.toast(i18n.t('toast_unfrozen'), 'success'); this.load(); }
+      catch (e) { ui.toast(e.message, 'error'); }
+    },
+    async delete(id) {
+      const ok = await ui.confirm(i18n.t('confirm_delete_member'));
+      if (!ok) return;
+      try { await api.del(`/api/members/${id}`); ui.toast(i18n.t('toast_member_deleted'), 'success'); this.load(); memberships.load(); dashboard.load(); }
+      catch (e) { ui.toast(e.message, 'error'); }
+    },
+    showQr(id, name) {
+      document.getElementById('qrModalTitle').textContent = `${i18n.t('qr_pass_title')} ${name} (#${id})`;
+      document.getElementById('qrModalImg').src = `/api/members/${id}/qr?t=${Date.now()}`;
+      ui.openModal('qrModal');
+    },
+    async openProfile(id) {
+      try {
+        const p = await api.get(`/api/members/${id}/profile`);
+        const inb = p.inbody_progress;
+        const inbLine = inb && inb.weight_change !== undefined
+          ? `Δ${i18n.t('tr_weight_col')}: ${inb.weight_change}kg · Δ${i18n.t('tr_fat_col')}: ${inb.fat_change}% · Δ${i18n.t('tr_muscle_col')}: ${inb.muscle_change}kg`
+          : '—';
+        ui.toast(`${p.name} · ${p.membership_plan} · ${p.remaining_sessions} ${i18n.t('th_rem_sessions')} · ${inbLine}`, 'info', 5000);
+      } catch (e) { ui.toast(e.message, 'error'); }
     }
+  };
 
-    function showMemberQR(id, name) {
-      document.getElementById('qrModalTitle').textContent = `QR Pass — ${name} (#${id})`;
-      document.getElementById('qrModalImg').src = `/api/members/${id}/qr?t=${new Date().getTime()}`;
-      openModal('qrModal');
-    }
-
-    async function viewProfile(id) {
-      const res = await fetch(`/api/members/${id}/profile`);
-      const p = await res.json();
-      let inbMsg = p.inbody_progress && p.inbody_progress.weight_change !== undefined
-        ? `تغير الوزن: ${p.inbody_progress.weight_change} kg\nتغير الدهون: ${p.inbody_progress.fat_change} %\nتغير العضلات: ${p.inbody_progress.muscle_change} kg`
-        : 'لا يوجد قياسات سابقة كافية للمقارنة';
-
-      alert(`الملف الشامل للعضو: ${p.name} (#${p.id})\nالخطة: ${p.membership_plan}\nالحصص المتبقية: ${p.remaining_sessions}\nميعاد التجديد: ${p.renewal_deadline}\nآخر حضور: ${p.last_checkin}\n\n[مقارنة InBody]:\n${inbMsg}`);
-    }
-
-    async function deleteMember(id) {
-      if (!confirm(`حذف المشترك #${id} نهائياً؟`)) return;
-      const res = await fetch(`/api/members/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) { loadMembers(); loadMemberships(); loadDashboard(); }
-    }
-
-    function exitApplication() {
-      if (confirm('هل أنت متأكد من رغبتك في إغلاق الجلسة والخروج؟')) {
-        document.body.innerHTML = `
-          <div class="h-screen flex flex-col items-center justify-center bg-[#090d16] text-center p-6 space-y-4">
-            <span class="text-6xl">🔒</span>
-            <h1 class="text-3xl font-black text-orange-500">FitZone Pro Offline</h1>
-            <p class="text-slate-400 text-sm font-semibold">تم إغلاق الجلسة بنجاح. يمكنك إغلاق نافذة المتصفح بأمان.</p>
+  /* ----- Trainers ----- */
+  const trainers = {
+    async load() {
+      ui.skeletonCards('trainers_cards', 3);
+      try {
+        const res = await api.get('/api/trainers');
+        state.trainers = res;
+        this.render();
+        plans.fillTrainerSelect();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    render() {
+      const container = document.getElementById('trainers_cards');
+      if (!state.trainers.length) { container.innerHTML = `<p class="text-slate-500 col-span-full text-center py-8">—</p>`; return; }
+      container.innerHTML = state.trainers.map((t, i) => `
+        <div class="panel p-6 space-y-4" style="--i:${i}; animation: fadeSlideUp .4s var(--ease) both; animation-delay: calc(${i} * 60ms)">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3.5">
+              <div class="w-12 h-12 rounded-2xl bg-orange-600/15 text-orange-500 font-black flex items-center justify-center text-xl border border-orange-500/20">🏋️</div>
+              <div><h4 class="font-black text-base">${esc(t.name)}</h4><p class="text-xs text-orange-400 font-bold">${esc(t.specialty)}</p></div>
+            </div>
+            ${t.is_present_now
+              ? `<span class="badge" style="background:var(--emerald-soft);color:#6ee7a0"><span class="badge-dot"></span>${i18n.t('present_now')}</span>`
+              : `<span class="badge" style="background:var(--surface-3);color:var(--muted)">${i18n.t('not_present')}</span>`}
           </div>
-        `;
-      }
+          <div class="flex items-center justify-between text-xs text-slate-400 border-y hairline py-3">
+            <span>${i18n.t('trainer_code_label')} <strong class="text-orange-400">#${t.id}</strong></span>
+            <span>${i18n.t('trainees_label')} <strong class="text-cyan-400">${t.trainees_count}</strong></span>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button class="col-span-2 btn btn-primary btn-xs" data-act="tr-profile" data-id="${t.id}">${i18n.t('btn_view_full_profile')}</button>
+            <button class="btn btn-ghost btn-xs" data-act="tr-qr" data-id="${t.id}" data-name="${escAttr(t.name)}">${i18n.t('btn_qr_code')}</button>
+          </div>
+        </div>
+      `).join('');
+      ui.rebuildIcons();
+    },
+    openAdd() { ui.openModal('addTrainerModal'); },
+    async submitAdd() {
+      const payload = {
+        name: document.getElementById('tr_new_name').value.trim(),
+        phone: document.getElementById('tr_new_phone').value.trim(),
+        specialty: document.getElementById('tr_new_spec').value,
+        salary: document.getElementById('tr_new_salary').value
+      };
+      if (!payload.name || !payload.phone || !payload.salary) { ui.toast(i18n.t('toast_fill_required'), 'error'); return; }
+      try {
+        await api.send('/api/trainers', 'POST', payload);
+        ui.toast(i18n.t('toast_trainer_added'), 'success');
+        ui.closeModal('addTrainerModal');
+        ['tr_new_name','tr_new_phone','tr_new_salary'].forEach(id => document.getElementById(id).value = '');
+        this.load();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    async openProfile(id) {
+      state.currentTrainerId = id;
+      try {
+        const p = await api.get(`/api/trainers/${id}/profile`);
+        document.getElementById('tr_prof_name').textContent = p.name;
+        document.getElementById('tr_prof_spec').textContent = p.specialization;
+        document.getElementById('tr_prof_id').textContent = `#${p.id}`;
+        document.getElementById('tr_prof_phone').textContent = p.phone;
+        document.getElementById('tr_prof_salary').textContent = `$${Number(p.salary).toFixed(2)}`;
+        document.getElementById('tr_prof_att_days').textContent = `${p.total_attendance_days} ${i18n.t('days_suffix')}`;
+
+        const badge = document.getElementById('tr_prof_presence_badge');
+        const btn = document.getElementById('tr_prof_checkin_btn');
+        badge.textContent = p.is_present_now ? i18n.t('present_now') : i18n.t('not_present');
+        badge.style.color = p.is_present_now ? '#6ee7a0' : 'var(--muted)';
+        btn.classList.toggle('hidden', !!p.is_present_now);
+
+        const tbody = document.getElementById('tr_prof_trainees_table');
+        tbody.innerHTML = (!p.trainees || !p.trainees.length)
+          ? `<tr><td colspan="6" class="text-center py-4 text-slate-500">${i18n.t('no_trainees_yet')}</td></tr>`
+          : p.trainees.map(tr => {
+              const pr = tr.progress_before_and_after || {};
+              return `<tr>
+                <td class="font-bold">${esc(tr.name)}</td><td class="text-slate-400">${esc(tr.phone)}</td>
+                <td class="text-emerald-400 font-bold">${tr.attendance_last_3_months} ${i18n.t('days_suffix')}</td>
+                <td class="font-bold">${pr.weight_change !== undefined ? pr.weight_change + 'kg' : '-'}</td>
+                <td class="font-bold text-amber-400">${pr.fat_change !== undefined ? pr.fat_change + '%' : '-'}</td>
+                <td class="font-bold text-emerald-400">${pr.muscle_change !== undefined ? pr.muscle_change + 'kg' : '-'}</td>
+              </tr>`;
+            }).join('');
+        ui.openModal('trainerProfileModal');
+        ui.rebuildIcons();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    async checkinCurrent() {
+      if (!state.currentTrainerId) return;
+      try {
+        await api.send(`/api/trainers/${state.currentTrainerId}/checkin`, 'POST');
+        ui.toast(i18n.t('toast_trainer_checkin'), 'success');
+        ui.closeModal('trainerProfileModal');
+        dashboard.load(); this.load(); attendance.loadDaily();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    showQr(id, name) {
+      document.getElementById('qrModalTitle').textContent = `${i18n.t('qr_pass_title')} ${name} (#${id})`;
+      document.getElementById('qrModalImg').src = `/api/trainers/${id}/qr?t=${Date.now()}`;
+      ui.openModal('qrModal');
     }
-  </script>
+  };
+
+  /* ----- Memberships ----- */
+  const memberships = {
+    _lastRendered: [],
+    currentList() { return this._lastRendered; },
+    async load() {
+      ui.skeletonRows('memberships_table', 9, 5);
+      try { const res = await api.get('/api/memberships'); state.memberships = res; this.render(res); }
+      catch (e) { ui.toast(e.message, 'error'); }
+    },
+    render(list) {
+      this._lastRendered = list;
+      const tbody = document.getElementById('memberships_table');
+      if (!list.length) { tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-500 font-bold">${i18n.t('no_memberships')}</td></tr>`; return; }
+      tbody.innerHTML = list.map((ms, i) => `
+        <tr style="--i:${i}">
+          <td class="font-bold text-orange-400">#${ms.membership_id}</td>
+          <td class="font-bold">${esc(ms.member_name)} (#${ms.member_id})</td>
+          <td class="text-slate-400">${esc(ms.member_phone)}</td>
+          <td class="text-xs font-semibold text-slate-300">${esc(ms.plan_name)}</td>
+          <td class="text-xs font-mono text-slate-300">${ms.start_date}</td>
+          <td class="text-xs font-mono text-slate-300">${ms.end_date}</td>
+          <td class="font-black text-cyan-400">${ms.remaining_sessions} / ${ms.total_sessions}</td>
+          <td class="font-black text-emerald-400">$${Number(ms.cost).toFixed(2)}</td>
+          <td class="text-center">${statusBadge(ms.status)}</td>
+        </tr>
+      `).join('');
+    },
+    filter(q) {
+      q = q.trim().toLowerCase();
+      this.render(state.memberships.filter(ms => ms.member_name.toLowerCase().includes(q) || ms.member_phone.includes(q) || String(ms.member_id).includes(q)));
+    }
+  };
+
+  /* ----- Attendance ----- */
+  const attendance = {
+    toggleCamera() { state.isCameraRunning ? this.stopScan() : this.startScan(); },
+    startScan() {
+      const box = document.getElementById('cameraScannerBox');
+      box.classList.remove('hidden');
+      document.getElementById('cameraBtnText').textContent = i18n.t('btn_close_cam');
+      if (!state.html5QrScanner) state.html5QrScanner = new Html5Qrcode('qr-reader');
+      state.html5QrScanner.start(
+        { facingMode: 'environment' }, { fps: 15, qrbox: { width: 250, height: 250 } },
+        async (decoded) => { this.stopScan(); await this.process(decoded); },
+        () => {}
+      ).then(() => { state.isCameraRunning = true; }).catch(() => {
+        ui.toast(i18n.t('toast_camera_error'), 'error');
+        box.classList.add('hidden');
+        document.getElementById('cameraBtnText').textContent = i18n.t('btn_open_cam');
+      });
+    },
+    stopScan() {
+      if (state.html5QrScanner && state.isCameraRunning) {
+        state.html5QrScanner.stop().then(() => {
+          document.getElementById('cameraScannerBox').classList.add('hidden');
+          document.getElementById('cameraBtnText').textContent = i18n.t('btn_open_cam');
+          state.isCameraRunning = false;
+        }).catch(() => {});
+      } else { document.getElementById('cameraScannerBox').classList.add('hidden'); state.isCameraRunning = false; }
+    },
+    async scanFile(file) {
+      const scanner = new Html5Qrcode('qr-reader');
+      try { const text = await scanner.scanFile(file, true); await this.process(text); }
+      catch (e) { ui.toast(i18n.t('toast_no_qr_in_image'), 'error'); }
+    },
+    async manualCheckin() {
+      const input = document.getElementById('checkinMemberId');
+      const val = input.value.trim();
+      if (!val) { ui.toast(i18n.t('toast_enter_id'), 'error'); return; }
+      await this.process(val);
+      input.value = '';
+    },
+    async process(code) {
+      const payload = /^\d+$/.test(code.trim()) ? { member_id: parseInt(code.trim(), 10) } : { token: code.trim() };
+      try {
+        const data = await api.send('/api/attendance/checkin', 'POST', payload);
+        const roleLabel = data.role === 'Trainer' ? i18n.t('role_trainer') : i18n.t('role_member');
+        const extra = data.role === 'Trainer' ? '' : ` · ${data.remaining_sessions} ${i18n.t('th_rem_sessions')}`;
+        ui.toast(`${i18n.t('toast_checkin_success')} — ${roleLabel}: ${data.name}${extra}`, 'success', 4000);
+        dashboard.load(); this.loadDaily(); members.load(); trainers.load();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    async loadDaily() {
+      ui.skeletonRows('daily_att_table', 5, 4);
+      try {
+        const data = await api.get('/api/attendance/daily');
+        const tbody = document.getElementById('daily_att_table');
+        if (!data.length) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-500 font-bold">${i18n.t('no_attendance_today')}</td></tr>`; return; }
+        tbody.innerHTML = data.map((r, i) => `
+          <tr style="--i:${i}">
+            <td class="text-slate-500">#${r.attendance_id}</td>
+            <td class="font-bold text-orange-400">#${r.member_id}</td>
+            <td class="font-semibold">${esc(r.name)}</td>
+            <td class="text-center">${roleBadge(r.role)}</td>
+            <td class="text-emerald-400 font-bold">${esc(r.time)}</td>
+          </tr>
+        `).join('');
+      } catch (e) { ui.toast(e.message, 'error'); }
+    }
+  };
+
+  /* ----- Payments ----- */
+  const payments = {
+    _lastRendered: [],
+    currentList() { return this._lastRendered; },
+    async load() {
+      ui.skeletonRows('payments_table', 7, 5);
+      try { const data = await api.get('/api/payments'); this.render(data); }
+      catch (e) { ui.toast(e.message, 'error'); }
+    },
+    render(data) {
+      this._lastRendered = data;
+      document.getElementById('payments_table').innerHTML = data.map((p, i) => `
+        <tr style="--i:${i}">
+          <td class="text-slate-400">#${p.id}</td>
+          <td class="font-bold">${esc(p.member_name)} (#${p.member_id})</td>
+          <td class="font-black text-emerald-400">$${Number(p.amount).toFixed(2)}</td>
+          <td><span class="badge" style="background:var(--surface-3);color:#cbd3e6">${methodLabel(p.method)}</span></td>
+          <td class="text-slate-400 text-xs">${esc(p.ref || '-')}</td>
+          <td class="text-slate-400 text-xs font-mono">${esc(p.date)}</td>
+          <td class="text-center">
+            <div class="flex gap-1.5 justify-center">
+              <button class="btn btn-blue btn-xs" data-act="pay-edit" data-id="${p.id}" data-amt="${p.amount}" data-method="${escAttr(p.method)}" data-ref="${escAttr(p.ref || '')}">${i18n.t('btn_edit')}</button>
+              <button class="btn btn-danger btn-xs" data-act="pay-delete" data-id="${p.id}">${i18n.t('btn_delete')}</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    },
+    verifyMember(val) {
+      const badge = document.getElementById('pay_verify_badge');
+      if (!val) { badge.textContent = ''; return; }
+      const m = state.members.find(x => String(x.id) === String(val));
+      badge.textContent = m ? `✓ ${i18n.t('member_verify_found')}` : `✗ ${i18n.t('member_verify_missing')}`;
+      badge.style.color = m ? '#6ee7a0' : '#fda4b5';
+    },
+    async submitNew() {
+      const payload = {
+        member_id: document.getElementById('pay_new_mid').value,
+        amount: document.getElementById('pay_new_amt').value,
+        method: document.getElementById('pay_new_method').value,
+        ref: document.getElementById('pay_new_ref').value
+      };
+      if (!payload.member_id || !payload.amount) { ui.toast(i18n.t('toast_fill_required'), 'error'); return; }
+      try {
+        await api.send('/api/payments', 'POST', payload);
+        ui.toast(i18n.t('toast_payment_recorded'), 'success');
+        ['pay_new_mid','pay_new_amt','pay_new_ref'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('pay_verify_badge').textContent = '';
+        this.load(); dashboard.load();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    openEdit(id, amt, method, ref) {
+      document.getElementById('edit_pay_id').value = id;
+      document.getElementById('editPayModalTitle').textContent = `${i18n.t('edit_pay_title_prefix')}${id}`;
+      document.getElementById('edit_pay_amt').value = amt;
+      document.getElementById('edit_pay_method').value = method;
+      document.getElementById('edit_pay_ref').value = ref;
+      ui.openModal('editPaymentModal');
+    },
+    async submitEdit() {
+      const id = document.getElementById('edit_pay_id').value;
+      try {
+        await api.send(`/api/payments/${id}`, 'PUT', {
+          amount: document.getElementById('edit_pay_amt').value,
+          method: document.getElementById('edit_pay_method').value,
+          ref: document.getElementById('edit_pay_ref').value
+        });
+        ui.toast(i18n.t('toast_payment_updated'), 'success');
+        ui.closeModal('editPaymentModal');
+        this.load(); dashboard.load();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    async delete(id) {
+      const ok = await ui.confirm(i18n.t('confirm_delete_payment'));
+      if (!ok) return;
+      try { await api.del(`/api/payments/${id}`); ui.toast(i18n.t('toast_payment_deleted'), 'success'); this.load(); dashboard.load(); }
+      catch (e) { ui.toast(e.message, 'error'); }
+    }
+  };
+
+  /* ----- Plans (shared reference data + localized selects) ----- */
+  const plans = {
+    METHODS: [['cash','method_cash'],['visa','method_visa'],['instapay','method_instapay'],['vodafone_cash','method_vodafone']],
+    SPECIALTIES: [['Iron / Bodybuilding','spec_iron'],['Fitness','spec_fitness'],['Cardio','spec_cardio'],['Crossfit','spec_crossfit'],['Boxing','spec_boxing']],
+
+    async load() {
+      try {
+        const data = await api.get('/api/plans');
+        state.plans = data.plans || {};
+        state.taxRate = data.tax_rate ?? 0.10;
+        this.fillSelect('reg_plan');
+        this.rebuildLocalizedSelects();
+        this.updatePricePreview();
+      } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    fillSelect(selectId) {
+      const el = document.getElementById(selectId);
+      el.innerHTML = Object.keys(state.plans).map(k => `<option value="${escAttr(k)}">${esc(k)} — $${state.plans[k].price}</option>`).join('');
+    },
+    fillTrainerSelect() {
+      const sel = document.getElementById('reg_trainer');
+      sel.innerHTML = `<option value="">${i18n.t('no_trainer_opt')}</option>` + state.trainers.map(t => `<option value="${t.id}">${esc(t.name)} (${esc(t.specialty)})</option>`).join('');
+    },
+    rebuildLocalizedSelects() {
+      const methodOptions = this.METHODS.map(([val, key]) => `<option value="${val}">${i18n.t(key)}</option>`).join('');
+      document.getElementById('pay_new_method').innerHTML = methodOptions;
+      document.getElementById('edit_pay_method').innerHTML = methodOptions;
+      document.getElementById('tr_new_spec').innerHTML = this.SPECIALTIES.map(([val, key]) => `<option value="${val}">${i18n.t(key)}</option>`).join('');
+    },
+    updatePricePreview() {
+      const planName = document.getElementById('reg_plan').value;
+      const hasTrainer = !!document.getElementById('reg_trainer').value;
+      const plan = state.plans[planName];
+      if (!plan) return;
+      let price = plan.price;
+      if (hasTrainer) price = price * (1 + state.taxRate);
+      document.getElementById('pricePreviewText').textContent = `$${price.toFixed(2)}${hasTrainer ? ' · ' + i18n.t('trainer_fee_note') : ''}`;
+    }
+  };
+
+  /* ----- small render helpers ----- */
+  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+  function escAttr(s) { return esc(s); }
+  function statusBadge(status) {
+    const map = {
+      Active:  ['status_active',  'var(--emerald-soft)', '#6ee7a0'],
+      Frozen:  ['status_frozen',  'rgba(245,158,11,.14)', '#fcd34d'],
+      Expired: ['status_expired', 'var(--rose-soft)', '#fda4b5'],
+    };
+    const [key, bg, fg] = map[status] || map.Expired;
+    return `<span class="badge" style="background:${bg};color:${fg}"><span class="badge-dot"></span>${i18n.t(key)}</span>`;
+  }
+  function roleBadge(role) {
+    return role === 'Trainer'
+      ? `<span class="badge" style="background:var(--orange-soft);color:#fdba74">${i18n.t('role_trainer')}</span>`
+      : `<span class="badge" style="background:rgba(34,211,238,.14);color:#67e8f9">${i18n.t('role_member')}</span>`;
+  }
+  function methodLabel(method) {
+    const entry = plans.METHODS.find(([val]) => val === method || val === (method || '').toLowerCase());
+    return entry ? i18n.t(entry[1]) : esc(method);
+  }
+
+  /* ----- event wiring (delegation-based, resilient to re-renders) ----- */
+  function wireEvents() {
+    document.getElementById('langBtnAr').addEventListener('click', () => i18n.setLang('ar'));
+    document.getElementById('langBtnEn').addEventListener('click', () => i18n.setLang('en'));
+
+    document.getElementById('btnOpenRegister').addEventListener('click', () => members.openRegister());
+    document.getElementById('btnSubmitRegister').addEventListener('click', () => members.submitRegister());
+    document.getElementById('reg_plan').addEventListener('change', () => plans.updatePricePreview());
+    document.getElementById('reg_trainer').addEventListener('change', () => plans.updatePricePreview());
+    document.getElementById('btnSubmitRenew').addEventListener('click', () => members.submitRenew());
+
+    let searchDebounce;
+    document.getElementById('memberSearchInput').addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => members.search(e.target.value), 200);
+    });
+    document.getElementById('memberFilterSelect').addEventListener('change', () => members.applyFilter());
+
+    document.getElementById('members_table').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const { act, id, name } = btn.dataset;
+      ({ renew: () => members.openRenew(id, name), freeze: () => members.freeze(id), unfreeze: () => members.unfreeze(id),
+         profile: () => members.openProfile(id), qr: () => members.showQr(id, name), delete: () => members.delete(id) })[act]?.();
+    });
+
+    document.getElementById('btnOpenAddTrainer').addEventListener('click', () => trainers.openAdd());
+    document.getElementById('btnSubmitAddTrainer').addEventListener('click', () => trainers.submitAdd());
+    document.getElementById('trainers_cards').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const { act, id, name } = btn.dataset;
+      if (act === 'tr-profile') trainers.openProfile(id);
+      if (act === 'tr-qr') trainers.showQr(id, name);
+    });
+    document.getElementById('tr_prof_checkin_btn').addEventListener('click', () => trainers.checkinCurrent());
+
+    document.getElementById('membershipSearchInput').addEventListener('input', (e) => memberships.filter(e.target.value));
+
+    document.getElementById('btnToggleCamera').addEventListener('click', () => attendance.toggleCamera());
+    document.getElementById('qrFileInput').addEventListener('change', (e) => { if (e.target.files[0]) attendance.scanFile(e.target.files[0]); });
+    document.getElementById('btnManualCheckin').addEventListener('click', () => attendance.manualCheckin());
+    document.getElementById('checkinMemberId').addEventListener('keydown', (e) => { if (e.key === 'Enter') attendance.manualCheckin(); });
+
+    document.getElementById('pay_new_mid').addEventListener('input', (e) => payments.verifyMember(e.target.value));
+    document.getElementById('btnSubmitPayment').addEventListener('click', () => payments.submitNew());
+    document.getElementById('btnSubmitEditPayment').addEventListener('click', () => payments.submitEdit());
+    document.getElementById('payments_table').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const { act, id, amt, method, ref } = btn.dataset;
+      if (act === 'pay-edit') payments.openEdit(id, amt, method, ref);
+      if (act === 'pay-delete') payments.delete(id);
+    });
+
+    document.querySelectorAll('[data-close-modal]').forEach(btn => btn.addEventListener('click', () => ui.closeModal(btn.dataset.closeModal)));
+    document.querySelectorAll('.modal-backdrop').forEach(bd => bd.addEventListener('click', (e) => { if (e.target === bd) bd.classList.add('hidden'); }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach(bd => bd.classList.add('hidden')); });
+
+    document.getElementById('exitBtn').addEventListener('click', async () => {
+      const ok = await ui.confirm(i18n.t('exit_confirm'));
+      if (!ok) return;
+      document.body.innerHTML = `
+        <div class="h-screen flex flex-col items-center justify-center text-center p-6 space-y-4">
+          <span class="text-6xl">🔒</span>
+          <h1 class="text-2xl font-black text-orange-500">${i18n.t('exit_title')}</h1>
+          <p class="text-slate-400 text-sm font-semibold">${i18n.t('exit_sub')}</p>
+        </div>`;
+    });
+  }
+
+  /* ----- boot ----- */
+  function init() {
+    document.documentElement.setAttribute('data-lang', state.lang);
+    document.getElementById('langBtnAr').classList.toggle('is-active', state.lang === 'ar');
+    document.getElementById('langBtnEn').classList.toggle('is-active', state.lang === 'en');
+    i18n.apply();
+    ui.rebuildIcons();
+    nav.init();
+    wireEvents();
+    plans.load();
+    dashboard.load();
+    members.load();
+    trainers.load();
+    memberships.load();
+    attendance.loadDaily();
+    payments.load();
+    setInterval(() => dashboard.load(), 15000);
+  }
+
+  return { init, i18n, ui, nav, dashboard, members, trainers, memberships, attendance, payments, plans, state };
+})();
+
+document.addEventListener('DOMContentLoaded', App.init);
+</script>
 </body>
 </html>
