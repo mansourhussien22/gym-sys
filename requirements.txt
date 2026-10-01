@@ -4,3 +4,4 @@ Pillow
 qrcode[pil]
 opencv-python
 customtkinter
+pywebview

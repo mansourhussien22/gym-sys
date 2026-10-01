@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-lang="ar">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FitZone Pro — Gym Management Platform</title>
+<title>FitZone Pro — Elite Gym Management</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
@@ -18,7 +18,10 @@
     darkMode: 'class',
     theme: {
       extend: {
-        fontFamily: { sans: ['var(--font-ui)', 'sans-serif'] },
+        fontFamily: { 
+          sans: ['Inter', 'sans-serif'],
+          display: ['Oswald', 'sans-serif']
+        },
         colors: { brand: { orange: '#f97316', amber: '#f59e0b', dark: '#080b12' } }
       }
     }
@@ -29,46 +32,20 @@
 :root {
   --bg: #080b12;
   --surface: #0e1320;
-  --surface-2: rgba(18, 23, 37, 0.82);
-  --surface-3: #1a2238;
+  --surface-2: rgba(18, 23, 37, 0.85);
   --border: rgba(255, 255, 255, 0.08);
-  --border-soft: rgba(255, 255, 255, 0.05);
-  --text: #f8fafc;
-  --muted: #94a3b8;
-  --muted-dim: #64748b;
-
   --orange: #f97316;
   --orange-soft: rgba(249,115,22,.15);
-  --amber: #f59e0b;
   --emerald: #10b981;
   --emerald-soft: rgba(16,185,129,.15);
   --rose: #f43f5e;
   --rose-soft: rgba(244,63,94,.15);
   --blue: #3b82f6;
-  --blue-soft: rgba(59,130,246,.15);
   --purple: #8b5cf6;
-  --purple-soft: rgba(139,92,246,.15);
-  --cyan: #06b6d4;
-
-  --r-lg: 20px;
-  --r-md: 14px;
-  --r-sm: 10px;
-
-  --ease: cubic-bezier(.22,1,.36,1);
-  --font-ui: 'Cairo', sans-serif;
 }
-:root[data-lang="en"] { --font-ui: 'Inter', 'Cairo', sans-serif; }
 
 * { box-sizing: border-box; }
-html, body { height: 100%; }
-body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-ui);
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
-}
+html, body { height: 100%; margin: 0; background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
 #mainViewport {
   transition: background-image 0.45s ease-in-out;
@@ -82,17 +59,15 @@ body {
 ::-webkit-scrollbar-thumb { background: #263049; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
 
-@keyframes fadeSlideUp { from { opacity:0; transform: translateY(12px); } to { opacity:1; transform:none; } }
-@keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
-@keyframes popIn { from { opacity:0; transform: scale(.95) translateY(6px);} to { opacity:1; transform:none; } }
-@keyframes pulseDot { 0%{box-shadow:0 0 0 0 rgba(16,185,129,.6);} 70%{box-shadow:0 0 0 8px rgba(16,185,129,0);} 100%{box-shadow:0 0 0 0 rgba(16,185,129,0);} }
+@keyframes pulseNeon { 0%, 100% { filter: drop-shadow(0 0 12px rgba(249,115,22,0.8)); } 50% { filter: drop-shadow(0 0 25px rgba(249,115,22,1)); } }
+@keyframes spinFast { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes toastIn { from { opacity:0; transform: translateY(14px) scale(.95); } to { opacity:1; transform:none; } }
-@keyframes barShrink { from { width: 100%; } to { width: 0%; } }
 
-.tab-content { animation: fadeSlideUp .4s var(--ease) both; }
+.neon-glow { animation: pulseNeon 2s infinite ease-in-out; }
+.spinner { animation: spinFast 0.8s linear infinite; }
 
 .glass {
-  background: rgba(14, 19, 32, 0.78);
+  background: rgba(14, 19, 32, 0.8);
   backdrop-filter: blur(16px);
   border: 1px solid var(--border);
 }
@@ -101,449 +76,424 @@ body {
   background: var(--surface-2);
   backdrop-filter: blur(14px);
   border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-}
-
-.sidebar-nav-item {
-  position: relative; z-index: 1;
-  display:flex; align-items:center; gap:.75rem;
-  padding: .75rem 1rem; border-radius: 14px;
-  font-weight:700; font-size:.88rem; color: var(--muted);
-  transition: all .25s var(--ease);
-  cursor: pointer; width:100%; background:transparent; border:none; text-align: inherit;
-}
-.sidebar-nav-item:hover { color: #fff; background: rgba(255,255,255,.03); }
-.sidebar-nav-item.is-active { color: #fff; }
-.sidebar-nav-item svg { width:19px; height:19px; flex-shrink:0; }
-
-#navIndicator {
-  position:absolute; right:0; left:0; z-index:0;
-  border-radius: 14px;
-  background: linear-gradient(135deg, var(--orange), #ea580c);
-  box-shadow: 0 8px 24px -6px rgba(249,115,22,.65);
-  transition: transform .35s var(--ease), height .35s var(--ease);
-  will-change: transform, height;
+  border-radius: 18px;
 }
 
 .stat-card {
-  position: relative; overflow:hidden;
   background: var(--surface-2);
   backdrop-filter: blur(14px);
   border: 1px solid var(--border);
-  border-radius: var(--r-lg);
+  border-radius: 18px;
   padding: 1.25rem 1.35rem;
-  transition: transform .25s var(--ease), border-color .25s var(--ease), box-shadow .25s var(--ease);
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
-.stat-card:hover { transform: translateY(-3px); border-color: var(--accent, var(--orange)); box-shadow: 0 16px 32px -16px var(--accent, var(--orange)); }
-.stat-card .icon-badge {
-  width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center;
-  background: var(--accent-soft, var(--orange-soft)); color: var(--accent, var(--orange));
-}
-.stat-card .icon-badge svg { width:20px; height:20px; }
-.stat-value { font-weight:900; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.stat-card:hover { transform: translateY(-3px); border-color: var(--orange); box-shadow: 0 16px 32px -16px rgba(249,115,22,0.5); }
 
-.table-wrap { border-radius: var(--r-lg); overflow:hidden; border:1px solid var(--border); background: var(--surface-2); backdrop-filter: blur(14px); }
-table { width:100%; font-size:.86rem; }
-thead th { font-size:.7rem; letter-spacing:.04em; color: var(--muted); font-weight:800; padding: .9rem 1.1rem; background: rgba(22, 28, 45, 0.9); }
-tbody tr { transition: background .18s var(--ease); }
+.sidebar-nav-item {
+  position: relative; z-index: 1;
+  display: flex; align-items: center; gap: .75rem;
+  padding: .75rem 1rem; border-radius: 14px;
+  font-weight: 700; font-size: .88rem; color: #94a3b8;
+  transition: all .25s ease; width: 100%; background: transparent; border: none; cursor: pointer;
+}
+.sidebar-nav-item:hover { color: #fff; background: rgba(255,255,255,.04); }
+.sidebar-nav-item.is-active { color: #fff; }
+
+#navIndicator {
+  position: absolute; right: 0; left: 0; z-index: 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--orange), #ea580c);
+  box-shadow: 0 8px 24px -6px rgba(249,115,22,.65);
+  transition: transform .35s ease, height .35s ease;
+}
+
+.table-wrap { border-radius: 18px; overflow: hidden; border: 1px solid var(--border); background: var(--surface-2); backdrop-filter: blur(14px); }
+table { width: 100%; font-size: .86rem; text-align: left; }
+thead th { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; font-weight: 800; padding: .9rem 1.1rem; background: rgba(22, 28, 45, 0.9); }
+tbody tr { transition: background .18s ease; }
 tbody tr:hover { background: rgba(255,255,255,.035); }
 tbody td { padding: .85rem 1.1rem; }
 
-.badge { display:inline-flex; align-items:center; gap:.35rem; padding:.28rem .7rem; border-radius:999px; font-size:.7rem; font-weight:800; white-space:nowrap; }
-.badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
+.badge { display: inline-flex; align-items: center; gap: .35rem; padding: .28rem .7rem; border-radius: 999px; font-size: .7rem; font-weight: 800; }
+.badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
-.field-label { display:block; font-size:.74rem; font-weight:700; color: var(--muted); margin-bottom:.35rem; }
 .input, select.input {
-  width:100%; background: rgba(8, 11, 18, 0.85); border:1px solid var(--border); color: var(--text);
-  border-radius: var(--r-sm); padding:.65rem .85rem; font-size:.86rem; font-family: inherit;
-  transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+  width: 100%; background: rgba(8, 11, 18, 0.85); border: 1px solid var(--border); color: #fff;
+  border-radius: 10px; padding: .65rem .85rem; font-size: .86rem; outline: none; transition: border-color .2s;
 }
-.input::placeholder { color: var(--muted-dim); }
-.input:focus { outline:none; border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
+.input:focus { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-soft); }
 
 .btn {
-  display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
-  font-weight:800; font-size:.82rem; border-radius: var(--r-sm);
-  padding:.65rem 1.15rem; cursor:pointer; border:1px solid transparent;
-  transition: transform .15s var(--ease), filter .2s var(--ease), box-shadow .2s var(--ease);
-  font-family: inherit; white-space: nowrap;
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  font-weight: 800; font-size: .82rem; border-radius: 10px; padding: .65rem 1.15rem; cursor: pointer; border: 1px solid transparent; transition: all .2s;
 }
-.btn:active { transform: scale(.96); }
-.btn-primary { background: linear-gradient(135deg, var(--orange), #ea580c); color:#fff; box-shadow: 0 10px 24px -10px rgba(249,115,22,.65); }
-.btn-primary:hover { filter: brightness(1.08); }
-.btn-blue { background: linear-gradient(135deg, var(--blue), #2563eb); color:#fff; box-shadow: 0 10px 24px -10px rgba(59,130,246,.6); }
-.btn-blue:hover { filter: brightness(1.08); }
-.btn-emerald { background: linear-gradient(135deg, var(--emerald), #059669); color:#fff; box-shadow: 0 10px 24px -10px rgba(16,185,129,.6); }
-.btn-emerald:hover { filter: brightness(1.08); }
-.btn-ghost { background: rgba(255,255,255,.05); color: var(--text); border-color: var(--border); }
+.btn-primary { background: linear-gradient(135deg, var(--orange), #ea580c); color: #fff; box-shadow: 0 10px 24px -10px rgba(249,115,22,.65); }
+.btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-blue { background: linear-gradient(135deg, var(--blue), #2563eb); color: #fff; }
+.btn-emerald { background: linear-gradient(135deg, var(--emerald), #059669); color: #fff; }
+.btn-ghost { background: rgba(255,255,255,.05); color: #fff; border-color: var(--border); }
 .btn-ghost:hover { background: rgba(255,255,255,.1); }
 .btn-danger { background: var(--rose-soft); color: #fda4b5; border-color: rgba(244,63,94,.28); }
-.btn-danger:hover { background: rgba(244,63,94,.22); }
-.btn-xs { padding:.42rem .75rem; font-size:.7rem; border-radius:9px; }
+.btn-xs { padding: .42rem .75rem; font-size: .7rem; border-radius: 8px; }
 
 .modal-backdrop {
-  position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:1rem;
-  background: rgba(4,6,11,.8); backdrop-filter: blur(8px);
-  animation: fadeIn .2s var(--ease);
+  position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 1rem;
+  background: rgba(4,6,11,.82); backdrop-filter: blur(8px);
 }
-.modal-panel {
-  animation: popIn .25s var(--ease);
-  background: #111827; border:1px solid rgba(255,255,255,.1); border-radius: var(--r-lg);
-}
+.modal-panel { background: #111827; border: 1px solid rgba(255,255,255,.1); border-radius: 20px; }
 
-#toastStack {
-  position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
-  z-index: 100; display:flex; flex-direction:column; gap:.5rem; width: min(92vw, 380px);
-}
+#toastStack { position: fixed; bottom: 22px; right: 24px; z-index: 100; display: flex; flex-direction: column; gap: .5rem; width: 340px; }
 .toast-item {
-  position: relative; overflow:hidden;
-  background: #1a2238; border:1px solid var(--border); border-radius: 12px;
-  padding: .8rem 1rem; display:flex; align-items:center; gap:.65rem;
-  font-size:.82rem; font-weight:700; box-shadow: 0 14px 30px -14px rgba(0,0,0,.6);
-  animation: toastIn .25s var(--ease);
+  background: #1a2238; border: 1px solid var(--border); border-radius: 12px; padding: .8rem 1rem;
+  display: flex; align-items: center; gap: .65rem; font-size: .82rem; font-weight: 700; box-shadow: 0 14px 30px -14px rgba(0,0,0,.6);
+  animation: toastIn .25s ease;
 }
-.toast-item svg { width:18px; height:18px; flex-shrink:0; }
-.toast-item.success { border-color: rgba(16,185,129,.4); }
-.toast-item.success svg { color: var(--emerald); }
-.toast-item.error { border-color: rgba(244,63,94,.4); }
-.toast-item.error svg { color: var(--rose); }
-.toast-item.info svg { color: var(--blue); }
-.toast-bar { position:absolute; bottom:0; right:0; left:0; height:2px; background: currentColor; opacity:.5; animation: barShrink linear forwards; }
 
-.dot-live { width:8px; height:8px; border-radius:50%; background: var(--emerald); animation: pulseDot 2s infinite; }
-
-.lang-switch { display:flex; background: rgba(255,255,255,.05); border:1px solid var(--border); border-radius: 999px; padding: 2px; }
-.lang-switch button {
-  padding: .35rem .8rem; border-radius:999px; font-size:.72rem; font-weight:800; color: var(--muted);
-  background:transparent; border:none; cursor:pointer; transition: all .2s var(--ease); font-family: inherit;
-}
-.lang-switch button.is-active { background: var(--orange); color:#fff; }
-
-.qr-frame { background:#fff; border-radius: var(--r-md); padding: 12px; display:inline-block; box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); }
-.hairline { border-color: var(--border); }
-
-@media (max-width: 900px) {
-  #sidebar { display:none; }
-}
+.qr-frame { background: #fff; border-radius: 14px; padding: 12px; display: inline-block; box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); }
 </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
 
+<!-- TOAST CONTAINER -->
 <div id="toastStack"></div>
 
-<!-- CONFIRM DIALOG -->
-<div id="confirmBackdrop" class="modal-backdrop hidden">
-  <div class="modal-panel w-full max-w-sm p-6 text-center space-y-4">
-    <div class="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-400 mx-auto flex items-center justify-center">
-      <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+<!-- ================= BEAST MODE LOADING OVERLAY ================= -->
+<div id="beastLoader" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center space-y-4 hidden">
+  <div class="relative w-24 h-24 flex items-center justify-center">
+    <div class="absolute inset-0 rounded-full border-4 border-orange-500/20 border-t-orange-500 spinner"></div>
+    <span class="text-4xl neon-glow">⚡</span>
+  </div>
+  <h2 class="font-display text-2xl font-black tracking-widest text-orange-500 uppercase" id="beastLoaderText">BEAST MODE ACTIVATED!</h2>
+  <p class="text-xs text-slate-400 font-bold uppercase tracking-wider" id="beastLoaderSub">CRUSHING THE LIMITS...</p>
+</div>
+
+<!-- ================= 1. EPIC LOGIN VIEW ================= -->
+<div id="loginView" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-cover bg-center"
+     style="background-image: linear-gradient(rgba(8,11,18,0.78), rgba(8,11,18,0.92)), url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1800&auto=format&fit=crop');">
+  <div class="w-full max-w-md panel p-8 space-y-6 shadow-2xl border border-orange-500/20">
+    <div class="text-center space-y-2">
+      <div class="w-16 h-16 rounded-2xl bg-orange-600/20 border border-orange-500/30 text-orange-500 mx-auto flex items-center justify-center text-3xl font-black neon-glow">
+        ⚡
+      </div>
+      <h1 class="font-display text-3xl font-black tracking-wider bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent uppercase">
+        FITZONE PRO
+      </h1>
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">UNLEASH YOUR INNER BEAST</p>
     </div>
-    <p id="confirmMessage" class="text-sm text-slate-200 font-bold leading-relaxed"></p>
-    <div class="flex gap-3">
-      <button id="confirmCancelBtn" class="btn btn-ghost flex-1"></button>
-      <button id="confirmOkBtn" class="btn btn-danger flex-1"></button>
-    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+      <div>
+        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Username</label>
+        <input type="text" id="loginUser" required placeholder="Enter username..." class="input py-2.5 text-sm" autocomplete="off">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password</label>
+        <input type="password" id="loginPass" required placeholder="Enter password..." class="input py-2.5 text-sm" autocomplete="off">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-full py-3 text-sm font-black tracking-wider uppercase mt-2">
+        ENTER THE ARENA
+      </button>
+    </form>
+    <p class="text-[11px] text-center text-slate-500 font-semibold uppercase">Authorized Personnel Only · FitZone Core</p>
   </div>
 </div>
 
-<!-- TOPBAR -->
-<header id="topbar" class="glass border-b px-6 py-3.5 flex justify-between items-center relative z-20">
-  <div class="flex items-center gap-3">
-    <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500/30 to-amber-500/15 text-orange-500 border border-orange-500/30 flex items-center justify-center font-black text-lg shadow-inner">⚡</span>
-    <h1 class="font-black text-xl tracking-wide bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400 bg-clip-text text-transparent">FitZone Pro</h1>
-  </div>
-
-  <div class="flex items-center gap-3">
-    <div class="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-xs font-bold">
-      <span class="dot-live"></span>
-      <span data-i18n="live_floor"></span>
-      <span id="liveCountText" class="font-black">0</span>
+<!-- ================= 2. MAIN APP VIEW ================= -->
+<div id="appView" class="min-h-screen flex flex-col hidden">
+  
+  <!-- TOPBAR -->
+  <header class="glass border-b px-6 py-3.5 flex justify-between items-center sticky top-0 z-40">
+    <div class="flex items-center gap-3">
+      <span class="w-9 h-9 rounded-xl bg-orange-500/20 text-orange-500 border border-orange-500/30 flex items-center justify-center font-black text-lg neon-glow">⚡</span>
+      <h1 class="font-display text-2xl font-black tracking-wide bg-gradient-to-r from-orange-400 to-amber-400 bg-clip-text text-transparent uppercase">FitZone Pro</h1>
     </div>
-    <div class="lang-switch">
-      <button id="langBtnAr" data-lang-btn="ar">AR</button>
-      <button id="langBtnEn" data-lang-btn="en">EN</button>
+
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3.5 py-1.5 rounded-full text-xs font-bold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span>LIVE FLOOR:</span>
+        <span id="liveCountText" class="font-black">0</span>
+      </div>
+      <button onclick="handleLogout()" class="btn btn-ghost btn-xs text-xs font-bold text-rose-400 hover:text-rose-300">
+        <i data-lucide="log-out" class="w-3.5 h-3.5"></i> LOGOUT
+      </button>
     </div>
-  </div>
-</header>
+  </header>
 
-<div class="flex-1 flex overflow-hidden relative z-10">
-
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="w-60 border-l hairline glass flex flex-col justify-between p-4">
-    <nav id="navList" class="relative space-y-1.5">
-      <div id="navIndicator" style="height:0"></div>
-      <button class="sidebar-nav-item is-active" data-tab="dashboard">
-        <i data-lucide="layout-dashboard"></i><span data-i18n="nav_dashboard"></span>
-      </button>
-      <button class="sidebar-nav-item" data-tab="members">
-        <i data-lucide="users"></i><span data-i18n="nav_members"></span>
-      </button>
-      <button class="sidebar-nav-item" data-tab="trainers">
-        <i data-lucide="trophy"></i><span data-i18n="nav_trainers"></span>
-      </button>
-      <button class="sidebar-nav-item" data-tab="memberships">
-        <i data-lucide="file-text"></i><span data-i18n="nav_memberships"></span>
-      </button>
-      <button class="sidebar-nav-item" data-tab="attendance">
-        <i data-lucide="scan-line"></i><span data-i18n="nav_attendance"></span>
-      </button>
-      <button class="sidebar-nav-item" data-tab="payments">
-        <i data-lucide="credit-card"></i><span data-i18n="nav_payments"></span>
-      </button>
-    </nav>
-
-    <button id="exitBtn" class="w-full flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs bg-rose-950/40 hover:bg-rose-900/60 border border-rose-800/60 text-rose-300 transition">
-      <i data-lucide="log-out" class="w-4 h-4"></i><span data-i18n="nav_exit"></span>
-    </button>
-  </aside>
-
-  <!-- MAIN VIEWPORT WITH BACKGROUND IMAGES -->
-  <main id="mainViewport" class="flex-1 overflow-y-auto p-6 md:p-8">
-
-    <!-- 1. DASHBOARD -->
-    <section id="tab-dashboard" class="tab-content space-y-5">
-      <div class="flex justify-between items-center panel p-5">
-        <h2 class="text-xl font-black" data-i18n="dash_title"></h2>
-        <span class="px-3.5 py-1.5 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl text-xs font-black" id="retentionText"></span>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="statCardsGrid"></div>
-
-      <div class="panel p-5 space-y-3">
-        <div class="flex justify-between items-center pb-2 border-b hairline">
-          <h3 class="font-black text-sm flex items-center gap-2">
-            <i data-lucide="flame" class="text-orange-500 w-4 h-4"></i>
-            <span data-i18n="live_gym_list"></span>
-          </h3>
-          <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-            <span class="dot-live"></span>
-            <span data-i18n="live_refresh_badge"></span>
-          </span>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr>
-              <th data-i18n="th_member_id"></th><th data-i18n="th_name"></th>
-              <th class="text-center" data-i18n="th_role"></th><th data-i18n="th_checkin_time"></th>
-              <th data-i18n="th_duration"></th><th class="text-center" data-i18n="th_status"></th>
-            </tr></thead>
-            <tbody id="live_floor_table"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <!-- 2. MEMBERS -->
-    <section id="tab-members" class="tab-content hidden space-y-5">
-      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 panel p-5">
-        <h2 class="text-xl font-black" data-i18n="mem_title"></h2>
-        
-        <div class="flex items-center gap-2.5">
-          <!-- SEARCH (COMPACT & SLEEK) -->
-          <div class="relative w-56">
-            <i data-lucide="search" class="w-4 h-4 absolute top-1/2 -translate-y-1/2 right-3 text-slate-400"></i>
-            <input type="text" id="memberSearchInput" class="input pr-9 py-1.5 text-xs rounded-xl" data-i18n-ph="search_placeholder">
-            <div id="searchSuggestionsDropdown" class="absolute right-0 left-0 top-[115%] bg-[#111827]/95 border hairline rounded-xl shadow-2xl z-30 max-h-56 overflow-y-auto hidden divide-y divide-white/5 backdrop-blur-md"></div>
-          </div>
-
-          <!-- FILTER (COMPACT PILL) -->
-          <select id="memberFilterSelect" class="input w-36 py-1.5 text-xs rounded-xl font-bold">
-            <option value="all" data-i18n="filter_all"></option>
-            <option value="active" data-i18n="filter_active"></option>
-            <option value="expired" data-i18n="filter_expired"></option>
-            <option value="frozen" data-i18n="filter_frozen"></option>
-          </select>
-
-          <!-- REGISTER BUTTON -->
-          <button id="btnOpenRegister" class="btn btn-primary btn-xs py-2 px-3.5">
-            <i data-lucide="user-plus" class="w-4 h-4"></i><span data-i18n="btn_add_member"></span>
-          </button>
-        </div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th data-i18n="th_code"></th><th data-i18n="th_member_name"></th><th data-i18n="th_phone"></th>
-            <th data-i18n="th_plan"></th><th data-i18n="th_rem_sessions"></th><th data-i18n="th_coach"></th>
-            <th data-i18n="th_status"></th><th class="text-center" data-i18n="th_actions"></th>
-          </tr></thead>
-          <tbody id="members_table"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- 3. TRAINERS -->
-    <section id="tab-trainers" class="tab-content hidden space-y-5">
-      <div class="flex justify-between items-center panel p-5">
-        <h2 class="text-xl font-black" data-i18n="coach_title"></h2>
-        <button id="btnOpenAddTrainer" class="btn btn-blue btn-xs py-2 px-3.5">
-          <i data-lucide="plus" class="w-4 h-4"></i><span data-i18n="btn_add_trainer"></span>
+  <div class="flex-1 flex overflow-hidden">
+    <!-- SIDEBAR -->
+    <aside class="w-60 border-r border-slate-800/80 glass flex flex-col justify-between p-4">
+      <nav id="navList" class="relative space-y-1.5">
+        <div id="navIndicator" style="height:0"></div>
+        <button class="sidebar-nav-item is-active" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
         </button>
+        <button class="sidebar-nav-item" data-tab="members">
+          <i data-lucide="users"></i><span>Members</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="trainers">
+          <i data-lucide="trophy"></i><span>Coaches</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="memberships">
+          <i data-lucide="file-text"></i><span>Memberships</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="attendance">
+          <i data-lucide="scan-line"></i><span>Attendance</span>
+        </button>
+        <button class="sidebar-nav-item" data-tab="payments">
+          <i data-lucide="credit-card"></i><span>Finance</span>
+        </button>
+      </nav>
+
+      <div class="p-3 rounded-xl bg-orange-600/10 border border-orange-500/20 text-center">
+        <p class="text-[10px] font-black text-orange-400 uppercase tracking-widest">BEAST MODE ON</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="trainers_cards"></div>
-    </section>
+    </aside>
 
-    <!-- 4. MEMBERSHIPS -->
-    <section id="tab-memberships" class="tab-content hidden space-y-5">
-      <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 panel p-5">
-        <h2 class="text-xl font-black" data-i18n="ms_title"></h2>
-        <div class="relative w-64">
-          <i data-lucide="search" class="w-4 h-4 absolute top-1/2 -translate-y-1/2 right-3 text-slate-400"></i>
-          <input type="text" id="membershipSearchInput" class="input pr-9 py-1.5 text-xs rounded-xl" data-i18n-ph="ms_search_ph">
-        </div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th data-i18n="th_sub_id"></th><th data-i18n="th_member_name"></th><th data-i18n="th_phone"></th>
-            <th data-i18n="th_plan_chosen"></th><th data-i18n="th_start_d"></th><th data-i18n="th_end_d"></th>
-            <th data-i18n="th_sessions_left"></th><th data-i18n="th_cost"></th><th class="text-center" data-i18n="th_status"></th>
-          </tr></thead>
-          <tbody id="memberships_table"></tbody>
-        </table>
-      </div>
-    </section>
+    <!-- MAIN VIEWPORT -->
+    <main id="mainViewport" class="flex-1 overflow-y-auto p-6 md:p-8">
 
-    <!-- 5. ATTENDANCE -->
-    <section id="tab-attendance" class="tab-content hidden space-y-5">
-      <div class="max-w-xl mx-auto panel p-7 text-center space-y-5">
-        <div class="w-14 h-14 rounded-2xl bg-orange-600/15 text-orange-500 mx-auto flex items-center justify-center">
-          <i data-lucide="qr-code" class="w-7 h-7"></i>
-        </div>
-        <h2 class="text-xl font-black" data-i18n="att_title"></h2>
-
-        <div class="flex flex-wrap gap-2.5 justify-center">
-          <button id="btnToggleCamera" class="btn btn-blue btn-xs py-2 px-3.5">
-            <i data-lucide="camera" class="w-4 h-4"></i><span id="cameraBtnText"></span>
-          </button>
-          <label class="btn btn-xs py-2 px-3.5" style="background:var(--purple-soft); color:#c9b6fb; border:1px solid rgba(139,92,246,.3); cursor:pointer;">
-            <i data-lucide="image" class="w-4 h-4"></i><span data-i18n="btn_scan_file"></span>
-            <input type="file" id="qrFileInput" accept="image/*" class="hidden">
-          </label>
+      <!-- 1. DASHBOARD -->
+      <section id="tab-dashboard" class="tab-content space-y-5">
+        <div class="flex justify-between items-center panel p-5">
+          <h2 class="font-display text-xl font-black uppercase tracking-wider">GYM OVERVIEW</h2>
+          <span class="px-3.5 py-1.5 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-xl text-xs font-black" id="retentionText">Retention: 0%</span>
         </div>
 
-        <div id="cameraScannerBox" class="hidden rounded-2xl border-2 border-orange-500/70 overflow-hidden bg-black p-2 relative">
-          <div id="qr-reader" class="w-full"></div>
-          <p class="text-xs text-orange-400 font-bold mt-2 animate-pulse" data-i18n="cam_prompt"></p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="statCardsGrid"></div>
+
+        <div class="panel p-5 space-y-3">
+          <div class="flex justify-between items-center pb-2 border-b border-slate-800">
+            <h3 class="font-black text-sm flex items-center gap-2">
+              <i data-lucide="flame" class="text-orange-500 w-4 h-4"></i>
+              <span>ATHLETES CURRENTLY TRAINING</span>
+            </h3>
+            <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> LIVE
+            </span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>ID</th><th>Athlete Name</th><th class="text-center">Role</th><th>Check-in Time</th><th>Duration</th><th class="text-center">Status</th>
+              </tr></thead>
+              <tbody id="live_floor_table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. MEMBERS -->
+      <section id="tab-members" class="tab-content hidden space-y-5">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 panel p-5">
+          <h2 class="font-display text-xl font-black uppercase tracking-wider">ATHLETES & INBODY</h2>
+          
+          <div class="flex items-center gap-2.5">
+            <!-- SLEEK COMPACT SEARCH -->
+            <div class="relative w-56">
+              <i data-lucide="search" class="w-4 h-4 absolute top-1/2 -translate-y-1/2 left-3 text-slate-400"></i>
+              <input type="text" id="memberSearchInput" class="input pl-9 py-1.5 text-xs rounded-xl" placeholder="Search athletes...">
+              <div id="searchSuggestionsDropdown" class="absolute left-0 right-0 top-[115%] bg-[#111827]/95 border border-slate-800 rounded-xl shadow-2xl z-30 max-h-56 overflow-y-auto hidden divide-y divide-white/5 backdrop-blur-md"></div>
+            </div>
+
+            <!-- COMPACT FILTER -->
+            <select id="memberFilterSelect" class="input w-36 py-1.5 text-xs rounded-xl font-bold">
+              <option value="all">All Athletes</option>
+              <option value="active">Active Only</option>
+              <option value="expired">Expired</option>
+              <option value="frozen">Frozen</option>
+            </select>
+
+            <button onclick="openRegisterModal()" class="btn btn-primary btn-xs py-2 px-3.5">
+              <i data-lucide="user-plus" class="w-4 h-4"></i> New Athlete
+            </button>
+          </div>
         </div>
 
-        <div class="border-t hairline pt-4 space-y-3">
-          <input type="number" id="checkinMemberId" data-i18n-ph="checkin_ph"
-                 class="input text-center text-lg font-black text-orange-400 py-2.5">
-          <button id="btnManualCheckin" class="btn btn-emerald w-full py-2.5">
-            <i data-lucide="check-circle" class="w-4 h-4"></i><span data-i18n="btn_checkin"></span>
-          </button>
-        </div>
-      </div>
-
-      <div class="panel p-5 space-y-3">
-        <h3 class="font-black text-sm flex items-center gap-2 text-blue-400">
-          <i data-lucide="history" class="w-4 h-4"></i><span data-i18n="audit_24h_title"></span>
-        </h3>
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th data-i18n="th_log_id"></th><th data-i18n="th_code"></th><th data-i18n="th_name"></th>
-              <th class="text-center" data-i18n="th_role"></th><th data-i18n="th_time"></th>
+              <th>ID</th><th>Athlete</th><th>Phone</th><th>Plan</th><th>Sessions Left</th><th>Coach</th><th>Status</th><th class="text-center">Actions</th>
             </tr></thead>
-            <tbody id="daily_att_table"></tbody>
+            <tbody id="members_table"></tbody>
           </table>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 6. PAYMENTS -->
-    <section id="tab-payments" class="tab-content hidden space-y-5">
-      <div class="panel p-5">
-        <h2 class="text-xl font-black" data-i18n="pay_title"></h2>
-      </div>
-
-      <div class="panel p-5 space-y-3">
-        <h3 class="text-xs font-bold text-orange-400" data-i18n="pay_new_header"></h3>
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
-          <div class="relative">
-            <input type="number" id="pay_new_mid" class="input py-2 text-xs" data-i18n-ph="pay_member_id_ph">
-            <span id="pay_verify_badge" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold"></span>
-          </div>
-          <input type="number" id="pay_new_amt" class="input py-2 text-xs" data-i18n-ph="pay_amount_ph">
-          <select id="pay_new_method" class="input py-2 text-xs font-semibold"></select>
-          <input type="text" id="pay_new_ref" class="input py-2 text-xs" data-i18n-ph="pay_ref_ph">
-          <button id="btnSubmitPayment" class="btn btn-emerald btn-xs py-2">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i><span data-i18n="btn_record_pay"></span>
+      <!-- 3. COACHES -->
+      <section id="tab-trainers" class="tab-content hidden space-y-5">
+        <div class="flex justify-between items-center panel p-5">
+          <h2 class="font-display text-xl font-black uppercase tracking-wider">COACHING STAFF</h2>
+          <button onclick="openModal('addTrainerModal')" class="btn btn-blue btn-xs py-2 px-3.5">
+            <i data-lucide="plus" class="w-4 h-4"></i> Add Coach
           </button>
         </div>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="trainers_cards"></div>
+      </section>
 
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th data-i18n="th_receipt_id"></th><th data-i18n="th_trainee"></th><th data-i18n="th_amount"></th>
-            <th data-i18n="th_method"></th><th data-i18n="th_desc"></th><th data-i18n="th_date"></th>
-            <th class="text-center" data-i18n="th_actions"></th>
-          </tr></thead>
-          <tbody id="payments_table"></tbody>
-        </table>
-      </div>
-    </section>
+      <!-- 4. MEMBERSHIPS -->
+      <section id="tab-memberships" class="tab-content hidden space-y-5">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 panel p-5">
+          <h2 class="font-display text-xl font-black uppercase tracking-wider">SUBSCRIPTIONS LEDGER</h2>
+          <div class="relative w-64">
+            <i data-lucide="search" class="w-4 h-4 absolute top-1/2 -translate-y-1/2 left-3 text-slate-400"></i>
+            <input type="text" id="membershipSearchInput" oninput="filterMemberships(this.value)" class="input pl-9 py-1.5 text-xs rounded-xl" placeholder="Search subscriptions...">
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Sub #</th><th>Athlete Name</th><th>Phone</th><th>Plan</th><th>Start Date</th><th>End Date</th><th>Sessions</th><th>Cost</th><th class="text-center">Status</th>
+            </tr></thead>
+            <tbody id="memberships_table"></tbody>
+          </table>
+        </div>
+      </section>
 
-  </main>
+      <!-- 5. ATTENDANCE -->
+      <section id="tab-attendance" class="tab-content hidden space-y-5">
+        <div class="max-w-xl mx-auto panel p-7 text-center space-y-5">
+          <div class="w-14 h-14 rounded-2xl bg-orange-600/20 text-orange-500 mx-auto flex items-center justify-center neon-glow">
+            <i data-lucide="qr-code" class="w-7 h-7"></i>
+          </div>
+          <h2 class="font-display text-xl font-black uppercase tracking-wider">FAST ATTENDANCE CHECK-IN</h2>
+
+          <div class="flex flex-wrap gap-2.5 justify-center">
+            <button id="btnToggleCamera" onclick="toggleCameraScan()" class="btn btn-blue btn-xs py-2 px-3.5">
+              <i data-lucide="camera" class="w-4 h-4"></i><span id="cameraBtnText">Open Camera</span>
+            </button>
+            <label class="btn btn-xs py-2 px-3.5" style="background:rgba(139,92,246,.2); color:#c9b6fb; border:1px solid rgba(139,92,246,.3); cursor:pointer;">
+              <i data-lucide="image" class="w-4 h-4"></i> Scan QR File
+              <input type="file" id="qrFileInput" accept="image/*" class="hidden" onchange="scanQRFromFile(event)">
+            </label>
+          </div>
+
+          <div id="cameraScannerBox" class="hidden rounded-2xl border-2 border-orange-500/70 overflow-hidden bg-black p-2 relative">
+            <div id="qr-reader" class="w-full"></div>
+            <p class="text-xs text-orange-400 font-bold mt-2 animate-pulse uppercase tracking-wider">Align QR pass within the frame...</p>
+          </div>
+
+          <div class="border-t border-slate-800 pt-4 space-y-3">
+            <input type="number" id="checkinMemberId" placeholder="Enter Athlete or Coach ID..."
+                   class="input text-center text-lg font-black text-orange-400 py-2.5 tracking-wider"
+                   onkeydown="if(event.key==='Enter') handleManualCheckin()">
+            <button onclick="handleManualCheckin()" class="btn btn-emerald w-full py-2.5 uppercase font-black tracking-wider">
+              <i data-lucide="check-circle" class="w-4 h-4"></i> Confirm Check-in
+            </button>
+          </div>
+        </div>
+
+        <div class="panel p-5 space-y-3">
+          <h3 class="font-black text-sm flex items-center gap-2 text-blue-400">
+            <i data-lucide="history" class="w-4 h-4"></i><span>TODAY'S ATTENDANCE LOG</span>
+          </h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Log #</th><th>ID</th><th>Name</th><th class="text-center">Role</th><th>Time</th>
+              </tr></thead>
+              <tbody id="daily_att_table"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. FINANCE -->
+      <section id="tab-payments" class="tab-content hidden space-y-5">
+        <div class="panel p-5">
+          <h2 class="font-display text-xl font-black uppercase tracking-wider">FINANCIAL LEDGER</h2>
+        </div>
+
+        <div class="panel p-5 space-y-3">
+          <h3 class="text-xs font-bold text-orange-400 uppercase tracking-wider">Record New Collection</h3>
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-center">
+            <div class="relative">
+              <input type="number" id="pay_new_mid" oninput="verifyPayMember(this.value)" placeholder="Member ID" class="input py-2 text-xs">
+              <span id="pay_verify_badge" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold"></span>
+            </div>
+            <input type="number" id="pay_new_amt" placeholder="Amount ($)" class="input py-2 text-xs">
+            <select id="pay_new_method" class="input py-2 text-xs font-semibold">
+              <option value="Cash">Cash</option>
+              <option value="Visa">Visa</option>
+              <option value="Instapay">InstaPay</option>
+              <option value="Vodafone Cash">Vodafone Cash</option>
+            </select>
+            <input type="text" id="pay_new_ref" placeholder="Notes / Reference" class="input py-2 text-xs">
+            <button onclick="submitNewPayment()" class="btn btn-emerald btn-xs py-2">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i> Save Payment
+            </button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Receipt #</th><th>Athlete</th><th>Amount</th><th>Method</th><th>Reference</th><th>Date</th><th class="text-center">Actions</th>
+            </tr></thead>
+            <tbody id="payments_table"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
 </div>
 
-<!-- MODAL: TRAINER PROFILE -->
+<!-- ================= MODALS ================= -->
+
+<!-- COACH PROFILE & TRAINEES -->
 <div id="trainerProfileModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-3xl p-6 max-h-[90vh] overflow-y-auto space-y-5">
-    <div class="flex justify-between items-start border-b hairline pb-3">
+    <div class="flex justify-between items-start border-b border-slate-800 pb-3">
       <div class="flex items-center gap-3">
         <div class="w-12 h-12 rounded-xl bg-orange-600/20 text-orange-500 font-black flex items-center justify-center text-xl border border-orange-500/20">🏋️</div>
         <div>
-          <h3 class="text-lg font-black" id="tr_prof_name"></h3>
-          <p class="text-xs text-orange-400 font-bold mt-0.5" id="tr_prof_spec"></p>
+          <h3 class="text-lg font-black" id="tr_prof_name">Coach</h3>
+          <p class="text-xs text-orange-400 font-bold mt-0.5" id="tr_prof_spec">Specialty</p>
         </div>
       </div>
-      <button data-close-modal="trainerProfileModal" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-white/5">✕</button>
+      <button onclick="closeModal('trainerProfileModal')" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-white/5">✕</button>
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-center">
-      <div class="p-2.5 rounded-xl bg-black/30 border hairline">
-        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_id_label"></p>
-        <p class="text-sm font-black text-orange-400 mt-0.5" id="tr_prof_id"></p>
+      <div class="p-2.5 rounded-xl bg-black/30 border border-slate-800">
+        <p class="text-[11px] text-slate-400 font-semibold uppercase">Coach ID</p>
+        <p class="text-sm font-black text-orange-400 mt-0.5" id="tr_prof_id">#00000</p>
       </div>
-      <div class="p-2.5 rounded-xl bg-black/30 border hairline">
-        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_phone_label"></p>
-        <p class="text-xs font-bold mt-0.5" id="tr_prof_phone"></p>
+      <div class="p-2.5 rounded-xl bg-black/30 border border-slate-800">
+        <p class="text-[11px] text-slate-400 font-semibold uppercase">Phone</p>
+        <p class="text-xs font-bold mt-0.5" id="tr_prof_phone">-</p>
       </div>
-      <div class="p-2.5 rounded-xl bg-black/30 border hairline">
-        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_salary_label"></p>
-        <p class="text-sm font-black text-emerald-400 mt-0.5" id="tr_prof_salary"></p>
+      <div class="p-2.5 rounded-xl bg-black/30 border border-slate-800">
+        <p class="text-[11px] text-slate-400 font-semibold uppercase">Salary</p>
+        <p class="text-sm font-black text-emerald-400 mt-0.5" id="tr_prof_salary">$0.00</p>
       </div>
-      <div class="p-2.5 rounded-xl bg-black/30 border hairline">
-        <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_att_days_label"></p>
-        <p class="text-sm font-black text-blue-400 mt-0.5" id="tr_prof_att_days"></p>
+      <div class="p-2.5 rounded-xl bg-black/30 border border-slate-800">
+        <p class="text-[11px] text-slate-400 font-semibold uppercase">Attendance</p>
+        <p class="text-sm font-black text-blue-400 mt-0.5" id="tr_prof_att_days">0 days</p>
       </div>
     </div>
 
-    <div class="flex items-center justify-between p-3.5 rounded-xl bg-black/30 border hairline">
+    <div class="flex items-center justify-between p-3.5 rounded-xl bg-black/30 border border-slate-800">
       <div>
-        <span class="text-xs text-slate-400 font-semibold" data-i18n="tr_current_status_label"></span>
+        <span class="text-xs text-slate-400 font-semibold uppercase">Floor Status:</span>
         <span id="tr_prof_presence_badge" class="ms-2 font-black text-xs"></span>
       </div>
-      <button id="tr_prof_checkin_btn" class="btn btn-emerald btn-xs" data-i18n="tr_checkin_btn"></button>
+      <button id="tr_prof_checkin_btn" onclick="checkinCurrentTrainer()" class="btn btn-emerald btn-xs">
+        Check-in Coach Now
+      </button>
     </div>
 
     <div class="space-y-2.5">
-      <h4 class="text-xs font-bold flex items-center gap-2">
-        <i data-lucide="users" class="w-4 h-4 text-orange-400"></i><span data-i18n="tr_trainees_title"></span>
+      <h4 class="text-xs font-bold flex items-center gap-2 uppercase tracking-wider">
+        <i data-lucide="users" class="w-4 h-4 text-orange-400"></i> Assigned Athletes & Progress
       </h4>
-      <div class="overflow-x-auto rounded-xl border hairline bg-black/30">
+      <div class="overflow-x-auto rounded-xl border border-slate-800 bg-black/30">
         <table class="text-xs">
           <thead><tr>
-            <th data-i18n="tr_trainee_col"></th>
-            <th data-i18n="th_phone"></th>
-            <th data-i18n="tr_commitment_col"></th>
-            <th data-i18n="th_rem_sessions"></th>
-            <th class="text-center" data-i18n="tf_view_comparison"></th>
-            <th class="text-center" data-i18n="th_actions"></th>
+            <th>Athlete</th><th>Phone</th><th>Commitment</th><th>Sessions</th><th class="text-center">Transformation</th><th class="text-center">Actions</th>
           </tr></thead>
           <tbody id="tr_prof_trainees_table"></tbody>
         </table>
@@ -552,56 +502,56 @@ tbody td { padding: .85rem 1.1rem; }
   </div>
 </div>
 
-<!-- MODAL: BEFORE & AFTER TRANSFORMATION -->
+<!-- BEFORE & AFTER TRANSFORMATION -->
 <div id="traineeTransformationModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-lg p-6 space-y-5">
-    <div class="flex justify-between items-center border-b hairline pb-3">
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
       <div>
-        <h3 class="text-base font-black" id="tf_modal_trainee_name"></h3>
-        <p class="text-xs text-orange-400 font-semibold mt-0.5" id="tf_modal_duration"></p>
+        <h3 class="text-base font-black uppercase" id="tf_modal_trainee_name">Transformation</h3>
+        <p class="text-xs text-orange-400 font-semibold mt-0.5" id="tf_modal_duration">-</p>
       </div>
-      <button data-close-modal="traineeTransformationModal" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-white/5">✕</button>
+      <button onclick="closeModal('traineeTransformationModal')" class="p-1.5 text-slate-400 hover:text-white rounded-lg bg-white/5">✕</button>
     </div>
 
     <div class="grid grid-cols-2 gap-3.5">
-      <div class="p-3.5 rounded-xl bg-black/30 border hairline space-y-2">
-        <div class="flex items-center justify-between border-b hairline pb-1.5">
-          <span class="text-xs font-black text-slate-400" data-i18n="tf_first_day"></span>
+      <div class="p-3.5 rounded-xl bg-black/30 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+          <span class="text-xs font-black text-slate-400 uppercase">First Day</span>
           <span class="text-[11px] font-bold text-amber-400 font-mono" id="tf_start_date">-</span>
         </div>
         <div class="space-y-1 text-xs">
-          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_weight"></span> <strong class="font-mono text-white" id="tf_start_weight">-</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_fat"></span> <strong class="font-mono text-white" id="tf_start_fat">-</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_muscle"></span> <strong class="font-mono text-white" id="tf_start_muscle">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400">Weight:</span> <strong class="font-mono" id="tf_start_weight">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400">Fat %:</span> <strong class="font-mono" id="tf_start_fat">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400">Muscle:</span> <strong class="font-mono" id="tf_start_muscle">-</strong></div>
         </div>
       </div>
 
-      <div class="p-3.5 rounded-xl bg-black/30 border hairline space-y-2">
-        <div class="flex items-center justify-between border-b hairline pb-1.5">
-          <span class="text-xs font-black text-emerald-400" data-i18n="tf_latest_day"></span>
+      <div class="p-3.5 rounded-xl bg-black/30 border border-slate-800 space-y-2">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+          <span class="text-xs font-black text-emerald-400 uppercase">Latest Day</span>
           <span class="text-[11px] font-bold text-emerald-400 font-mono" id="tf_latest_date">-</span>
         </div>
         <div class="space-y-1 text-xs">
-          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_weight"></span> <strong class="font-mono text-white" id="tf_latest_weight">-</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_fat"></span> <strong class="font-mono text-white" id="tf_latest_fat">-</strong></div>
-          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_muscle"></span> <strong class="font-mono text-white" id="tf_latest_muscle">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400">Weight:</span> <strong class="font-mono" id="tf_latest_weight">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400">Fat %:</span> <strong class="font-mono" id="tf_latest_fat">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400">Muscle:</span> <strong class="font-mono" id="tf_latest_muscle">-</strong></div>
         </div>
       </div>
     </div>
 
-    <div class="p-3.5 rounded-xl bg-black/40 border hairline space-y-2.5">
-      <h4 class="text-xs font-black text-slate-300" data-i18n="tf_net_change"></h4>
+    <div class="p-3.5 rounded-xl bg-black/40 border border-slate-800 space-y-2.5">
+      <h4 class="text-xs font-black text-slate-300 uppercase tracking-wider">Net Progress With Coach</h4>
       <div class="grid grid-cols-3 gap-2.5 text-center">
-        <div class="p-2 rounded-lg bg-black/30 border hairline">
-          <p class="text-[10px] text-slate-400 font-semibold" data-i18n="tr_weight_col"></p>
+        <div class="p-2 rounded-lg bg-black/30 border border-slate-800">
+          <p class="text-[10px] text-slate-400 font-semibold uppercase">Weight</p>
           <p class="text-xs font-black mt-0.5 font-mono" id="tf_diff_weight">-</p>
         </div>
-        <div class="p-2 rounded-lg bg-black/30 border hairline">
-          <p class="text-[10px] text-slate-400 font-semibold" data-i18n="tr_fat_col"></p>
+        <div class="p-2 rounded-lg bg-black/30 border border-slate-800">
+          <p class="text-[10px] text-slate-400 font-semibold uppercase">Fat %</p>
           <p class="text-xs font-black mt-0.5 font-mono" id="tf_diff_fat">-</p>
         </div>
-        <div class="p-2 rounded-lg bg-black/30 border hairline">
-          <p class="text-[10px] text-slate-400 font-semibold" data-i18n="tr_muscle_col"></p>
+        <div class="p-2 rounded-lg bg-black/30 border border-slate-800">
+          <p class="text-[10px] text-slate-400 font-semibold uppercase">Muscle</p>
           <p class="text-xs font-black mt-0.5 font-mono" id="tf_diff_muscle">-</p>
         </div>
       </div>
@@ -609,26 +559,32 @@ tbody td { padding: .85rem 1.1rem; }
   </div>
 </div>
 
-<!-- MODAL: REGISTER MEMBER -->
+<!-- REGISTER ATHLETE -->
 <div id="registerModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-md p-6 max-h-[90vh] overflow-y-auto space-y-4">
-    <div class="flex justify-between items-center border-b hairline pb-3">
-      <h3 class="text-base font-black" data-i18n="modal_reg_title"></h3>
-      <button data-close-modal="registerModal" class="text-slate-400 hover:text-white">✕</button>
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+      <h3 class="text-base font-black uppercase">Register New Athlete</h3>
+      <button onclick="closeModal('registerModal')" class="text-slate-400 hover:text-white">✕</button>
     </div>
     <div class="space-y-3 text-sm">
-      <div><label class="field-label" data-i18n="lbl_name"></label><input type="text" id="reg_name" class="input"></div>
-      <div><label class="field-label" data-i18n="lbl_phone"></label><input type="text" id="reg_phone" class="input"></div>
-      <div><label class="field-label" data-i18n="lbl_plan"></label><select id="reg_plan" class="input font-semibold"></select></div>
-      <div><label class="field-label" data-i18n="lbl_coach"></label><select id="reg_trainer" class="input"></select></div>
+      <div><label class="block text-xs font-bold text-slate-400 mb-1">Full Name</label><input type="text" id="reg_name" class="input"></div>
+      <div><label class="block text-xs font-bold text-slate-400 mb-1">Phone Number (11 digits)</label><input type="text" id="reg_phone" class="input"></div>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 mb-1">Membership Plan</label>
+        <select id="reg_plan" onchange="calculatePricePreview()" class="input font-semibold"></select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 mb-1">Assigned Coach (+10% Fee)</label>
+        <select id="reg_trainer" onchange="calculatePricePreview()" class="input"></select>
+      </div>
 
-      <div class="p-3 bg-black/30 border hairline rounded-xl space-y-2">
-        <p class="text-xs font-black text-orange-400" data-i18n="inbody_box_title"></p>
+      <div class="p-3 bg-black/30 border border-slate-800 rounded-xl space-y-2">
+        <p class="text-xs font-black text-orange-400 uppercase">Initial InBody Metrics</p>
         <div class="grid grid-cols-2 gap-2">
-          <input type="number" id="reg_weight" data-i18n-ph="ph_weight" class="input text-xs">
-          <input type="number" id="reg_height" data-i18n-ph="ph_height" class="input text-xs">
-          <input type="number" id="reg_fat" data-i18n-ph="ph_fat" class="input text-xs">
-          <input type="number" id="reg_muscle" data-i18n-ph="ph_muscle" class="input text-xs">
+          <input type="number" id="reg_weight" placeholder="Weight (kg)" class="input text-xs">
+          <input type="number" id="reg_height" placeholder="Height (cm)" class="input text-xs">
+          <input type="number" id="reg_fat" placeholder="Fat (%)" class="input text-xs">
+          <input type="number" id="reg_muscle" placeholder="Muscle (kg)" class="input text-xs">
         </div>
       </div>
 
@@ -636,1151 +592,879 @@ tbody td { padding: .85rem 1.1rem; }
         <span id="pricePreviewText" class="text-base font-black text-emerald-400">$0.00</span>
       </div>
 
-      <button id="btnSubmitRegister" class="btn btn-primary w-full py-2.5" data-i18n="btn_confirm_reg"></button>
+      <button onclick="submitRegisterMember()" class="btn btn-primary w-full py-2.5 uppercase font-black">
+        Confirm & Activate
+      </button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: RENEW -->
+<!-- RENEW SUBSCRIPTION -->
 <div id="renewModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-sm p-6 space-y-4">
-    <div class="flex justify-between items-center border-b hairline pb-3">
-      <h3 class="text-base font-black" id="renewModalTitle"></h3>
-      <button data-close-modal="renewModal" class="text-slate-400 hover:text-white">✕</button>
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+      <h3 class="text-base font-black uppercase" id="renewModalTitle">Renew Subscription</h3>
+      <button onclick="closeModal('renewModal')" class="text-slate-400 hover:text-white">✕</button>
     </div>
     <input type="hidden" id="renew_mid">
     <div class="space-y-3 text-sm">
-      <div><label class="field-label" data-i18n="lbl_choose_plan"></label><select id="renew_plan" class="input font-semibold"></select></div>
-      <div class="p-3 bg-black/30 border hairline rounded-xl space-y-2">
-        <p class="text-xs font-black text-emerald-400" data-i18n="renew_inbody_title"></p>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 mb-1">Select New Plan</label>
+        <select id="renew_plan" class="input font-semibold"></select>
+      </div>
+      <div class="p-3 bg-black/30 border border-slate-800 rounded-xl space-y-2">
+        <p class="text-xs font-black text-emerald-400 uppercase">Renewal InBody Metrics</p>
         <div class="grid grid-cols-2 gap-2">
-          <input type="number" id="renew_w" data-i18n-ph="ph_weight_now" class="input text-xs">
-          <input type="number" id="renew_h" data-i18n-ph="ph_height" class="input text-xs">
-          <input type="number" id="renew_fat" data-i18n-ph="ph_fat_pct" class="input text-xs">
-          <input type="number" id="renew_mus" data-i18n-ph="ph_muscle_mass" class="input text-xs">
+          <input type="number" id="renew_w" placeholder="Current Weight" class="input text-xs">
+          <input type="number" id="renew_h" placeholder="Height (cm)" class="input text-xs">
+          <input type="number" id="renew_fat" placeholder="Fat (%)" class="input text-xs">
+          <input type="number" id="renew_mus" placeholder="Muscle (kg)" class="input text-xs">
         </div>
       </div>
-      <button id="btnSubmitRenew" class="btn btn-emerald w-full py-2.5" data-i18n="btn_confirm_renew"></button>
+      <button onclick="submitRenewMember()" class="btn btn-emerald w-full py-2.5 uppercase font-black">
+        Confirm Renewal & Pay
+      </button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: QR -->
+<!-- QR PASS -->
 <div id="qrModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-xs p-6 text-center space-y-3">
-    <div class="flex justify-between items-center border-b hairline pb-2">
-      <h3 class="text-sm font-black" id="qrModalTitle"></h3>
-      <button data-close-modal="qrModal" class="text-slate-400 hover:text-white">✕</button>
+    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+      <h3 class="text-sm font-black uppercase" id="qrModalTitle">QR Pass</h3>
+      <button onclick="closeModal('qrModal')" class="text-slate-400 hover:text-white">✕</button>
     </div>
     <div class="qr-frame mx-auto">
       <img id="qrModalImg" src="" alt="QR Code" class="w-44 h-44 object-contain"
            onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(this.dataset.token || this.dataset.id || '10001');">
     </div>
-    <p class="text-[11px] text-slate-400" data-i18n="qr_modal_sub"></p>
+    <p class="text-[11px] text-slate-400 font-semibold uppercase">Scan at gym camera for fast entry</p>
   </div>
 </div>
 
-<!-- MODAL: ADD TRAINER -->
+<!-- ADD COACH -->
 <div id="addTrainerModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-sm p-6 space-y-3.5">
-    <div class="flex justify-between items-center border-b hairline pb-3">
-      <h3 class="text-base font-black" data-i18n="modal_add_tr_title"></h3>
-      <button data-close-modal="addTrainerModal" class="text-slate-400 hover:text-white">✕</button>
+    <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+      <h3 class="text-base font-black uppercase">Add New Coach</h3>
+      <button onclick="closeModal('addTrainerModal')" class="text-slate-400 hover:text-white">✕</button>
     </div>
     <div class="space-y-3 text-sm">
-      <div><label class="field-label" data-i18n="lbl_tr_name"></label><input type="text" id="tr_new_name" class="input"></div>
-      <div><label class="field-label" data-i18n="lbl_phone"></label><input type="text" id="tr_new_phone" class="input"></div>
-      <div><label class="field-label" data-i18n="lbl_spec"></label><select id="tr_new_spec" class="input font-semibold"></select></div>
-      <div><label class="field-label" data-i18n="lbl_salary"></label><input type="number" id="tr_new_salary" class="input"></div>
-      <button id="btnSubmitAddTrainer" class="btn btn-blue w-full py-2.5" data-i18n="btn_confirm_add_tr"></button>
+      <div><label class="block text-xs font-bold text-slate-400 mb-1">Coach Name</label><input type="text" id="tr_new_name" class="input"></div>
+      <div><label class="block text-xs font-bold text-slate-400 mb-1">Phone Number</label><input type="text" id="tr_new_phone" class="input"></div>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 mb-1">Specialization</label>
+        <select id="tr_new_spec" class="input font-semibold">
+          <option value="Iron / Bodybuilding">Iron / Bodybuilding</option>
+          <option value="Fitness">Fitness</option>
+          <option value="Cardio">Cardio</option>
+          <option value="Crossfit">Crossfit</option>
+          <option value="Boxing">Boxing</option>
+        </select>
+      </div>
+      <div><label class="block text-xs font-bold text-slate-400 mb-1">Monthly Salary ($)</label><input type="number" id="tr_new_salary" class="input"></div>
+      <button onclick="submitAddTrainer()" class="btn btn-blue w-full py-2.5 uppercase font-black">
+        Save Coach
+      </button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: EDIT PAYMENT -->
+<!-- EDIT PAYMENT -->
 <div id="editPaymentModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-xs p-6 space-y-3.5">
-    <div class="flex justify-between items-center border-b hairline pb-2">
-      <h3 class="text-sm font-black" id="editPayModalTitle"></h3>
-      <button data-close-modal="editPaymentModal" class="text-slate-400 hover:text-white">✕</button>
+    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+      <h3 class="text-sm font-black uppercase" id="editPayModalTitle">Edit Receipt</h3>
+      <button onclick="closeModal('editPaymentModal')" class="text-slate-400 hover:text-white">✕</button>
     </div>
     <input type="hidden" id="edit_pay_id">
     <div class="space-y-3 text-sm">
-      <div><label class="field-label" data-i18n="lbl_amt"></label><input type="number" id="edit_pay_amt" class="input"></div>
-      <div><label class="field-label" data-i18n="lbl_method"></label><select id="edit_pay_method" class="input font-semibold"></select></div>
-      <div><label class="field-label" data-i18n="lbl_desc"></label><input type="text" id="edit_pay_ref" class="input"></div>
-      <button id="btnSubmitEditPayment" class="btn btn-blue w-full py-2.5" data-i18n="btn_save_pay"></button>
+      <div><label class="block text-xs font-bold text-slate-400 mb-1">Amount ($)</label><input type="number" id="edit_pay_amt" class="input"></div>
+      <div>
+        <label class="block text-xs font-bold text-slate-400 mb-1">Payment Method</label>
+        <select id="edit_pay_method" class="input font-semibold">
+          <option value="Cash">Cash</option>
+          <option value="Visa">Visa</option>
+          <option value="Instapay">InstaPay</option>
+          <option value="Vodafone Cash">Vodafone Cash</option>
+        </select>
+      </div>
+      <div><label class="block text-xs font-bold text-slate-400 mb-1">Reference / Note</label><input type="text" id="edit_pay_ref" class="input"></div>
+      <button onclick="submitEditPayment()" class="btn btn-blue w-full py-2.5 uppercase font-black">
+        Save Updates
+      </button>
     </div>
   </div>
 </div>
 
 <script>
 const TAB_BACKGROUNDS = {
-  dashboard: "linear-gradient(rgba(8,11,18,0.86), rgba(8,11,18,0.93)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop')",
-  members: "linear-gradient(rgba(8,11,18,0.86), rgba(8,11,18,0.93)), url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1600&auto=format&fit=crop')",
-  trainers: "linear-gradient(rgba(8,11,18,0.86), rgba(8,11,18,0.93)), url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1600&auto=format&fit=crop')",
-  memberships: "linear-gradient(rgba(8,11,18,0.86), rgba(8,11,18,0.93)), url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1600&auto=format&fit=crop')",
-  attendance: "linear-gradient(rgba(8,11,18,0.86), rgba(8,11,18,0.93)), url('https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=1600&auto=format&fit=crop')",
-  payments: "linear-gradient(rgba(8,11,18,0.86), rgba(8,11,18,0.93)), url('https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=1600&auto=format&fit=crop')"
+  dashboard: "linear-gradient(rgba(8,11,18,0.85), rgba(8,11,18,0.92)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1600&auto=format&fit=crop')",
+  members: "linear-gradient(rgba(8,11,18,0.85), rgba(8,11,18,0.92)), url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1600&auto=format&fit=crop')",
+  trainers: "linear-gradient(rgba(8,11,18,0.85), rgba(8,11,18,0.92)), url('https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?q=80&w=1600&auto=format&fit=crop')",
+  memberships: "linear-gradient(rgba(8,11,18,0.85), rgba(8,11,18,0.92)), url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1600&auto=format&fit=crop')",
+  attendance: "linear-gradient(rgba(8,11,18,0.85), rgba(8,11,18,0.92)), url('https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=1600&auto=format&fit=crop')",
+  payments: "linear-gradient(rgba(8,11,18,0.85), rgba(8,11,18,0.92)), url('https://images.unsplash.com/photo-1550345332-09e3ac987658?q=80&w=1600&auto=format&fit=crop')"
 };
 
-const I18N = {
-  ar: {
-    live_floor: "الصالة الحية:",
-    nav_dashboard: "لوحة التحكم", nav_members: "الأعضاء", nav_trainers: "الكباتن",
-    nav_memberships: "الاشتراكات", nav_attendance: "الحضور", nav_payments: "الخزينة", nav_exit: "خروج",
+let globalMembers = [];
+let globalTrainers = [];
+let globalMemberships = [];
+let globalPlans = {};
+let globalTaxRate = 0.10;
+let currentSelectedTrainerId = null;
+let currentTrainerTraineesList = [];
+let html5QrScanner = null;
+let isCameraRunning = false;
 
-    dash_title: "نشاط الصالة الرياضية",
-    stat_in_gym: "في الجيم الآن",
-    stat_today_att: "حضور اليوم",
-    stat_active: "المشتركين النشطين",
-    stat_revenue: "إجمالي الدخل",
-    retention_label: "الاستمرارية",
-    live_gym_list: "المتواجدون بالصالة حالياً", live_refresh_badge: "مباشر",
-    minutes_suffix: "دقيقة", days_suffix: "يوم", none_in_gym: "لا يوجد أحد داخل الصالة حالياً",
+// ================= BEAST MODE LOADING & TOASTS =================
+function triggerBeastLoader(mainText, subText, callback, duration = 900) {
+  const loader = document.getElementById('beastLoader');
+  document.getElementById('beastLoaderText').textContent = mainText;
+  document.getElementById('beastLoaderSub').textContent = subText;
+  loader.classList.remove('hidden');
 
-    th_member_id: "الكود", th_name: "الاسم", th_role: "الصفة", th_checkin_time: "وقت الدخول",
-    th_duration: "المدة", th_status: "الحالة", th_code: "الكود", th_member_name: "اسم العضو",
-    th_phone: "الهاتف", th_plan: "الخطة", th_rem_sessions: "الحصص", th_coach: "الكابتن",
-    th_actions: "الإجراءات", th_sub_id: "رقم الاشتراك", th_plan_chosen: "الخطة",
-    th_start_d: "البدء", th_end_d: "الانتهاء", th_sessions_left: "الحصص (متبقية/إجمالي)",
-    th_cost: "التكلفة", th_log_id: "الحركة", th_time: "الساعة", th_receipt_id: "الإيصال",
-    th_trainee: "المشترك", th_amount: "المبلغ", th_method: "وسيلة الدفع", th_desc: "البيان", th_date: "التاريخ",
+  setTimeout(() => {
+    loader.classList.add('hidden');
+    if (callback) callback();
+  }, duration);
+}
 
-    mem_title: "الأعضاء وInBody",
-    btn_add_member: "عضو جديد", search_placeholder: "بحث بالاسم، الهاتف، أو الكود…",
-    filter_all: "الكل", filter_active: "النشطين", filter_expired: "المنتهية", filter_frozen: "المجمدين",
-    no_members_found: "لا يوجد أعضاء مطابقين", no_suggestions: "لا توجد نتائج",
-    status_active: "نشط", status_frozen: "مجمد", status_expired: "منتهي",
-    btn_renew: "تجديد", btn_unfreeze: "فك تجميد", btn_freeze: "تجميد", btn_inbody: "InBody",
-    btn_qr: "QR", btn_delete: "حذف", btn_edit: "تعديل",
+function showToast(message, type = 'info') {
+  const stack = document.getElementById('toastStack');
+  const toast = document.createElement('div');
+  const icons = { success: 'check-circle', error: 'x-circle', info: 'flame' };
+  toast.className = `toast-item border-l-4 ${type === 'success' ? 'border-emerald-500' : (type === 'error' ? 'border-rose-500' : 'border-orange-500')}`;
+  toast.innerHTML = `<i data-lucide="${icons[type]}" class="w-4 h-4 ${type === 'success' ? 'text-emerald-400' : (type === 'error' ? 'text-rose-400' : 'text-orange-400')}"></i><span>${message}</span>`;
+  stack.appendChild(toast);
+  lucide.createIcons();
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 250); }, 3200);
+}
 
-    coach_title: "طاقم الكباتن",
-    btn_add_trainer: "كابتن جديد", present_now: "حاضر الآن", not_present: "غير متواجد",
-    trainer_code_label: "الكود:", trainees_label: "المتدربين:",
-    btn_view_full_profile: "البروفايل والنتائج", btn_qr_code: "QR",
+// ================= AUTHENTICATION =================
+function handleLogin(e) {
+  e.preventDefault();
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value.trim();
 
-    ms_title: "سجل الاشتراكات",
-    ms_search_ph: "بحث في الاشتراكات…", no_memberships: "لا توجد اشتراكات مسجلة",
-
-    att_title: "تسجيل الحضور السريع",
-    btn_open_cam: "فتح الكاميرا", btn_close_cam: "إغلاق الكاميرا", btn_scan_file: "مسح صورة",
-    cam_prompt: "وجّه كود الـ QR داخل الإطار للمسح التلقائي…", checkin_ph: "ادخل كود العضو أو الكابتن…",
-    btn_checkin: "تأكيد الحضور", audit_24h_title: "سجل حضور اليوم (24 ساعة)",
-    no_attendance_today: "لا يوجد حضور اليوم حتى الآن", role_trainer: "كابتن", role_member: "عضو",
-
-    pay_title: "الخزينة والمعاملات المالية",
-    pay_new_header: "تسجيل حركة تحصيل جديدة", pay_member_id_ph: "كود العضو", pay_amount_ph: "المبلغ ($)",
-    pay_ref_ph: "ملاحظات", btn_record_pay: "تسجيل الدفعة",
-    method_cash: "نقدي", method_visa: "فيزا", method_instapay: "إنستاباي", method_vodafone: "فودافون كاش",
-
-    modal_reg_title: "تسجيل مشترك جديد مع InBody", lbl_name: "الاسم", lbl_phone: "الهاتف",
-    lbl_plan: "الباقة", lbl_coach: "الكابتن", no_trainer_opt: "بدون كابتن",
-    inbody_box_title: "قياسات InBody المبدئية", ph_weight: "الوزن (kg)", ph_height: "الطول (cm)",
-    ph_fat: "الدهون (%)", ph_muscle: "العضلات (kg)",
-    btn_confirm_reg: "تأكيد وتفعيل الاشتراك", trainer_fee_note: "+10% ضريبة كابتن",
-
-    renew_title_prefix: "تجديد:", lbl_choose_plan: "اختر الباقة",
-    renew_inbody_title: "قياسات InBody التجديد", ph_weight_now: "الوزن الحالي",
-    ph_fat_pct: "الدهون (%)", ph_muscle_mass: "العضلات (kg)", btn_confirm_renew: "تأكيد التجديد",
-
-    qr_pass_title: "QR Pass —", qr_modal_sub: "امسح الكود عبر كاميرا الصالة للدخول",
-
-    modal_add_tr_title: "إضافة كابتن جديد", lbl_tr_name: "اسم الكابتن", lbl_spec: "التخصص",
-    lbl_salary: "الراتب ($)", btn_confirm_add_tr: "حفظ الكابتن",
-    spec_iron: "حديد وبناء أجسام", spec_fitness: "لياقة بدنية", spec_cardio: "كارديو وتخسيس",
-    spec_crossfit: "كروس فيت", spec_boxing: "ملاكمة",
-
-    tr_id_label: "الكود (ID)", tr_phone_label: "الهاتف", tr_salary_label: "الراتب",
-    tr_att_days_label: "أيام الحضور", tr_current_status_label: "الحالة بالصالة:",
-    tr_checkin_btn: "تسجيل حضور الكابتن الآن", tr_trainees_title: "قائمة المتدربين والنتائج",
-    tr_trainee_col: "المتدرب", tr_commitment_col: "التزام 3 أشهر",
-    no_trainees_yet: "لا يوجد متدربين لهذا الكابتن حالياً",
-
-    edit_pay_title_prefix: "تعديل إيصال #", lbl_amt: "المبلغ ($)", lbl_method: "وسيلة الدفع",
-    lbl_desc: "البيان", btn_save_pay: "حفظ التعديل",
-
-    exit_confirm: "هل تريد تسجيل الخروج؟",
-    exit_title: "FitZone Pro Offline", exit_sub: "تم إغلاق الجلسة بنجاح.",
-    confirm_cancel: "إلغاء", confirm_ok: "تأكيد الحذف",
-    confirm_delete_member: "حذف هذا العضو نهائياً من السيستم؟",
-    confirm_delete_payment: "حذف حركة الدفع هذه من الخزينة؟",
-
-    toast_member_registered: "تم تسجيل العضو بنجاح",
-    toast_member_deleted: "تم حذف العضو", toast_renewed: "تم التجديد بنجاح",
-    toast_frozen: "تم تجميد الاشتراك", toast_unfrozen: "تم فك التجميد",
-    toast_trainer_added: "تمت إضافة الكابتن بنجاح", toast_trainer_checkin: "تم تسجيل حضور الكابتن",
-    toast_checkin_success: "تم تسجيل الحضور بنجاح", toast_payment_recorded: "تم تسجيل الدفعة",
-    toast_payment_updated: "تم تعديل الإيصال", toast_payment_deleted: "تم حذف الدفعة",
-    toast_generic_error: "حدث خطأ، حاول مجدداً", toast_enter_id: "يرجى كتابة الكود أولاً",
-    toast_fill_required: "يرجى ملء جميع الحقول المطلوبة",
-    toast_select_plan: "يرجى اختيار باقة الاشتراك أولاً",
-    toast_no_qr_in_image: "لم يتم العثور على QR في الصورة",
-    toast_camera_error: "تعذر فتح الكاميرا",
-    member_verify_found: "موجود", member_verify_missing: "غير مسجل",
-
-    opt_choose_plan: "-- اختر باقة الاشتراك --",
-    tf_first_day: "📅 أول يوم",
-    tf_latest_day: "⚡ الوضع الحالي",
-    tf_net_change: "📊 صافي التغير الفعلي:",
-    tf_view_comparison: "قبل وبعد 🔍",
-    tf_no_inbody: "بدون فحص",
-    tf_duration_text: "المدة:",
-    tf_total_scans_text: "الفحوصات:",
-  },
-  en: {
-    live_floor: "Live Floor:",
-    nav_dashboard: "Dashboard", nav_members: "Members", nav_trainers: "Trainers",
-    nav_memberships: "Memberships", nav_attendance: "Attendance", nav_payments: "Finance", nav_exit: "Exit",
-
-    dash_title: "Gym Activity Overview",
-    stat_in_gym: "Currently in Gym",
-    stat_today_att: "Today's Check-ins",
-    stat_active: "Active Members",
-    stat_revenue: "Total Revenue",
-    retention_label: "Retention",
-    live_gym_list: "Members on the Floor", live_refresh_badge: "Live",
-    minutes_suffix: "min", days_suffix: "days", none_in_gym: "Floor is currently empty",
-
-    th_member_id: "ID", th_name: "Name", th_role: "Role", th_checkin_time: "Time In",
-    th_duration: "Duration", th_status: "Status", th_code: "ID", th_member_name: "Member Name",
-    th_phone: "Phone", th_plan: "Plan", th_rem_sessions: "Sessions", th_coach: "Coach",
-    th_actions: "Actions", th_sub_id: "Sub #", th_plan_chosen: "Plan",
-    th_start_d: "Start", th_end_d: "End", th_sessions_left: "Sessions (Left/Total)",
-    th_cost: "Cost", th_log_id: "Log #", th_time: "Time", th_receipt_id: "Receipt #",
-    th_trainee: "Member", th_amount: "Amount", th_method: "Method", th_desc: "Notes", th_date: "Date",
-
-    mem_title: "Members & InBody",
-    btn_add_member: "New Member", search_placeholder: "Search name, phone, ID…",
-    filter_all: "All", filter_active: "Active", filter_expired: "Expired", filter_frozen: "Frozen",
-    no_members_found: "No members found", no_suggestions: "No results",
-    status_active: "Active", status_frozen: "Frozen", status_expired: "Expired",
-    btn_renew: "Renew", btn_unfreeze: "Unfreeze", btn_freeze: "Freeze", btn_inbody: "InBody",
-    btn_qr: "QR", btn_delete: "Delete", btn_edit: "Edit",
-
-    coach_title: "Coaching Staff",
-    btn_add_trainer: "New Coach", present_now: "Present", not_present: "Absent",
-    trainer_code_label: "ID:", trainees_label: "Trainees:",
-    btn_view_full_profile: "Profile & Results", btn_qr_code: "QR",
-
-    ms_title: "Subscriptions Ledger",
-    ms_search_ph: "Search subscriptions…", no_memberships: "No records found",
-
-    att_title: "Fast Access Check-in",
-    btn_open_cam: "Open Camera", btn_close_cam: "Close Camera", btn_scan_file: "Scan Image",
-    cam_prompt: "Scan QR pass…", checkin_ph: "Enter Member or Coach ID…",
-    btn_checkin: "Confirm", audit_24h_title: "24-Hour Attendance Log",
-    no_attendance_today: "No check-ins today", role_trainer: "Coach", role_member: "Member",
-
-    pay_title: "Finance & Payments",
-    pay_new_header: "Record Payment", pay_member_id_ph: "Member ID", pay_amount_ph: "Amount ($)",
-    pay_ref_ph: "Reference", btn_record_pay: "Save",
-    method_cash: "Cash", method_visa: "Visa", method_instapay: "InstaPay", method_vodafone: "Vodafone Cash",
-
-    modal_reg_title: "Register New Member with InBody", lbl_name: "Name", lbl_phone: "Phone",
-    lbl_plan: "Plan", lbl_coach: "Coach", no_trainer_opt: "No Personal Coach",
-    inbody_box_title: "Initial InBody Scans", ph_weight: "Weight (kg)", ph_height: "Height (cm)",
-    ph_fat: "Fat (%)", ph_muscle: "Muscle (kg)",
-    btn_confirm_reg: "Save & Activate", trainer_fee_note: "+10% Coach Fee",
-
-    renew_title_prefix: "Renew:", lbl_choose_plan: "Select Plan",
-    renew_inbody_title: "Renewal InBody", ph_weight_now: "Current Weight",
-    ph_fat_pct: "Fat (%)", ph_muscle_mass: "Muscle (kg)", btn_confirm_renew: "Confirm Renewal",
-
-    qr_pass_title: "QR Pass —", qr_modal_sub: "Scan with gym camera",
-
-    modal_add_tr_title: "Add New Coach", lbl_tr_name: "Coach Name", lbl_spec: "Specialty",
-    lbl_salary: "Salary ($)", btn_confirm_add_tr: "Save Coach",
-    spec_iron: "Iron / Bodybuilding", spec_fitness: "Fitness", spec_cardio: "Cardio",
-    spec_crossfit: "Crossfit", spec_boxing: "Boxing",
-
-    tr_id_label: "ID", tr_phone_label: "Phone", tr_salary_label: "Salary",
-    tr_att_days_label: "Attendance", tr_current_status_label: "Floor Status:",
-    tr_checkin_btn: "Check-in Coach Now", tr_trainees_title: "Trainees & Results",
-    tr_trainee_col: "Trainee", tr_commitment_col: "3-Month Commit",
-    no_trainees_yet: "No trainees assigned",
-
-    edit_pay_title_prefix: "Edit Receipt #", lbl_amt: "Amount ($)", lbl_method: "Payment Method",
-    lbl_desc: "Notes", btn_save_pay: "Save",
-
-    exit_confirm: "Exit session?",
-    exit_title: "FitZone Pro Offline", exit_sub: "Session closed safely.",
-    confirm_cancel: "Cancel", confirm_ok: "Delete",
-    confirm_delete_member: "Delete this member permanently?",
-    confirm_delete_payment: "Delete this payment receipt?",
-
-    toast_member_registered: "Member registered",
-    toast_member_deleted: "Member deleted", toast_renewed: "Membership renewed",
-    toast_frozen: "Membership frozen", toast_unfrozen: "Membership unfrozen",
-    toast_trainer_added: "Coach added", toast_trainer_checkin: "Coach checked in",
-    toast_checkin_success: "Checked-in successfully", toast_payment_recorded: "Payment saved",
-    toast_payment_updated: "Receipt updated", toast_payment_deleted: "Receipt deleted",
-    toast_generic_error: "Something went wrong", toast_enter_id: "Enter ID first",
-    toast_fill_required: "Fill all required fields",
-    toast_select_plan: "Please select a membership plan",
-    toast_no_qr_in_image: "No QR found in image",
-    toast_camera_error: "Camera access failed",
-    member_verify_found: "Valid", member_verify_missing: "Not found",
-
-    opt_choose_plan: "-- Select Membership Plan --",
-    tf_first_day: "📅 First Day",
-    tf_latest_day: "⚡ Current Status",
-    tf_net_change: "📊 Net Progress:",
-    tf_view_comparison: "Before & After 🔍",
-    tf_no_inbody: "No Scan",
-    tf_duration_text: "Period:",
-    tf_total_scans_text: "Scans:",
+  if (u === 'admin' && p === 'admin') {
+    triggerBeastLoader("BEAST MODE ACTIVATED!", "WELCOME CHAMP, CRUSH YOUR GOALS!", () => {
+      sessionStorage.setItem('fitzone_logged', 'true');
+      document.getElementById('loginView').classList.add('hidden');
+      document.getElementById('appView').classList.remove('hidden');
+      initializeApp();
+    }, 1100);
+  } else {
+    showToast("Invalid Credentials! Try admin / admin", "error");
   }
-};
+}
 
-const App = (() => {
+function handleLogout() {
+  if (confirm("Close session and return to arena gate?")) {
+    sessionStorage.removeItem('fitzone_logged');
+    document.getElementById('appView').classList.add('hidden');
+    document.getElementById('loginView').classList.remove('hidden');
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+  }
+}
 
-  const state = {
-    lang: localStorage.getItem('fz_lang') || 'ar',
-    members: [], trainers: [], memberships: [], plans: {}, taxRate: 0.10,
-    isCameraRunning: false, html5QrScanner: null, currentTrainerId: null,
-    currentTrainerTrainees: []
-  };
+// ================= INITIALIZATION =================
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('fitzone_logged') === 'true') {
+    document.getElementById('loginView').classList.add('hidden');
+    document.getElementById('appView').classList.remove('hidden');
+    initializeApp();
+  }
+});
 
-  const i18n = {
-    t(key) { return I18N[state.lang][key] ?? key; },
-    setLang(lang) {
-      state.lang = lang;
-      localStorage.setItem('fz_lang', lang);
-      document.documentElement.setAttribute('data-lang', lang);
-      document.documentElement.setAttribute('lang', lang);
-      this.apply();
-      ui.rebuildIcons();
-      members.render(members.currentList());
-      trainers.render();
-      memberships.render(memberships.currentList());
-      attendance.loadDaily();
-      payments.render(payments.currentList());
-      plans.rebuildLocalizedSelects();
-      document.getElementById('langBtnAr').classList.toggle('is-active', lang === 'ar');
-      document.getElementById('langBtnEn').classList.toggle('is-active', lang === 'en');
-    },
-    apply() {
-      document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = this.t(el.dataset.i18n); });
-      document.querySelectorAll('[data-i18n-ph]').forEach(el => { el.placeholder = this.t(el.dataset.i18nPh); });
+function initializeApp() {
+  lucide.createIcons();
+  setupNav();
+  document.getElementById('mainViewport').style.backgroundImage = TAB_BACKGROUNDS['dashboard'];
+  loadDashboard();
+  loadMembers();
+  loadTrainers();
+  loadMemberships();
+  loadDailyAttendance();
+  loadPayments();
+  loadPlans();
+  setInterval(loadDashboard, 15000);
+}
+
+function setupNav() {
+  document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+  updateNavIndicator();
+}
+
+function switchTab(tabId) {
+  if (isCameraRunning && tabId !== 'attendance') stopCameraScan();
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+  document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
+    btn.classList.toggle('is-active', btn.dataset.tab === tabId);
+  });
+
+  if (TAB_BACKGROUNDS[tabId]) {
+    document.getElementById('mainViewport').style.backgroundImage = TAB_BACKGROUNDS[tabId];
+  }
+
+  updateNavIndicator();
+  lucide.createIcons();
+}
+
+function updateNavIndicator() {
+  const active = document.querySelector('.sidebar-nav-item.is-active');
+  const ind = document.getElementById('navIndicator');
+  if (active && ind) {
+    ind.style.height = `${active.offsetHeight}px`;
+    ind.style.transform = `translateY(${active.offsetTop}px)`;
+  }
+}
+
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+
+// ================= 1. DASHBOARD =================
+async function loadDashboard() {
+  try {
+    const res = await fetch('/api/dashboard');
+    const data = await res.json();
+    document.getElementById('liveCountText').textContent = data.in_gym_now || 0;
+    document.getElementById('retentionText').textContent = `Retention: ${data.retention_rate || 0}%`;
+
+    const grid = document.getElementById('statCardsGrid');
+    grid.innerHTML = `
+      <div class="stat-card">
+        <p class="text-xs font-bold text-slate-400 uppercase">In Gym Now</p>
+        <h3 class="text-3xl font-black mt-1 text-amber-400">${data.in_gym_now || 0}</h3>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-bold text-slate-400 uppercase">Today's Check-ins</p>
+        <h3 class="text-3xl font-black mt-1 text-blue-400">${data.today_attendance || 0}</h3>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-bold text-slate-400 uppercase">Active Members</p>
+        <h3 class="text-3xl font-black mt-1 text-emerald-400">${data.active_members || 0}</h3>
+      </div>
+      <div class="stat-card">
+        <p class="text-xs font-bold text-slate-400 uppercase">Total Revenue</p>
+        <h3 class="text-3xl font-black mt-1 text-orange-400">$${(data.total_revenue || 0).toLocaleString()}</h3>
+      </div>
+    `;
+
+    const liveRes = await fetch('/api/attendance/live');
+    const live = await liveRes.json();
+    const tbody = document.getElementById('live_floor_table');
+    if (!live.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-bold">Gym floor is empty right now</td></tr>`;
+      return;
     }
+    tbody.innerHTML = live.map(p => `
+      <tr>
+        <td class="font-bold text-orange-400">#${p.person_id}</td>
+        <td class="font-bold">${p.name}</td>
+        <td class="text-center"><span class="badge ${p.role === 'Trainer' ? 'bg-orange-500/20 text-orange-400' : 'bg-cyan-500/20 text-cyan-400'}">${p.role}</span></td>
+        <td class="text-slate-400">${p.check_in_time}</td>
+        <td class="text-emerald-400 font-bold">${p.duration_minutes} min</td>
+        <td class="text-center"><span class="badge bg-emerald-500/20 text-emerald-400"><span class="badge-dot"></span>Training</span></td>
+      </tr>
+    `).join('');
+  } catch (err) { console.error(err); }
+}
+
+// ================= 2. MEMBERS =================
+async function loadMembers() {
+  const res = await fetch('/api/members');
+  globalMembers = await res.json();
+  renderMembers(globalMembers);
+}
+
+function renderMembers(list) {
+  const tbody = document.getElementById('members_table');
+  if (!list.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500 font-bold">No athletes found</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = list.map(m => {
+    let sColor = m.status === 'Active' ? 'bg-emerald-500/20 text-emerald-400' : (m.status === 'Frozen' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400');
+    return `
+      <tr>
+        <td class="font-bold text-orange-400">#${m.id}</td>
+        <td class="font-bold">${m.name}</td>
+        <td class="text-slate-400">${m.phone}</td>
+        <td class="text-xs text-slate-300 font-semibold">${m.plan}</td>
+        <td class="font-black text-cyan-400">${m.remaining_sessions}</td>
+        <td class="text-slate-400 text-xs">${m.trainer || '—'}</td>
+        <td><span class="badge ${sColor}"><span class="badge-dot"></span>${m.status}</span></td>
+        <td class="text-center space-x-1">
+          <button onclick="openRenewModal(${m.id}, '${m.name}')" class="btn btn-emerald btn-xs">Renew</button>
+          ${m.is_frozen 
+            ? `<button onclick="unfreezeMember(${m.id})" class="btn btn-xs bg-blue-500/20 text-blue-400">Unfreeze</button>`
+            : `<button onclick="freezeMember(${m.id})" class="btn btn-xs bg-amber-500/20 text-amber-400">Freeze</button>`
+          }
+          <button onclick="viewMemberProfile(${m.id})" class="btn btn-xs bg-purple-500/20 text-purple-300">InBody</button>
+          <button onclick="showMemberQR(${m.id}, '${m.name}')" class="btn btn-ghost btn-xs">QR</button>
+          <button onclick="deleteMember(${m.id})" class="btn btn-danger btn-xs">Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// COMPACT SEARCH WITH SUGGESTIONS
+document.getElementById('memberSearchInput').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  const dropdown = document.getElementById('searchSuggestionsDropdown');
+  if (!q) {
+    dropdown.classList.add('hidden');
+    renderMembers(globalMembers);
+    return;
+  }
+  const matches = globalMembers.filter(m => m.name.toLowerCase().includes(q) || m.phone.includes(q) || String(m.id).includes(q));
+  renderMembers(matches);
+
+  if (matches.length) {
+    dropdown.innerHTML = matches.slice(0, 5).map(m => `
+      <div onclick="selectMemberSearch(${m.id})" class="p-2.5 hover:bg-white/5 cursor-pointer flex justify-between items-center text-xs">
+        <div><strong class="text-white">${m.name}</strong> <span class="text-slate-400">#${m.id}</span></div>
+        <span class="text-orange-400 font-bold">${m.plan}</span>
+      </div>
+    `).join('');
+    dropdown.classList.remove('hidden');
+  } else {
+    dropdown.innerHTML = `<div class="p-3 text-center text-xs text-slate-500">No athletes match</div>`;
+    dropdown.classList.remove('hidden');
+  }
+});
+
+function selectMemberSearch(id) {
+  document.getElementById('searchSuggestionsDropdown').classList.add('hidden');
+  viewMemberProfile(id);
+}
+
+document.getElementById('memberFilterSelect').addEventListener('change', (e) => {
+  const val = e.target.value;
+  if (val === 'all') renderMembers(globalMembers);
+  else renderMembers(globalMembers.filter(m => m.status.toLowerCase() === val));
+});
+
+// OPEN REGISTER MODAL WITH EMPTY PLAN (NO DEFAULT VIP)
+function openRegisterModal() {
+  plansFillSelect('reg_plan');
+  document.getElementById('pricePreviewText').textContent = '$0.00';
+  openModal('registerModal');
+}
+
+async function submitRegisterMember() {
+  const plan = document.getElementById('reg_plan').value;
+  if (!plan) { showToast("Please select a membership plan!", "error"); return; }
+
+  const payload = {
+    name: document.getElementById('reg_name').value.trim(),
+    phone: document.getElementById('reg_phone').value.trim(),
+    plan: plan,
+    trainer_id: document.getElementById('reg_trainer').value,
+    weight: document.getElementById('reg_weight').value,
+    height: document.getElementById('reg_height').value,
+    fat: document.getElementById('reg_fat').value,
+    muscle: document.getElementById('reg_muscle').value
   };
 
-  const api = {
-    async get(url) {
-      const res = await fetch(url);
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.error) throw new Error(data.error || i18n.t('toast_generic_error'));
-      return data;
-    },
-    async send(url, method, body) {
-      const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}) });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.error || data.success === false) throw new Error(data.error || i18n.t('toast_generic_error'));
-      return data;
-    },
-    async del(url) {
-      const res = await fetch(url, { method: 'DELETE' });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data.error || data.success === false) throw new Error(data.error || i18n.t('toast_generic_error'));
-      return data;
-    }
-  };
+  if (!payload.name || !payload.phone) { showToast("Name and Phone are required!", "error"); return; }
 
-  const ui = {
-    rebuildIcons() { if (window.lucide) lucide.createIcons(); },
-
-    toast(message, type = 'info', duration = 3000) {
-      const icons = { success: 'check-circle-2', error: 'x-circle', info: 'info' };
-      const el = document.createElement('div');
-      el.className = `toast-item ${type}`;
-      el.innerHTML = `<i data-lucide="${icons[type]}"></i><span>${message}</span><div class="toast-bar" style="animation-duration:${duration}ms"></div>`;
-      document.getElementById('toastStack').appendChild(el);
-      this.rebuildIcons();
-      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateY(8px)'; setTimeout(() => el.remove(), 250); }, duration);
-    },
-
-    confirm(message) {
-      return new Promise(resolve => {
-        const backdrop = document.getElementById('confirmBackdrop');
-        document.getElementById('confirmMessage').textContent = message;
-        document.getElementById('confirmCancelBtn').textContent = i18n.t('confirm_cancel');
-        document.getElementById('confirmOkBtn').textContent = i18n.t('confirm_ok');
-        backdrop.classList.remove('hidden');
-        const cleanup = (result) => { backdrop.classList.add('hidden'); okBtn.onclick = null; cancelBtn.onclick = null; resolve(result); };
-        const okBtn = document.getElementById('confirmOkBtn');
-        const cancelBtn = document.getElementById('confirmCancelBtn');
-        okBtn.onclick = () => cleanup(true);
-        cancelBtn.onclick = () => cleanup(false);
-      });
-    },
-
-    openModal(id) { document.getElementById(id).classList.remove('hidden'); },
-    closeModal(id) { document.getElementById(id).classList.add('hidden'); },
-
-    animateValue(el, to, formatter = (v) => Math.round(v)) {
-      const from = Number(el.dataset.raw || 0);
-      const duration = 500;
-      const start = performance.now();
-      function step(now) {
-        const progress = Math.min(1, (now - start) / duration);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const value = from + (to - from) * eased;
-        el.textContent = formatter(value);
-        if (progress < 1) requestAnimationFrame(step);
-        else { el.dataset.raw = to; }
-      }
-      requestAnimationFrame(step);
-    }
-  };
-
-  const nav = {
-    init() {
-      document.querySelectorAll('.sidebar-nav-item').forEach(btn => btn.addEventListener('click', () => this.switchTab(btn.dataset.tab)));
-      window.addEventListener('resize', () => this.moveIndicator());
-      this.moveIndicator();
-    },
-    switchTab(tabName) {
-      if (state.isCameraRunning && tabName !== 'attendance') attendance.stopScan();
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-      document.querySelectorAll('.sidebar-nav-item').forEach(btn => btn.classList.toggle('is-active', btn.dataset.tab === tabName));
-
-      if (TAB_BACKGROUNDS[tabName]) {
-        document.getElementById('mainViewport').style.backgroundImage = TAB_BACKGROUNDS[tabName];
-      }
-
-      this.moveIndicator();
-      ui.rebuildIcons();
-      const loaders = { dashboard: dashboard.load, members: members.load, trainers: trainers.load, memberships: memberships.load, attendance: attendance.loadDaily, payments: payments.load };
-      loaders[tabName] && loaders[tabName].call(loaders[tabName] === members.load ? members : loaders[tabName] === trainers.load ? trainers : loaders[tabName] === memberships.load ? memberships : loaders[tabName] === attendance.loadDaily ? attendance : loaders[tabName] === payments.load ? payments : dashboard);
-    },
-    moveIndicator() {
-      const active = document.querySelector('.sidebar-nav-item.is-active');
-      const indicator = document.getElementById('navIndicator');
-      if (!active) return;
-      indicator.style.height = active.offsetHeight + 'px';
-      indicator.style.transform = `translateY(${active.offsetTop}px)`;
-    }
-  };
-
-  const dashboard = {
-    cardsMeta: [
-      { key: 'in_gym_now', accent: 'var(--amber)', accentSoft: 'rgba(245,158,11,.15)', icon: 'flame', titleKey: 'stat_in_gym' },
-      { key: 'today_attendance', accent: 'var(--blue)', accentSoft: 'var(--blue-soft)', icon: 'calendar-check', titleKey: 'stat_today_att' },
-      { key: 'active_members', accent: 'var(--emerald)', accentSoft: 'var(--emerald-soft)', icon: 'users', titleKey: 'stat_active' },
-      { key: 'total_revenue', accent: 'var(--orange)', accentSoft: 'var(--orange-soft)', icon: 'wallet', titleKey: 'stat_revenue', isMoney: true },
-    ],
-    renderShell() {
-      const grid = document.getElementById('statCardsGrid');
-      grid.innerHTML = this.cardsMeta.map(c => `
-        <div class="stat-card" style="--accent:${c.accent}; --accent-soft:${c.accentSoft}">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-xs font-bold text-slate-400">${i18n.t(c.titleKey)}</p>
-            <span class="icon-badge"><i data-lucide="${c.icon}"></i></span>
-          </div>
-          <h3 class="text-3xl stat-value" id="stat-${c.key}" data-raw="0" style="color:${c.accent}">0</h3>
-        </div>
-      `).join('');
-      ui.rebuildIcons();
-    },
-    async load() {
-      this.renderShell();
-      try {
-        const data = await api.get('/api/dashboard');
-        document.getElementById('liveCountText').textContent = data.in_gym_now ?? 0;
-        document.getElementById('retentionText').textContent = `${i18n.t('retention_label')}: ${data.retention_rate ?? 0}%`;
-
-        this.cardsMeta.forEach(c => {
-          const el = document.getElementById(`stat-${c.key}`);
-          const raw = data[c.key] || 0;
-          ui.animateValue(el, raw, v => c.isMoney ? `$${Math.round(v).toLocaleString()}` : Math.round(v).toLocaleString());
-        });
-
-        const live = await api.get('/api/attendance/live');
-        const tbody = document.getElementById('live_floor_table');
-        if (!live.length) {
-          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500 font-bold">${i18n.t('none_in_gym')}</td></tr>`;
-          return;
-        }
-        tbody.innerHTML = live.map((p, i) => `
-          <tr style="--i:${i}">
-            <td class="font-bold text-orange-400">#${p.person_id}</td>
-            <td class="font-bold">${esc(p.name)}</td>
-            <td class="text-center">${roleBadge(p.role)}</td>
-            <td class="text-slate-400">${esc(p.check_in_time)}</td>
-            <td class="text-emerald-400 font-bold">${p.duration_minutes} ${i18n.t('minutes_suffix')}</td>
-            <td class="text-center"><span class="badge" style="background:var(--emerald-soft);color:#6ee7a0"><span class="badge-dot"></span>${i18n.t('status_active')}</span></td>
-          </tr>
-        `).join('');
-      } catch (e) { ui.toast(e.message, 'error'); }
-    }
-  };
-
-  const members = {
-    _lastRendered: [],
-    currentList() { return this._lastRendered; },
-    async load() {
-      try {
-        const res = await api.get('/api/members');
-        state.members = res;
-        this.render(res);
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    render(list) {
-      this._lastRendered = list;
-      const tbody = document.getElementById('members_table');
-      if (!list.length) { tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500 font-bold">${i18n.t('no_members_found')}</td></tr>`; return; }
-      tbody.innerHTML = list.map((m, i) => `
-        <tr style="--i:${i}">
-          <td class="font-bold text-orange-400">#${m.id}</td>
-          <td class="font-bold">${esc(m.name)}</td>
-          <td class="text-slate-400">${esc(m.phone)}</td>
-          <td class="text-xs font-semibold text-slate-300">${esc(m.plan)}</td>
-          <td class="font-black text-cyan-400">${m.remaining_sessions}</td>
-          <td class="text-slate-400 text-xs">${esc(m.trainer || '—')}</td>
-          <td>${statusBadge(m.status)}</td>
-          <td class="text-center">
-            <div class="flex gap-1.5 justify-center flex-wrap">
-              <button class="btn btn-emerald btn-xs" data-act="renew" data-id="${m.id}" data-name="${escAttr(m.name)}">${i18n.t('btn_renew')}</button>
-              ${m.is_frozen
-                ? `<button class="btn btn-xs" style="background:var(--blue-soft);color:#93c5fd" data-act="unfreeze" data-id="${m.id}">${i18n.t('btn_unfreeze')}</button>`
-                : `<button class="btn btn-xs" style="background:var(--amber);color:#1a0d02" data-act="freeze" data-id="${m.id}">${i18n.t('btn_freeze')}</button>`}
-              <button class="btn btn-xs" style="background:var(--purple-soft);color:#d8c8fc" data-act="profile" data-id="${m.id}">${i18n.t('btn_inbody')}</button>
-              <button class="btn btn-ghost btn-xs" data-act="qr" data-id="${m.id}" data-name="${escAttr(m.name)}">${i18n.t('btn_qr')}</button>
-              <button class="btn btn-danger btn-xs" data-act="delete" data-id="${m.id}">${i18n.t('btn_delete')}</button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-      ui.rebuildIcons();
-    },
-    search(query) {
-      const q = query.trim().toLowerCase();
-      const dropdown = document.getElementById('searchSuggestionsDropdown');
-      if (!q) { dropdown.classList.add('hidden'); this.applyFilter(); return; }
-      const matches = state.members.filter(m => m.name.toLowerCase().includes(q) || m.phone.includes(q) || String(m.id).includes(q));
-      this.render(matches);
-      dropdown.innerHTML = matches.length
-        ? matches.slice(0, 5).map(m => `
-            <div class="p-2.5 hover:bg-white/5 cursor-pointer flex justify-between items-center" data-suggest="${m.id}">
-              <div class="flex items-center gap-2.5">
-                <span class="w-7 h-7 rounded-lg bg-orange-600/20 text-orange-500 font-bold flex items-center justify-center text-xs">#${m.id}</span>
-                <div><p class="font-bold text-xs">${esc(m.name)}</p><p class="text-[10px] text-slate-400">${esc(m.phone)}</p></div>
-              </div>
-              ${statusBadge(m.status)}
-            </div>`).join('')
-        : `<div class="p-3 text-center text-xs text-slate-500">${i18n.t('no_suggestions')}</div>`;
-      dropdown.classList.remove('hidden');
-      dropdown.querySelectorAll('[data-suggest]').forEach(d => d.addEventListener('click', () => { dropdown.classList.add('hidden'); this.openProfile(d.dataset.suggest); }));
-    },
-    applyFilter() {
-      const val = document.getElementById('memberFilterSelect').value;
-      const map = { active: 'Active', expired: 'Expired', frozen: 'Frozen' };
-      this.render(val === 'all' ? state.members : state.members.filter(m => m.status === map[val]));
-    },
-    openRegister() { 
-      plans.fillSelect('reg_plan');
-      plans.updatePricePreview();
-      ui.openModal('registerModal'); 
-    },
-    async submitRegister() {
-      const payload = {
-        name: document.getElementById('reg_name').value.trim(),
-        phone: document.getElementById('reg_phone').value.trim(),
-        plan: document.getElementById('reg_plan').value,
-        trainer_id: document.getElementById('reg_trainer').value,
-        weight: document.getElementById('reg_weight').value,
-        height: document.getElementById('reg_height').value,
-        fat: document.getElementById('reg_fat').value,
-        muscle: document.getElementById('reg_muscle').value
-      };
-      if (!payload.name || !payload.phone) { ui.toast(i18n.t('toast_fill_required'), 'error'); return; }
-      if (!payload.plan) { ui.toast(i18n.t('toast_select_plan'), 'error'); return; }
-      try {
-        await api.send('/api/members', 'POST', payload);
-        ui.toast(i18n.t('toast_member_registered'), 'success');
-        ui.closeModal('registerModal');
+  try {
+    const res = await fetch('/api/members', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) {
+      triggerBeastLoader("ATHLETE REGISTERED!", "WELCOME TO THE ARENA, CHAMP!", () => {
+        closeModal('registerModal');
         ['reg_name','reg_phone','reg_weight','reg_height','reg_fat','reg_muscle'].forEach(id => document.getElementById(id).value = '');
-        this.load(); memberships.load(); dashboard.load();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    openRenew(id, name) {
-      document.getElementById('renew_mid').value = id;
-      document.getElementById('renewModalTitle').textContent = `${i18n.t('renew_title_prefix')} ${name} (#${id})`;
-      document.getElementById('renew_w').value = '';
-      document.getElementById('renew_h').value = '';
-      document.getElementById('renew_fat').value = '';
-      document.getElementById('renew_mus').value = '';
+        loadMembers(); loadMemberships(); loadDashboard();
+      }, 700);
+    } else showToast(data.error, "error");
+  } catch (err) { showToast(err, "error"); }
+}
 
-      plans.fillSelect('renew_plan');
-      ui.openModal('renewModal');
-    },
-    async submitRenew() {
-      const id = document.getElementById('renew_mid').value;
-      const plan = document.getElementById('renew_plan').value;
-      if (!plan) { ui.toast(i18n.t('toast_select_plan'), 'error'); return; }
+function openRenewModal(id, name) {
+  document.getElementById('renew_mid').value = id;
+  document.getElementById('renewModalTitle').textContent = `Renew: ${name} (#${id})`;
+  document.getElementById('renew_w').value = '';
+  document.getElementById('renew_h').value = '';
+  document.getElementById('renew_fat').value = '';
+  document.getElementById('renew_mus').value = '';
+  plansFillSelect('renew_plan');
+  openModal('renewModal');
+}
 
-      const payload = {
-        plan: plan,
-        weight: document.getElementById('renew_w').value.trim() || null,
-        height: document.getElementById('renew_h').value.trim() || null,
-        fat: document.getElementById('renew_fat').value.trim() || null,
-        muscle: document.getElementById('renew_mus').value.trim() || null
-      };
-      try {
-        await api.send(`/api/members/${id}/renew`, 'POST', payload);
-        ui.toast(i18n.t('toast_renewed'), 'success');
-        ui.closeModal('renewModal');
-        this.load(); 
-        memberships.load(); 
-        dashboard.load();
-        if (state.currentTrainerId) {
-          trainers.openProfile(state.currentTrainerId);
-        }
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    async freeze(id) {
-      try { await api.send(`/api/members/${id}/freeze`, 'POST'); ui.toast(i18n.t('toast_frozen'), 'success'); this.load(); }
-      catch (e) { ui.toast(e.message, 'error'); }
-    },
-    async unfreeze(id) {
-      try { await api.send(`/api/members/${id}/unfreeze`, 'POST'); ui.toast(i18n.t('toast_unfrozen'), 'success'); this.load(); }
-      catch (e) { ui.toast(e.message, 'error'); }
-    },
-    async delete(id) {
-      const ok = await ui.confirm(i18n.t('confirm_delete_member'));
-      if (!ok) return;
-      try { await api.del(`/api/members/${id}`); ui.toast(i18n.t('toast_member_deleted'), 'success'); this.load(); memberships.load(); dashboard.load(); }
-      catch (e) { ui.toast(e.message, 'error'); }
-    },
-    showQr(id, name) {
-      const member = state.members.find(x => String(x.id) === String(id));
-      const token = member ? (member.qr_token || member.id) : id;
-      const img = document.getElementById('qrModalImg');
-      img.dataset.token = token;
-      img.dataset.id = id;
-      document.getElementById('qrModalTitle').textContent = `${i18n.t('qr_pass_title')} ${name} (#${id})`;
-      img.src = `/api/members/${id}/qr?t=${Date.now()}`;
-      ui.openModal('qrModal');
-    },
-    async openProfile(id) {
-      try {
-        const p = await api.get(`/api/members/${id}/profile`);
-        const inb = p.inbody_progress;
-        const inbLine = inb && inb.weight_change !== undefined
-          ? `Δالوزن: ${inb.weight_change}kg · Δالدهون: ${inb.fat_change}% · Δالعضلات: ${inb.muscle_change}kg`
-          : '—';
-        ui.toast(`${p.name} · ${p.membership_plan} · ${p.remaining_sessions} حصص متبقية · ${inbLine}`, 'info', 4000);
-      } catch (e) { ui.toast(e.message, 'error'); }
-    }
+async function submitRenewMember() {
+  const id = document.getElementById('renew_mid').value;
+  const plan = document.getElementById('renew_plan').value;
+  if (!plan) { showToast("Select a plan to renew!", "error"); return; }
+
+  const payload = {
+    plan: plan,
+    weight: document.getElementById('renew_w').value.trim() || null,
+    height: document.getElementById('renew_h').value.trim() || null,
+    fat: document.getElementById('renew_fat').value.trim() || null,
+    muscle: document.getElementById('renew_mus').value.trim() || null
   };
 
-  const trainers = {
-    async load() {
-      try {
-        const res = await api.get('/api/trainers');
-        state.trainers = res;
-        this.render();
-        plans.fillTrainerSelect();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    render() {
-      const container = document.getElementById('trainers_cards');
-      if (!state.trainers.length) { container.innerHTML = `<p class="text-slate-500 col-span-full text-center py-6">—</p>`; return; }
-      container.innerHTML = state.trainers.map((t, i) => `
-        <div class="panel p-5 space-y-3.5">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-11 h-11 rounded-xl bg-orange-600/20 text-orange-500 font-black flex items-center justify-center text-lg border border-orange-500/20">🏋️</div>
-              <div><h4 class="font-black text-sm">${esc(t.name)}</h4><p class="text-xs text-orange-400 font-bold">${esc(t.specialty)}</p></div>
-            </div>
-            ${t.is_present_now
-              ? `<span class="badge" style="background:var(--emerald-soft);color:#6ee7a0"><span class="badge-dot"></span>${i18n.t('present_now')}</span>`
-              : `<span class="badge" style="background:rgba(255,255,255,.05);color:var(--muted)">${i18n.t('not_present')}</span>`}
-          </div>
-          <div class="flex items-center justify-between text-xs text-slate-400 border-y hairline py-2.5">
-            <span>${i18n.t('trainer_code_label')} <strong class="text-orange-400">#${t.id}</strong></span>
-            <span>${i18n.t('trainees_label')} <strong class="text-cyan-400">${t.trainees_count}</strong></span>
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            <button class="col-span-2 btn btn-primary btn-xs" data-act="tr-profile" data-id="${t.id}">${i18n.t('btn_view_full_profile')}</button>
-            <button class="btn btn-ghost btn-xs" data-act="tr-qr" data-id="${t.id}" data-name="${escAttr(t.name)}">${i18n.t('btn_qr_code')}</button>
-          </div>
+  try {
+    const res = await fetch(`/api/members/${id}/renew`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) {
+      triggerBeastLoader("RENEWED! KEEP PUSHING!", "NEVER STOP, NEVER SETTLE!", () => {
+        closeModal('renewModal');
+        loadMembers(); loadMemberships(); loadDashboard();
+        if (currentSelectedTrainerId) openTrainerProfile(currentSelectedTrainerId);
+      }, 700);
+    } else showToast(data.error, "error");
+  } catch (err) { showToast(err, "error"); }
+}
+
+async function freezeMember(id) {
+  if (confirm("Freeze this membership? Remember your goals, champ!")) {
+    const res = await fetch(`/api/members/${id}/freeze`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      triggerBeastLoader("REST & RECOVER!", "DON'T FORGET THE SHAPE YOU'RE BUILDING!", () => {
+        loadMembers(); loadMemberships();
+      }, 700);
+    } else showToast(data.error, "error");
+  }
+}
+
+async function unfreezeMember(id) {
+  const res = await fetch(`/api/members/${id}/unfreeze`, { method: 'POST' });
+  const data = await res.json();
+  if (data.success) {
+    triggerBeastLoader("WELCOME BACK, BEAST!", "TIME TO CRUSH THE WEIGHTS!", () => {
+      loadMembers(); loadMemberships();
+    }, 700);
+  } else showToast(data.error, "error");
+}
+
+async function deleteMember(id) {
+  if (!confirm("Delete this athlete permanently?")) return;
+  const res = await fetch(`/api/members/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (data.success) { loadMembers(); loadMemberships(); loadDashboard(); showToast("Athlete removed", "info"); }
+}
+
+function showMemberQR(id, name) {
+  const member = globalMembers.find(x => String(x.id) === String(id));
+  const token = member ? (member.qr_token || member.id) : id;
+  const img = document.getElementById('qrModalImg');
+  img.dataset.token = token;
+  img.dataset.id = id;
+  document.getElementById('qrModalTitle').textContent = `QR Pass — ${name}`;
+  img.src = `/api/members/${id}/qr?t=${Date.now()}`;
+  openModal('qrModal');
+}
+
+async function viewMemberProfile(id) {
+  const res = await fetch(`/api/members/${id}/profile`);
+  const p = await res.json();
+  const pr = p.inbody_progress || {};
+  const diffMsg = pr.weight_change !== undefined ? `Weight: ${pr.weight_change}kg | Fat: ${pr.fat_change}% | Muscle: ${pr.muscle_change}kg` : "No prior InBody scans";
+  alert(`ATHLETE: ${p.name} (#${p.id})\nPlan: ${p.membership_plan}\nSessions Left: ${p.remaining_sessions}\n\n[InBody Progress]:\n${diffMsg}`);
+}
+
+// ================= 3. COACHES =================
+async function loadTrainers() {
+  const res = await fetch('/api/trainers');
+  globalTrainers = await res.json();
+  const c = document.getElementById('trainers_cards');
+  if (!globalTrainers.length) { c.innerHTML = `<p class="text-slate-500 col-span-full text-center py-6">No coaches registered</p>`; return; }
+  c.innerHTML = globalTrainers.map(t => `
+    <div class="panel p-5 space-y-3.5">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-xl bg-orange-600/20 text-orange-500 font-black flex items-center justify-center text-lg border border-orange-500/20">🏋️</div>
+          <div><h4 class="font-black text-sm">${t.name}</h4><p class="text-xs text-orange-400 font-bold">${t.specialty}</p></div>
         </div>
-      `).join('');
-      ui.rebuildIcons();
-    },
-    openAdd() { ui.openModal('addTrainerModal'); },
-    async submitAdd() {
-      const payload = {
-        name: document.getElementById('tr_new_name').value.trim(),
-        phone: document.getElementById('tr_new_phone').value.trim(),
-        specialty: document.getElementById('tr_new_spec').value,
-        salary: document.getElementById('tr_new_salary').value
-      };
-      if (!payload.name || !payload.phone || !payload.salary) { ui.toast(i18n.t('toast_fill_required'), 'error'); return; }
-      try {
-        await api.send('/api/trainers', 'POST', payload);
-        ui.toast(i18n.t('toast_trainer_added'), 'success');
-        ui.closeModal('addTrainerModal');
-        ['tr_new_name','tr_new_phone','tr_new_salary'].forEach(id => document.getElementById(id).value = '');
-        this.load();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    async openProfile(id) {
-      state.currentTrainerId = id;
-      state.currentTrainerTrainees = [];
+        ${t.is_present_now ? `<span class="badge bg-emerald-500/20 text-emerald-400"><span class="badge-dot"></span>Present</span>` : `<span class="badge bg-white/5 text-slate-400">Absent</span>`}
+      </div>
+      <div class="flex items-center justify-between text-xs text-slate-400 border-y border-slate-800 py-2.5">
+        <span>ID: <strong class="text-orange-400">#${t.id}</strong></span>
+        <span>Trainees: <strong class="text-cyan-400">${t.trainees_count}</strong></span>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <button onclick="openTrainerProfile(${t.id})" class="col-span-2 btn btn-primary btn-xs">Profile & Trainees</button>
+        <button onclick="showTrainerQR(${t.id}, '${t.name}')" class="btn btn-ghost btn-xs">QR</button>
+      </div>
+    </div>
+  `).join('');
 
-      document.getElementById('tr_prof_name').textContent = '—';
-      document.getElementById('tr_prof_spec').textContent = '';
-      document.getElementById('tr_prof_id').textContent = '';
-      document.getElementById('tr_prof_phone').textContent = '—';
-      document.getElementById('tr_prof_salary').textContent = '$0.00';
-      document.getElementById('tr_prof_att_days').textContent = '—';
-      document.getElementById('tr_prof_presence_badge').textContent = '';
-      document.getElementById('tr_prof_trainees_table').innerHTML = `
-        <tr><td colspan="6" class="text-center py-4 text-slate-500 font-bold">جاري التحميل...</td></tr>
-      `;
+  const sel = document.getElementById('reg_trainer');
+  sel.innerHTML = `<option value="">No Personal Coach</option>` + globalTrainers.map(t => `<option value="${t.id}">${t.name} (${t.specialty})</option>`).join('');
+}
 
-      ui.openModal('trainerProfileModal');
+async function openTrainerProfile(id) {
+  currentSelectedTrainerId = id;
+  currentTrainerTraineesList = [];
 
-      try {
-        const p = await api.get(`/api/trainers/${id}/profile?t=${Date.now()}`);
-        document.getElementById('tr_prof_name').textContent = p.name;
-        document.getElementById('tr_prof_spec').textContent = p.specialization;
-        document.getElementById('tr_prof_id').textContent = `#${p.id}`;
-        document.getElementById('tr_prof_phone').textContent = p.phone;
-        document.getElementById('tr_prof_salary').textContent = `$${Number(p.salary).toFixed(2)}`;
-        document.getElementById('tr_prof_att_days').textContent = `${p.total_attendance_days} ${i18n.t('days_suffix')}`;
+  // INSTANT RESET TO PREVENT CARRY-OVER FROM PREVIOUS COACH
+  document.getElementById('tr_prof_name').textContent = '—';
+  document.getElementById('tr_prof_spec').textContent = '';
+  document.getElementById('tr_prof_id').textContent = '';
+  document.getElementById('tr_prof_phone').textContent = '—';
+  document.getElementById('tr_prof_salary').textContent = '$0.00';
+  document.getElementById('tr_prof_att_days').textContent = '—';
+  document.getElementById('tr_prof_presence_badge').textContent = '';
+  document.getElementById('tr_prof_trainees_table').innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500 font-bold">Loading coach data...</td></tr>`;
 
-        const badge = document.getElementById('tr_prof_presence_badge');
-        const btn = document.getElementById('tr_prof_checkin_btn');
-        badge.textContent = p.is_present_now ? i18n.t('present_now') : i18n.t('not_present');
-        badge.style.color = p.is_present_now ? '#6ee7a0' : 'var(--muted)';
-        btn.classList.toggle('hidden', !!p.is_present_now);
+  openModal('trainerProfileModal');
 
-        state.currentTrainerTrainees = p.trainees || [];
-        const tbody = document.getElementById('tr_prof_trainees_table');
-        tbody.innerHTML = (!state.currentTrainerTrainees.length)
-          ? `<tr><td colspan="6" class="text-center py-4 text-slate-500 font-bold">${i18n.t('no_trainees_yet')}</td></tr>`
-          : state.currentTrainerTrainees.map((tr, idx) => {
-              const pr = tr.progress_before_and_after || {};
-              const hasData = pr.has_data;
+  try {
+    const res = await fetch(`/api/trainers/${id}/profile?t=${Date.now()}`);
+    const p = await res.json();
+    document.getElementById('tr_prof_name').textContent = p.name;
+    document.getElementById('tr_prof_spec').textContent = p.specialization;
+    document.getElementById('tr_prof_id').textContent = `#${p.id}`;
+    document.getElementById('tr_prof_phone').textContent = p.phone;
+    document.getElementById('tr_prof_salary').textContent = `$${Number(p.salary).toFixed(2)}`;
+    document.getElementById('tr_prof_att_days').textContent = `${p.total_attendance_days} days`;
 
-              return `<tr>
-                <td class="font-bold">${esc(tr.name)}</td>
-                <td class="text-slate-400">${esc(tr.phone)}</td>
-                <td class="text-emerald-400 font-bold">${tr.attendance_last_3_months} ${i18n.t('days_suffix')}</td>
-                <td class="font-black text-cyan-400">${tr.remaining_sessions}</td>
-                <td class="text-center">
-                  ${hasData 
-                    ? `<button class="btn btn-xs" style="background:var(--orange-soft);color:var(--orange);" data-act="tr-trainee-tf" data-idx="${idx}">
-                         ${i18n.t('tf_view_comparison')}
-                       </button>`
-                    : `<span class="text-slate-500 text-xs">${i18n.t('tf_no_inbody')}</span>`}
-                </td>
-                <td class="text-center">
-                  <button class="btn btn-emerald btn-xs" data-act="tr-trainee-renew" data-id="${tr.member_id}" data-name="${escAttr(tr.name)}">
-                    ${i18n.t('btn_renew')}
-                  </button>
-                </td>
-              </tr>`;
-            }).join('');
-        ui.rebuildIcons();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    showTransformation(index) {
-      const trainee = state.currentTrainerTrainees[index];
-      if (!trainee || !trainee.progress_before_and_after || !trainee.progress_before_and_after.has_data) {
-        ui.toast(i18n.t('tf_no_inbody'), 'info');
-        return;
-      }
-      const p = trainee.progress_before_and_after;
-      document.getElementById('tf_modal_trainee_name').textContent = trainee.name;
-      document.getElementById('tf_modal_duration').textContent = `${i18n.t('tf_duration_text')} ${p.tracked_days} ${i18n.t('days_suffix')} · ${i18n.t('tf_total_scans_text')} ${p.total_scans}`;
+    const b = document.getElementById('tr_prof_presence_badge');
+    const btn = document.getElementById('tr_prof_checkin_btn');
+    b.textContent = p.is_present_now ? "On Floor Now" : "Not Present";
+    b.className = `ms-2 font-black text-xs ${p.is_present_now ? 'text-emerald-400' : 'text-slate-500'}`;
+    btn.classList.toggle('hidden', !!p.is_present_now);
 
-      document.getElementById('tf_start_date').textContent = p.first_day_date;
-      document.getElementById('tf_start_weight').textContent = `${p.initial.weight} kg`;
-      document.getElementById('tf_start_fat').textContent = `${p.initial.fat} %`;
-      document.getElementById('tf_start_muscle').textContent = `${p.initial.muscle} kg`;
-
-      document.getElementById('tf_latest_date').textContent = p.latest_date;
-      document.getElementById('tf_latest_weight').textContent = `${p.latest.weight} kg`;
-      document.getElementById('tf_latest_fat').textContent = `${p.latest.fat} %`;
-      document.getElementById('tf_latest_muscle').textContent = `${p.latest.muscle} kg`;
-
-      const diffW = document.getElementById('tf_diff_weight');
-      diffW.textContent = `${p.weight_change > 0 ? '+' : ''}${p.weight_change} kg`;
-      diffW.className = `text-xs font-black mt-0.5 font-mono ${p.weight_change <= 0 ? 'text-emerald-400' : 'text-amber-400'}`;
-
-      const diffF = document.getElementById('tf_diff_fat');
-      diffF.textContent = `${p.fat_change > 0 ? '+' : ''}${p.fat_change} %`;
-      diffF.className = `text-xs font-black mt-0.5 font-mono ${p.fat_change <= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-
-      const diffM = document.getElementById('tf_diff_muscle');
-      diffM.textContent = `${p.muscle_change > 0 ? '+' : ''}${p.muscle_change} kg`;
-      diffM.className = `text-xs font-black mt-0.5 font-mono ${p.muscle_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-
-      ui.openModal('traineeTransformationModal');
-    },
-    async checkinCurrent() {
-      if (!state.currentTrainerId) return;
-      try {
-        await api.send(`/api/trainers/${state.currentTrainerId}/checkin`, 'POST');
-        ui.toast(i18n.t('toast_trainer_checkin'), 'success');
-        ui.closeModal('trainerProfileModal');
-        dashboard.load(); this.load(); attendance.loadDaily();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    showQr(id, name) {
-      const trainer = state.trainers.find(x => String(x.id) === String(id));
-      const token = trainer ? (trainer.qr_token || trainer.id) : id;
-      const img = document.getElementById('qrModalImg');
-      img.dataset.token = token;
-      img.dataset.id = id;
-      document.getElementById('qrModalTitle').textContent = `${i18n.t('qr_pass_title')} ${name} (#${id})`;
-      img.src = `/api/trainers/${id}/qr?t=${Date.now()}`;
-      ui.openModal('qrModal');
+    currentTrainerTraineesList = p.trainees || [];
+    const tbody = document.getElementById('tr_prof_trainees_table');
+    if (!currentTrainerTraineesList.length) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500 font-bold">No athletes assigned yet</td></tr>`;
+      return;
     }
-  };
-
-  const memberships = {
-    _lastRendered: [],
-    currentList() { return this._lastRendered; },
-    async load() {
-      try { const res = await api.get('/api/memberships'); state.memberships = res; this.render(res); }
-      catch (e) { ui.toast(e.message, 'error'); }
-    },
-    render(list) {
-      this._lastRendered = list;
-      const tbody = document.getElementById('memberships_table');
-      if (!list.length) { tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-500 font-bold">${i18n.t('no_memberships')}</td></tr>`; return; }
-      tbody.innerHTML = list.map((ms, i) => `
-        <tr style="--i:${i}">
-          <td class="font-bold text-orange-400">#${ms.membership_id}</td>
-          <td class="font-bold">${esc(ms.member_name)} (#${ms.member_id})</td>
-          <td class="text-slate-400">${esc(ms.member_phone)}</td>
-          <td class="text-xs font-semibold text-slate-300">${esc(ms.plan_name)}</td>
-          <td class="text-xs font-mono text-slate-300">${ms.start_date}</td>
-          <td class="text-xs font-mono text-slate-300">${ms.end_date}</td>
-          <td class="font-black text-cyan-400">${ms.remaining_sessions} / ${ms.total_sessions}</td>
-          <td class="font-black text-emerald-400">$${Number(ms.cost).toFixed(2)}</td>
-          <td class="text-center">${statusBadge(ms.status)}</td>
-        </tr>
-      `).join('');
-    },
-    filter(q) {
-      q = q.trim().toLowerCase();
-      this.render(state.memberships.filter(ms => ms.member_name.toLowerCase().includes(q) || ms.member_phone.includes(q) || String(ms.member_id).includes(q)));
-    }
-  };
-
-  const attendance = {
-    toggleCamera() { state.isCameraRunning ? this.stopScan() : this.startScan(); },
-    startScan() {
-      const box = document.getElementById('cameraScannerBox');
-      box.classList.remove('hidden');
-      document.getElementById('cameraBtnText').textContent = i18n.t('btn_close_cam');
-      if (!state.html5QrScanner) state.html5QrScanner = new Html5Qrcode('qr-reader');
-      state.html5QrScanner.start(
-        { facingMode: 'environment' }, { fps: 15, qrbox: { width: 220, height: 220 } },
-        async (decoded) => { this.stopScan(); await this.process(decoded); },
-        () => {}
-      ).then(() => { state.isCameraRunning = true; }).catch(() => {
-        ui.toast(i18n.t('toast_camera_error'), 'error');
-        box.classList.add('hidden');
-        document.getElementById('cameraBtnText').textContent = i18n.t('btn_open_cam');
-      });
-    },
-    stopScan() {
-      if (state.html5QrScanner && state.isCameraRunning) {
-        state.html5QrScanner.stop().then(() => {
-          document.getElementById('cameraScannerBox').classList.add('hidden');
-          document.getElementById('cameraBtnText').textContent = i18n.t('btn_open_cam');
-          state.isCameraRunning = false;
-        }).catch(() => {});
-      } else { document.getElementById('cameraScannerBox').classList.add('hidden'); state.isCameraRunning = false; }
-    },
-    async scanFile(file) {
-      const scanner = new Html5Qrcode('qr-reader');
-      try { const text = await scanner.scanFile(file, true); await this.process(text); }
-      catch (e) { ui.toast(i18n.t('toast_no_qr_in_image'), 'error'); }
-    },
-    async manualCheckin() {
-      const input = document.getElementById('checkinMemberId');
-      const val = input.value.trim();
-      if (!val) { ui.toast(i18n.t('toast_enter_id'), 'error'); return; }
-      await this.process(val);
-      input.value = '';
-    },
-    async process(code) {
-      const payload = /^\d+$/.test(code.trim()) ? { member_id: parseInt(code.trim(), 10) } : { token: code.trim() };
-      try {
-        const data = await api.send('/api/attendance/checkin', 'POST', payload);
-        const roleLabel = data.role === 'Trainer' ? i18n.t('role_trainer') : i18n.t('role_member');
-        const extra = data.role === 'Trainer' ? '' : ` · ${data.remaining_sessions} حصص`;
-        ui.toast(`${i18n.t('toast_checkin_success')} — ${roleLabel}: ${data.name}${extra}`, 'success', 3500);
-        dashboard.load(); this.loadDaily(); members.load(); trainers.load();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    async loadDaily() {
-      try {
-        const data = await api.get('/api/attendance/daily');
-        const tbody = document.getElementById('daily_att_table');
-        if (!data.length) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-bold">${i18n.t('no_attendance_today')}</td></tr>`; return; }
-        tbody.innerHTML = data.map((r, i) => `
-          <tr style="--i:${i}">
-            <td class="text-slate-500">#${r.attendance_id}</td>
-            <td class="font-bold text-orange-400">#${r.member_id}</td>
-            <td class="font-semibold">${esc(r.name)}</td>
-            <td class="text-center">${roleBadge(r.role)}</td>
-            <td class="text-emerald-400 font-bold">${esc(r.time)}</td>
-          </tr>
-        `).join('');
-      } catch (e) { ui.toast(e.message, 'error'); }
-    }
-  };
-
-  const payments = {
-    _lastRendered: [],
-    currentList() { return this._lastRendered; },
-    async load() {
-      try { const data = await api.get('/api/payments'); this.render(data); }
-      catch (e) { ui.toast(e.message, 'error'); }
-    },
-    render(data) {
-      this._lastRendered = data;
-      document.getElementById('payments_table').innerHTML = data.map((p, i) => `
-        <tr style="--i:${i}">
-          <td class="text-slate-400">#${p.id}</td>
-          <td class="font-bold">${esc(p.member_name)} (#${p.member_id})</td>
-          <td class="font-black text-emerald-400">$${Number(p.amount).toFixed(2)}</td>
-          <td><span class="badge" style="background:rgba(255,255,255,.05);color:#cbd3e6">${methodLabel(p.method)}</span></td>
-          <td class="text-slate-400 text-xs">${esc(p.ref || '-')}</td>
-          <td class="text-slate-400 text-xs font-mono">${esc(p.date)}</td>
+    tbody.innerHTML = currentTrainerTraineesList.map((tr, idx) => {
+      const pr = tr.progress_before_and_after || {};
+      const hasData = pr.has_data;
+      return `
+        <tr>
+          <td class="font-bold">${tr.name}</td>
+          <td class="text-slate-400">${tr.phone}</td>
+          <td class="text-emerald-400 font-bold">${tr.attendance_last_3_months} days</td>
+          <td class="font-black text-cyan-400">${tr.remaining_sessions}</td>
           <td class="text-center">
-            <div class="flex gap-1.5 justify-center">
-              <button class="btn btn-blue btn-xs" data-act="pay-edit" data-id="${p.id}" data-amt="${p.amount}" data-method="${escAttr(p.method)}" data-ref="${escAttr(p.ref || '')}">${i18n.t('btn_edit')}</button>
-              <button class="btn btn-danger btn-xs" data-act="pay-delete" data-id="${p.id}">${i18n.t('btn_delete')}</button>
-            </div>
+            ${hasData 
+              ? `<button onclick="showTraineeTransformation(${idx})" class="btn btn-xs bg-orange-500/20 text-orange-400">Before & After 🔍</button>`
+              : `<span class="text-slate-500 text-xs">No Scan</span>`}
+          </td>
+          <td class="text-center">
+            <button onclick="openRenewModal(${tr.member_id}, '${tr.name}')" class="btn btn-emerald btn-xs">Renew</button>
           </td>
         </tr>
-      `).join('');
-    },
-    verifyMember(val) {
-      const badge = document.getElementById('pay_verify_badge');
-      if (!val) { badge.textContent = ''; return; }
-      const m = state.members.find(x => String(x.id) === String(val));
-      badge.textContent = m ? `✓ ${i18n.t('member_verify_found')}` : `✗ ${i18n.t('member_verify_missing')}`;
-      badge.style.color = m ? '#6ee7a0' : '#fda4b5';
-    },
-    async submitNew() {
-      const payload = {
-        member_id: document.getElementById('pay_new_mid').value,
-        amount: document.getElementById('pay_new_amt').value,
-        method: document.getElementById('pay_new_method').value,
-        ref: document.getElementById('pay_new_ref').value
-      };
-      if (!payload.member_id || !payload.amount) { ui.toast(i18n.t('toast_fill_required'), 'error'); return; }
-      try {
-        await api.send('/api/payments', 'POST', payload);
-        ui.toast(i18n.t('toast_payment_recorded'), 'success');
-        ['pay_new_mid','pay_new_amt','pay_new_ref'].forEach(id => document.getElementById(id).value = '');
-        document.getElementById('pay_verify_badge').textContent = '';
-        this.load(); dashboard.load();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    openEdit(id, amt, method, ref) {
-      document.getElementById('edit_pay_id').value = id;
-      document.getElementById('editPayModalTitle').textContent = `${i18n.t('edit_pay_title_prefix')}${id}`;
-      document.getElementById('edit_pay_amt').value = amt;
-      document.getElementById('edit_pay_method').value = method;
-      document.getElementById('edit_pay_ref').value = ref;
-      ui.openModal('editPaymentModal');
-    },
-    async submitEdit() {
-      const id = document.getElementById('edit_pay_id').value;
-      try {
-        await api.send(`/api/payments/${id}`, 'PUT', {
-          amount: document.getElementById('edit_pay_amt').value,
-          method: document.getElementById('edit_pay_method').value,
-          ref: document.getElementById('edit_pay_ref').value
-        });
-        ui.toast(i18n.t('toast_payment_updated'), 'success');
-        ui.closeModal('editPaymentModal');
-        this.load(); dashboard.load();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    async delete(id) {
-      const ok = await ui.confirm(i18n.t('confirm_delete_payment'));
-      if (!ok) return;
-      try { await api.del(`/api/payments/${id}`); ui.toast(i18n.t('toast_payment_deleted'), 'success'); this.load(); dashboard.load(); }
-      catch (e) { ui.toast(e.message, 'error'); }
-    }
+      `;
+    }).join('');
+  } catch (err) { showToast(err, "error"); }
+}
+
+function showTraineeTransformation(idx) {
+  const tr = currentTrainerTraineesList[idx];
+  if (!tr || !tr.progress_before_and_after || !tr.progress_before_and_after.has_data) return;
+  const p = tr.progress_before_and_after;
+
+  document.getElementById('tf_modal_trainee_name').textContent = tr.name;
+  document.getElementById('tf_modal_duration').textContent = `Tracked: ${p.tracked_days} days · Scans: ${p.total_scans}`;
+
+  document.getElementById('tf_start_date').textContent = p.first_day_date;
+  document.getElementById('tf_start_weight').textContent = `${p.initial.weight} kg`;
+  document.getElementById('tf_start_fat').textContent = `${p.initial.fat} %`;
+  document.getElementById('tf_start_muscle').textContent = `${p.initial.muscle} kg`;
+
+  document.getElementById('tf_latest_date').textContent = p.latest_date;
+  document.getElementById('tf_latest_weight').textContent = `${p.latest.weight} kg`;
+  document.getElementById('tf_latest_fat').textContent = `${p.latest.fat} %`;
+  document.getElementById('tf_latest_muscle').textContent = `${p.latest.muscle} kg`;
+
+  const dW = document.getElementById('tf_diff_weight');
+  dW.textContent = `${p.weight_change > 0 ? '+' : ''}${p.weight_change} kg`;
+  dW.className = `text-xs font-black mt-0.5 font-mono ${p.weight_change <= 0 ? 'text-emerald-400' : 'text-amber-400'}`;
+
+  const dF = document.getElementById('tf_diff_fat');
+  dF.textContent = `${p.fat_change > 0 ? '+' : ''}${p.fat_change} %`;
+  dF.className = `text-xs font-black mt-0.5 font-mono ${p.fat_change <= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+  const dM = document.getElementById('tf_diff_muscle');
+  dM.textContent = `${p.muscle_change > 0 ? '+' : ''}${p.muscle_change} kg`;
+  dM.className = `text-xs font-black mt-0.5 font-mono ${p.muscle_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+  openModal('traineeTransformationModal');
+}
+
+async function checkinCurrentTrainer() {
+  if (!currentSelectedTrainerId) return;
+  const res = await fetch(`/api/trainers/${currentSelectedTrainerId}/checkin`, { method: 'POST' });
+  const data = await res.json();
+  if (data.success) {
+    triggerBeastLoader("COACH CHECKED IN!", "READY TO LEAD THE BEASTS!", () => {
+      closeModal('trainerProfileModal');
+      loadDashboard(); loadTrainers(); loadDailyAttendance();
+    }, 700);
+  } else showToast(data.error, "error");
+}
+
+function showTrainerQR(id, name) {
+  const tr = globalTrainers.find(x => String(x.id) === String(id));
+  const token = tr ? (tr.qr_token || tr.id) : id;
+  const img = document.getElementById('qrModalImg');
+  img.dataset.token = token;
+  img.dataset.id = id;
+  document.getElementById('qrModalTitle').textContent = `Coach QR — ${name}`;
+  img.src = `/api/trainers/${id}/qr?t=${Date.now()}`;
+  openModal('qrModal');
+}
+
+async function submitAddTrainer() {
+  const payload = {
+    name: document.getElementById('tr_new_name').value.trim(),
+    phone: document.getElementById('tr_new_phone').value.trim(),
+    specialty: document.getElementById('tr_new_spec').value,
+    salary: document.getElementById('tr_new_salary').value
   };
+  if (!payload.name || !payload.phone || !payload.salary) { showToast("All coach fields are required!", "error"); return; }
+  const res = await fetch('/api/trainers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (data.success) {
+    triggerBeastLoader("COACH ONBOARDED!", "NEW LEADER IN THE ARENA!", () => {
+      closeModal('addTrainerModal');
+      ['tr_new_name','tr_new_phone','tr_new_salary'].forEach(id => document.getElementById(id).value = '');
+      loadTrainers();
+    }, 700);
+  } else showToast(data.error, "error");
+}
 
-  const plans = {
-    METHODS: [['cash','method_cash'],['visa','method_visa'],['instapay','method_instapay'],['vodafone_cash','method_vodafone']],
-    SPECIALTIES: [['Iron / Bodybuilding','spec_iron'],['Fitness','spec_fitness'],['Cardio','spec_cardio'],['Crossfit','spec_crossfit'],['Boxing','spec_boxing']],
+// ================= 4. MEMBERSHIPS =================
+async function loadMemberships() {
+  const res = await fetch('/api/memberships');
+  globalMemberships = await res.json();
+  renderMemberships(globalMemberships);
+}
 
-    async load() {
-      try {
-        const data = await api.get('/api/plans');
-        state.plans = data.plans || {};
-        state.taxRate = data.tax_rate ?? 0.10;
-        this.fillSelect('reg_plan');
-        this.rebuildLocalizedSelects();
-        this.updatePricePreview();
-      } catch (e) { ui.toast(e.message, 'error'); }
-    },
-    fillSelect(selectId) {
-      const el = document.getElementById(selectId);
-      const defaultOpt = `<option value="" disabled selected>${i18n.t('opt_choose_plan')}</option>`;
-      el.innerHTML = defaultOpt + Object.keys(state.plans).map(k => `<option value="${escAttr(k)}">${esc(k)} — $${state.plans[k].price}</option>`).join('');
-    },
-    fillTrainerSelect() {
-      const sel = document.getElementById('reg_trainer');
-      sel.innerHTML = `<option value="">${i18n.t('no_trainer_opt')}</option>` + state.trainers.map(t => `<option value="${t.id}">${esc(t.name)} (${esc(t.specialty)})</option>`).join('');
-    },
-    rebuildLocalizedSelects() {
-      const methodOptions = this.METHODS.map(([val, key]) => `<option value="${val}">${i18n.t(key)}</option>`).join('');
-      document.getElementById('pay_new_method').innerHTML = methodOptions;
-      document.getElementById('edit_pay_method').innerHTML = methodOptions;
-      document.getElementById('tr_new_spec').innerHTML = this.SPECIALTIES.map(([val, key]) => `<option value="${val}">${i18n.t(key)}</option>`).join('');
-    },
-    updatePricePreview() {
-      const planName = document.getElementById('reg_plan').value;
-      const hasTrainer = !!document.getElementById('reg_trainer').value;
-      const plan = state.plans[planName];
-      if (!plan) {
-        document.getElementById('pricePreviewText').textContent = '$0.00';
-        return;
-      }
-      let price = plan.price;
-      if (hasTrainer) price = price * (1 + state.taxRate);
-      document.getElementById('pricePreviewText').textContent = `$${price.toFixed(2)}${hasTrainer ? ' · ' + i18n.t('trainer_fee_note') : ''}`;
-    }
+function renderMemberships(list) {
+  const tbody = document.getElementById('memberships_table');
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="9" class="text-center py-6 text-slate-500 font-bold">No subscriptions recorded</td></tr>`; return; }
+  tbody.innerHTML = list.map(ms => {
+    let sColor = ms.status === 'Active' ? 'bg-emerald-500/20 text-emerald-400' : (ms.status === 'Frozen' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400');
+    return `
+      <tr>
+        <td class="font-bold text-orange-400">#${ms.membership_id}</td>
+        <td class="font-bold">${ms.member_name} (#${ms.member_id})</td>
+        <td class="text-slate-400">${ms.member_phone}</td>
+        <td class="text-xs text-slate-300 font-semibold">${ms.plan_name}</td>
+        <td class="text-xs font-mono text-slate-300">${ms.start_date}</td>
+        <td class="text-xs font-mono text-slate-300">${ms.end_date}</td>
+        <td class="font-black text-cyan-400">${ms.remaining_sessions} / ${ms.total_sessions}</td>
+        <td class="font-black text-emerald-400">$${Number(ms.cost).toFixed(2)}</td>
+        <td class="text-center"><span class="badge ${sColor}">${ms.status}</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function filterMemberships(q) {
+  const query = q.trim().toLowerCase();
+  renderMemberships(globalMemberships.filter(ms => ms.member_name.toLowerCase().includes(query) || ms.member_phone.includes(query) || String(ms.member_id).includes(query)));
+}
+
+// ================= 5. ATTENDANCE & CAMERA =================
+function toggleCameraScan() {
+  if (isCameraRunning) stopCameraScan();
+  else startCameraScan();
+}
+
+function startCameraScan() {
+  const box = document.getElementById('cameraScannerBox');
+  box.classList.remove('hidden');
+  document.getElementById('cameraBtnText').textContent = 'Close Camera';
+  if (!html5QrScanner) html5QrScanner = new Html5Qrcode('qr-reader');
+  html5QrScanner.start(
+    { facingMode: 'environment' }, { fps: 15, qrbox: { width: 220, height: 220 } },
+    async (decoded) => { stopCameraScan(); await processAttendanceScan(decoded); },
+    () => {}
+  ).then(() => { isCameraRunning = true; }).catch(() => {
+    showToast("Camera access failed", "error");
+    box.classList.add('hidden');
+    document.getElementById('cameraBtnText').textContent = 'Open Camera';
+  });
+}
+
+function stopCameraScan() {
+  if (html5QrScanner && isCameraRunning) {
+    html5QrScanner.stop().then(() => {
+      document.getElementById('cameraScannerBox').classList.add('hidden');
+      document.getElementById('cameraBtnText').textContent = 'Open Camera';
+      isCameraRunning = false;
+    }).catch(() => {});
+  } else {
+    document.getElementById('cameraScannerBox').classList.add('hidden');
+    isCameraRunning = false;
+  }
+}
+
+async function scanQRFromFile(e) {
+  if (!e.target.files.length) return;
+  const scanner = new Html5Qrcode('qr-reader');
+  try {
+    const text = await scanner.scanFile(e.target.files[0], true);
+    await processAttendanceScan(text);
+  } catch (err) { showToast("No QR code detected in image", "error"); }
+}
+
+async function handleManualCheckin() {
+  const input = document.getElementById('checkinMemberId');
+  const val = input.value.trim();
+  if (!val) { showToast("Enter an athlete or coach ID!", "error"); return; }
+  await processAttendanceScan(val);
+  input.value = '';
+}
+
+async function processAttendanceScan(code) {
+  const payload = /^\d+$/.test(code.trim()) ? { member_id: parseInt(code.trim(), 10) } : { token: code.trim() };
+  try {
+    const res = await fetch('/api/attendance/checkin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (data.success) {
+      triggerBeastLoader("CHECK-IN CONFIRMED!", `WELCOME ${data.name.toUpperCase()}! TIME TO CRUSH IT!`, () => {
+        loadDashboard(); loadDailyAttendance(); loadMembers(); loadTrainers();
+      }, 800);
+    } else showToast(data.error, "error");
+  } catch (err) { showToast(err, "error"); }
+}
+
+async function loadDailyAttendance() {
+  const res = await fetch('/api/attendance/daily');
+  const data = await res.json();
+  const tbody = document.getElementById('daily_att_table');
+  if (!data.length) { tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-500 font-bold">No check-ins recorded yet today</td></tr>`; return; }
+  tbody.innerHTML = data.map(r => `
+    <tr>
+      <td class="text-slate-500">#${r.attendance_id}</td>
+      <td class="font-bold text-orange-400">#${r.member_id}</td>
+      <td class="font-semibold">${r.name}</td>
+      <td class="text-center"><span class="badge ${r.role === 'Trainer' ? 'bg-orange-500/20 text-orange-400' : 'bg-cyan-500/20 text-cyan-400'}">${r.role}</span></td>
+      <td class="text-emerald-400 font-bold">${r.time}</td>
+    </tr>
+  `).join('');
+}
+
+// ================= 6. FINANCE =================
+async function loadPayments() {
+  const res = await fetch('/api/payments');
+  const data = await res.json();
+  const tbody = document.getElementById('payments_table');
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td class="text-slate-400">#${p.id}</td>
+      <td class="font-bold">${p.member_name} (#${p.member_id})</td>
+      <td class="font-black text-emerald-400">$${Number(p.amount).toFixed(2)}</td>
+      <td><span class="badge bg-white/5 text-slate-300">${p.method}</span></td>
+      <td class="text-slate-400 text-xs">${p.ref || '-'}</td>
+      <td class="text-slate-400 text-xs font-mono">${p.date}</td>
+      <td class="text-center space-x-1">
+        <button onclick="openEditPaymentModal(${p.id}, ${p.amount}, '${p.method}', '${p.ref || ''}')" class="btn btn-blue btn-xs">Edit</button>
+        <button onclick="deletePayment(${p.id})" class="btn btn-danger btn-xs">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function verifyPayMember(val) {
+  const b = document.getElementById('pay_verify_badge');
+  if (!val) { b.textContent = ''; return; }
+  const m = globalMembers.find(x => String(x.id) === String(val));
+  b.textContent = m ? "✓ Found" : "✗ Missing";
+  b.className = `absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold ${m ? 'text-emerald-400' : 'text-rose-400'}`;
+}
+
+async function submitNewPayment() {
+  const payload = {
+    member_id: document.getElementById('pay_new_mid').value,
+    amount: document.getElementById('pay_new_amt').value,
+    method: document.getElementById('pay_new_method').value,
+    ref: document.getElementById('pay_new_ref').value
   };
+  if (!payload.member_id || !payload.amount) { showToast("ID and Amount required!", "error"); return; }
+  const res = await fetch('/api/payments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  const data = await res.json();
+  if (data.success) {
+    triggerBeastLoader("PAYMENT SECURED!", "KEEP GRINDING, BEAST!", () => {
+      ['pay_new_mid','pay_new_amt','pay_new_ref'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pay_verify_badge').textContent = '';
+      loadPayments(); loadDashboard();
+    }, 700);
+  } else showToast(data.error, "error");
+}
 
-  function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
-  function escAttr(s) { return esc(s); }
-  function statusBadge(status) {
-    const map = {
-      Active:  ['status_active',  'var(--emerald-soft)', '#6ee7a0'],
-      Frozen:  ['status_frozen',  'rgba(245,158,11,.15)', '#fcd34d'],
-      Expired: ['status_expired', 'var(--rose-soft)', '#fda4b5'],
-    };
-    const [key, bg, fg] = map[status] || map.Expired;
-    return `<span class="badge" style="background:${bg};color:${fg}"><span class="badge-dot"></span>${i18n.t(key)}</span>`;
+function openEditPaymentModal(id, amt, method, ref) {
+  document.getElementById('edit_pay_id').value = id;
+  document.getElementById('editPayModalTitle').textContent = `Edit Receipt #${id}`;
+  document.getElementById('edit_pay_amt').value = amt;
+  document.getElementById('edit_pay_method').value = method;
+  document.getElementById('edit_pay_ref').value = ref;
+  openModal('editPaymentModal');
+}
+
+async function submitEditPayment() {
+  const id = document.getElementById('edit_pay_id').value;
+  const res = await fetch(`/api/payments/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      amount: document.getElementById('edit_pay_amt').value,
+      method: document.getElementById('edit_pay_method').value,
+      ref: document.getElementById('edit_pay_ref').value
+    })
+  });
+  const data = await res.json();
+  if (data.success) {
+    closeModal('editPaymentModal');
+    loadPayments(); loadDashboard();
+    showToast("Receipt updated", "success");
+  } else showToast(data.error, "error");
+}
+
+async function deletePayment(id) {
+  if (!confirm("Permanently delete this payment?")) return;
+  const res = await fetch(`/api/payments/${id}`, { method: 'DELETE' });
+  const data = await res.json();
+  if (data.success) { loadPayments(); loadDashboard(); showToast("Payment deleted", "info"); }
+}
+
+// ================= PLANS HELPER (EMPTY BY DEFAULT) =================
+async function loadPlans() {
+  const res = await fetch('/api/plans');
+  const data = await res.json();
+  globalPlans = data.plans || {};
+  globalTaxRate = data.tax_rate || 0.10;
+  plansFillSelect('reg_plan');
+}
+
+function plansFillSelect(selectId) {
+  const el = document.getElementById(selectId);
+  const emptyOpt = `<option value="" disabled selected>-- Select Membership Plan --</option>`;
+  el.innerHTML = emptyOpt + Object.keys(globalPlans).map(k => `<option value="${k}">${k} — $${globalPlans[k].price}</option>`).join('');
+}
+
+function calculatePricePreview() {
+  const planName = document.getElementById('reg_plan').value;
+  const hasCoach = !!document.getElementById('reg_trainer').value;
+  const plan = globalPlans[planName];
+  if (!plan) {
+    document.getElementById('pricePreviewText').textContent = '$0.00';
+    return;
   }
-  function roleBadge(role) {
-    return role === 'Trainer'
-      ? `<span class="badge" style="background:var(--orange-soft);color:#fdba74">${i18n.t('role_trainer')}</span>`
-      : `<span class="badge" style="background:rgba(6,182,212,.15);color:#67e8f9">${i18n.t('role_member')}</span>`;
-  }
-  function methodLabel(method) {
-    const entry = plans.METHODS.find(([val]) => val === method || val === (method || '').toLowerCase());
-    return entry ? i18n.t(entry[1]) : esc(method);
-  }
-
-  function wireEvents() {
-    document.getElementById('langBtnAr').addEventListener('click', () => i18n.setLang('ar'));
-    document.getElementById('langBtnEn').addEventListener('click', () => i18n.setLang('en'));
-
-    document.getElementById('btnOpenRegister').addEventListener('click', () => members.openRegister());
-    document.getElementById('btnSubmitRegister').addEventListener('click', () => members.submitRegister());
-    document.getElementById('reg_plan').addEventListener('change', () => plans.updatePricePreview());
-    document.getElementById('reg_trainer').addEventListener('change', () => plans.updatePricePreview());
-    document.getElementById('btnSubmitRenew').addEventListener('click', () => members.submitRenew());
-
-    let searchDebounce;
-    document.getElementById('memberSearchInput').addEventListener('input', (e) => {
-      clearTimeout(searchDebounce);
-      searchDebounce = setTimeout(() => members.search(e.target.value), 200);
-    });
-    document.getElementById('memberFilterSelect').addEventListener('change', () => members.applyFilter());
-
-    document.getElementById('members_table').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-act]'); if (!btn) return;
-      const { act, id, name } = btn.dataset;
-      ({ renew: () => members.openRenew(id, name), freeze: () => members.freeze(id), unfreeze: () => members.unfreeze(id),
-         profile: () => members.openProfile(id), qr: () => members.showQr(id, name), delete: () => members.delete(id) })[act]?.();
-    });
-
-    document.getElementById('btnOpenAddTrainer').addEventListener('click', () => trainers.openAdd());
-    document.getElementById('btnSubmitAddTrainer').addEventListener('click', () => trainers.submitAdd());
-    document.getElementById('trainers_cards').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-act]'); if (!btn) return;
-      const { act, id, name } = btn.dataset;
-      if (act === 'tr-profile') trainers.openProfile(id);
-      if (act === 'tr-qr') trainers.showQr(id, name);
-    });
-    document.getElementById('tr_prof_checkin_btn').addEventListener('click', () => trainers.checkinCurrent());
-
-    document.getElementById('tr_prof_trainees_table').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-act]'); if (!btn) return;
-      const { act, idx, id, name } = btn.dataset;
-      if (act === 'tr-trainee-tf') trainers.showTransformation(parseInt(idx, 10));
-      if (act === 'tr-trainee-renew') members.openRenew(id, name);
-    });
-
-    document.getElementById('membershipSearchInput').addEventListener('input', (e) => memberships.filter(e.target.value));
-
-    document.getElementById('btnToggleCamera').addEventListener('click', () => attendance.toggleCamera());
-    document.getElementById('qrFileInput').addEventListener('change', (e) => { if (e.target.files[0]) attendance.scanFile(e.target.files[0]); });
-    document.getElementById('btnManualCheckin').addEventListener('click', () => attendance.manualCheckin());
-    document.getElementById('checkinMemberId').addEventListener('keydown', (e) => { if (e.key === 'Enter') attendance.manualCheckin(); });
-
-    document.getElementById('pay_new_mid').addEventListener('input', (e) => payments.verifyMember(e.target.value));
-    document.getElementById('btnSubmitPayment').addEventListener('click', () => payments.submitNew());
-    document.getElementById('btnSubmitEditPayment').addEventListener('click', () => payments.submitEdit());
-    document.getElementById('payments_table').addEventListener('click', (e) => {
-      const btn = e.target.closest('[data-act]'); if (!btn) return;
-      const { act, id, amt, method, ref } = btn.dataset;
-      if (act === 'pay-edit') payments.openEdit(id, amt, method, ref);
-      if (act === 'pay-delete') payments.delete(id);
-    });
-
-    document.querySelectorAll('[data-close-modal]').forEach(btn => btn.addEventListener('click', () => ui.closeModal(btn.dataset.closeModal)));
-    document.querySelectorAll('.modal-backdrop').forEach(bd => bd.addEventListener('click', (e) => { if (e.target === bd) bd.classList.add('hidden'); }));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop:not(.hidden)').forEach(bd => bd.classList.add('hidden')); });
-
-    document.getElementById('exitBtn').addEventListener('click', async () => {
-      const ok = await ui.confirm(i18n.t('exit_confirm'));
-      if (!ok) return;
-      document.body.innerHTML = `
-        <div class="h-screen flex flex-col items-center justify-center text-center p-6 space-y-3 bg-[#080b12]">
-          <span class="text-5xl">🔒</span>
-          <h1 class="text-xl font-black text-orange-500">${i18n.t('exit_title')}</h1>
-          <p class="text-slate-400 text-xs font-semibold">${i18n.t('exit_sub')}</p>
-        </div>`;
-    });
-  }
-
-  function init() {
-    document.documentElement.setAttribute('data-lang', state.lang);
-    document.getElementById('langBtnAr').classList.toggle('is-active', state.lang === 'ar');
-    document.getElementById('langBtnEn').classList.toggle('is-active', state.lang === 'en');
-    document.getElementById('mainViewport').style.backgroundImage = TAB_BACKGROUNDS['dashboard'];
-    i18n.apply();
-    ui.rebuildIcons();
-    nav.init();
-    wireEvents();
-    plans.load();
-    dashboard.load();
-    members.load();
-    trainers.load();
-    memberships.load();
-    attendance.loadDaily();
-    payments.load();
-    setInterval(() => dashboard.load(), 15000);
-  }
-
-  return { init, i18n, ui, nav, dashboard, members, trainers, memberships, attendance, payments, plans, state };
-})();
-
-document.addEventListener('DOMContentLoaded', App.init);
+  let p = plan.price;
+  if (hasCoach) p = p * (1 + globalTaxRate);
+  document.getElementById('pricePreviewText').textContent = `$${p.toFixed(2)}${hasCoach ? ' (+10% Coach Fee)' : ''}`;
+}
 </script>
 </body>
 </html>
