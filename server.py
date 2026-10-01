@@ -116,11 +116,14 @@ def get_member_profile(member_id):
 
 @app.route("/api/members/<int:member_id>/qr", methods=["GET"])
 def get_member_qr(member_id):
-    member = gym.find_member_by_id(member_id)
-    if not member:
-        return jsonify({"error": "Member not found"}), 404
-    qr_path = QRManager.generate_qr(member.person_id, member.qr_token, role="member")
-    return send_file(qr_path, mimetype='image/png')
+    try:
+        member = gym.find_member_by_id(member_id)
+        token = getattr(member, "qr_token", None) if member else str(member_id)
+        buf = QRManager.get_qr_bytes(token)
+        return send_file(buf, mimetype="image/png")
+    except Exception:
+        buf = QRManager.get_qr_bytes(str(member_id))
+        return send_file(buf, mimetype="image/png")
 
 @app.route("/api/members/<int:member_id>/freeze", methods=["POST"])
 def freeze_member(member_id):
@@ -153,15 +156,15 @@ def delete_member(member_id):
 @app.route("/api/trainers", methods=["GET"])
 def list_trainers():
     trainers = []
-    in_gym_ids = {p["person_id"] for p in gym.get_currently_in_gym() if p.get("role") == "Trainer"}
+    in_gym_ids = {int(p["person_id"]) for p in gym.get_currently_in_gym() if p.get("role") == "Trainer"}
     for t in gym.trainers:
-        cnt = len([m for m in gym.members if m.trainer_id == t.person_id])
+        cnt = len([m for m in gym.members if m.trainer_id is not None and int(m.trainer_id) == int(t.person_id)])
         trainers.append({
             "id": t.person_id,
             "name": t.name,
             "specialty": t.specialization,
             "trainees_count": cnt,
-            "is_present_now": t.person_id in in_gym_ids
+            "is_present_now": int(t.person_id) in in_gym_ids
         })
     return jsonify(trainers)
 
@@ -193,12 +196,14 @@ def get_trainer_profile_endpoint(trainer_id):
 
 @app.route("/api/trainers/<int:trainer_id>/qr", methods=["GET"])
 def get_trainer_qr(trainer_id):
-    trainer = gym.find_trainer_by_id(trainer_id)
-    if not trainer:
-        return jsonify({"error": "Trainer not found"}), 404
-    token = getattr(trainer, "qr_token", str(trainer.person_id))
-    qr_path = QRManager.generate_qr(trainer.person_id, token, role="trainer")
-    return send_file(qr_path, mimetype='image/png')
+    try:
+        trainer = gym.find_trainer_by_id(trainer_id)
+        token = getattr(trainer, "qr_token", None) if trainer else str(trainer_id)
+        buf = QRManager.get_qr_bytes(token)
+        return send_file(buf, mimetype="image/png")
+    except Exception:
+        buf = QRManager.get_qr_bytes(str(trainer_id))
+        return send_file(buf, mimetype="image/png")
 
 @app.route("/api/trainers/<int:trainer_id>/checkin", methods=["POST"])
 def trainer_checkin(trainer_id):

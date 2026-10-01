@@ -317,7 +317,6 @@ tbody td { padding: .8rem 1rem; }
 
   <main class="flex-1 overflow-y-auto p-6 md:p-8">
 
-    <!-- 1. DASHBOARD -->
     <section id="tab-dashboard" class="tab-content space-y-6">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 panel p-6">
         <div>
@@ -353,7 +352,6 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- 2. MEMBERS -->
     <section id="tab-members" class="tab-content hidden space-y-6">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 panel p-6">
         <div>
@@ -391,7 +389,6 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- 3. TRAINERS -->
     <section id="tab-trainers" class="tab-content hidden space-y-6">
       <div class="flex justify-between items-center panel p-6">
         <div>
@@ -405,7 +402,6 @@ tbody td { padding: .8rem 1rem; }
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="trainers_cards"></div>
     </section>
 
-    <!-- 4. MEMBERSHIPS -->
     <section id="tab-memberships" class="tab-content hidden space-y-6">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 panel p-6">
         <div>
@@ -426,7 +422,6 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- 5. ATTENDANCE -->
     <section id="tab-attendance" class="tab-content hidden space-y-6">
       <div class="max-w-xl mx-auto panel p-8 text-center space-y-6">
         <div class="w-16 h-16 rounded-2xl bg-orange-600/15 text-orange-500 mx-auto flex items-center justify-center">
@@ -477,7 +472,6 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- 6. PAYMENTS -->
     <section id="tab-payments" class="tab-content hidden space-y-6">
       <div class="panel p-6">
         <h2 class="text-2xl font-black" data-i18n="pay_title"></h2>
@@ -515,7 +509,6 @@ tbody td { padding: .8rem 1rem; }
   </main>
 </div>
 
-<!-- ================= MODAL: TRAINER PROFILE ================= -->
 <div id="trainerProfileModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-3xl p-7 max-h-[90vh] overflow-y-auto space-y-6">
     <div class="flex justify-between items-start border-b hairline pb-4">
@@ -577,7 +570,6 @@ tbody td { padding: .8rem 1rem; }
   </div>
 </div>
 
-<!-- ================= MODAL: TRAINEE TRANSFORMATION (BEFORE & AFTER) ================= -->
 <div id="traineeTransformationModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-xl p-6 space-y-6">
     <div class="flex justify-between items-center border-b hairline pb-3">
@@ -634,7 +626,6 @@ tbody td { padding: .8rem 1rem; }
   </div>
 </div>
 
-<!-- ================= MODAL: REGISTER MEMBER ================= -->
 <div id="registerModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto space-y-4">
     <div class="flex justify-between items-center border-b hairline pb-3">
@@ -667,7 +658,6 @@ tbody td { padding: .8rem 1rem; }
   </div>
 </div>
 
-<!-- ================= MODAL: RENEW ================= -->
 <div id="renewModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-md p-6 space-y-4">
     <div class="flex justify-between items-center border-b hairline pb-3">
@@ -691,19 +681,20 @@ tbody td { padding: .8rem 1rem; }
   </div>
 </div>
 
-<!-- ================= MODAL: QR ================= -->
 <div id="qrModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-sm p-6 text-center space-y-4">
     <div class="flex justify-between items-center border-b hairline pb-3">
       <h3 class="text-base font-black" id="qrModalTitle"></h3>
       <button data-close-modal="qrModal" class="text-slate-400 hover:text-white">✕</button>
     </div>
-    <div class="qr-frame mx-auto"><img id="qrModalImg" src="" alt="QR" class="w-48 h-48"></div>
+    <div class="qr-frame mx-auto">
+      <img id="qrModalImg" src="" alt="QR Code" class="w-48 h-48 object-contain"
+           onerror="this.onerror=null; this.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(this.dataset.token || this.dataset.id || '10001');">
+    </div>
     <p class="text-xs text-slate-400" data-i18n="qr_modal_sub"></p>
   </div>
 </div>
 
-<!-- ================= MODAL: ADD TRAINER ================= -->
 <div id="addTrainerModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-md p-6 space-y-4">
     <div class="flex justify-between items-center border-b hairline pb-3">
@@ -720,7 +711,6 @@ tbody td { padding: .8rem 1rem; }
   </div>
 </div>
 
-<!-- ================= MODAL: EDIT PAYMENT ================= -->
 <div id="editPaymentModal" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-sm p-6 space-y-4">
     <div class="flex justify-between items-center border-b hairline pb-3">
@@ -738,211 +728,6 @@ tbody td { padding: .8rem 1rem; }
 </div>
 
 <script>
-const I18N = {
-  ar: {
-    sub_title: "بوابة الإدارة والتتبع الرياضي الشامل",
-    live_floor: "الصالة الحية:",
-    nav_dashboard: "لوحة التحكم", nav_members: "الأعضاء", nav_trainers: "الكباتن",
-    nav_memberships: "الاشتراكات", nav_attendance: "الحضور", nav_payments: "الخزينة", nav_exit: "إغلاق النظام",
-
-    dash_title: "نظرة عامة على نشاط الصالة", dash_sub: "متابعة فورية للحضور والإيرادات والالتزام الرياضي",
-    stat_in_gym: "في الجيم الآن (ساعتان)", stat_in_gym_sub: "يختفي الشخص تلقائياً بعد ساعتين",
-    stat_today_att: "حضور اليوم بالكامل", stat_today_att_sub: "سجل غير مكرر على مدار 24 ساعة",
-    stat_active: "المشتركين النشطين", stat_active_sub: "صلاحية سارية وحصص متبقية",
-    stat_revenue: "إجمالي الدخل المحصل", stat_revenue_sub: "شامل الاشتراكات ونسبة المدربين",
-    retention_label: "معدل الاستمرارية",
-    live_gym_list: "المتواجدون بالصالة حالياً (كباتن وأعضاء)", live_refresh_badge: "تحديث تلقائي لحظي",
-    minutes_suffix: "دقيقة", days_suffix: "يوم", none_in_gym: "لا يوجد أحد داخل الصالة حالياً",
-
-    th_member_id: "الكود", th_name: "الاسم", th_role: "الصفة (الرتبة)", th_checkin_time: "وقت الدخول",
-    th_duration: "المدة بالداخل", th_status: "الحالة", th_code: "الكود", th_member_name: "اسم العضو",
-    th_phone: "الهاتف", th_plan: "الخطة", th_rem_sessions: "الحصص المتبقية", th_coach: "الكابتن",
-    th_actions: "الإجراءات", th_sub_id: "رقم الاشتراك", th_plan_chosen: "الخطة المختارة",
-    th_start_d: "تاريخ البدء", th_end_d: "تاريخ الانتهاء", th_sessions_left: "الحصص (متبقية/إجمالي)",
-    th_cost: "التكلفة", th_log_id: "رقم الحركة", th_time: "ساعة الحضور", th_receipt_id: "رقم الإيصال",
-    th_trainee: "اسم المشترك", th_amount: "المبلغ", th_method: "وسيلة الدفع", th_desc: "البيان", th_date: "التاريخ",
-
-    mem_title: "إدارة الأعضاء وفحوصات الـ InBody", mem_sub: "سجل المشتركين، التجميد، التجديد، ومتابعة تطور الجسم",
-    btn_add_member: "تسجيل عضو جديد", search_placeholder: "ابحث بالاسم، الهاتف، أو الكود…",
-    filter_all: "جميع الأعضاء", filter_active: "النشطين فقط", filter_expired: "المنتهية اشتراكاتهم", filter_frozen: "المجمدين فقط",
-    no_members_found: "لا يوجد أعضاء مطابقين", no_suggestions: "لا توجد نتائج مقترحة مطابقة",
-    status_active: "نشط", status_frozen: "مجمد", status_expired: "منتهي",
-    btn_renew: "تجديد", btn_unfreeze: "فك التجميد", btn_freeze: "تجميد", btn_inbody: "InBody",
-    btn_qr: "QR", btn_delete: "حذف", btn_edit: "تعديل",
-
-    coach_title: "فريق تدريب FitZone Pro", coach_sub: "كروت مختصرة للكباتن مع إمكانية الدخول للبروفايل الكامل",
-    btn_add_trainer: "إضافة كابتن جديد", present_now: "حاضر بالصالة الآن", not_present: "غير متواجد",
-    trainer_code_label: "الكود:", trainees_label: "المتدربين:", champ_suffix: "بطل",
-    btn_view_full_profile: "عرض البروفايل الكامل", btn_qr_code: "QR كود",
-
-    ms_title: "سجل الاشتراكات وتتبع الصلاحيات الكامل", ms_sub: "جميع اشتراكات الأعضاء بالتاريخ والوقت والحصص والمبالغ",
-    ms_search_ph: "بحث في الاشتراكات (اسم، كود، هاتف)…", no_memberships: "لا توجد اشتراكات مسجلة",
-
-    att_title: "تسجيل حضور المشتركين والكباتن", att_sub: "سجل بالكود، افتح الكاميرا، أو ارفع صورة الـ QR",
-    btn_open_cam: "تشغيل كاميرا مسح الـ QR", btn_close_cam: "إغلاق الكاميرا", btn_scan_file: "مسح من صورة QR",
-    cam_prompt: "وجّه كود الـ QR داخل الإطار للمسح التلقائي…", checkin_ph: "ادخل كود العضو أو الكابتن…",
-    btn_checkin: "تأكيد الحضور بالكود", audit_24h_title: "سجل تدقيق الحضور على مدار الـ 24 ساعة (اليوم)",
-    no_attendance_today: "لا يوجد حضور مسجل اليوم حتى الآن", role_trainer: "كابتن", role_member: "عضو",
-
-    pay_title: "سجل المعاملات المالية", pay_sub: "تسجيل، تعديل، وحذف الحركات المالية والتحصيل",
-    pay_new_header: "تسجيل حركة تحصيل جديدة", pay_member_id_ph: "كود العضو", pay_amount_ph: "المبلغ ($)",
-    pay_ref_ph: "البيان / ملاحظات", btn_record_pay: "تسجيل الدفعة",
-    method_cash: "نقدي", method_visa: "فيزا", method_instapay: "إنستاباي", method_vodafone: "فودافون كاش",
-
-    modal_reg_title: "تسجيل مشترك جديد مع قياسات InBody", lbl_name: "الاسم بالكامل", lbl_phone: "رقم الهاتف (11 رقم)",
-    lbl_plan: "باقة الاشتراك", lbl_coach: "تعيين مدرب (رسوم إضافية)", no_trainer_opt: "بدون مدرب شخصي",
-    inbody_box_title: "قياسات الـ InBody المبدئية", ph_weight: "الوزن (kg)", ph_height: "الطول (cm)",
-    ph_fat: "الدهون (%)", ph_muscle: "العضلات (kg)", lbl_total_price: "المبلغ المطلوب سداده",
-    btn_confirm_reg: "حفظ وتفعيل الاشتراك", trainer_fee_note: "شامل نسبة كابتن",
-
-    renew_title_prefix: "تجديد اشتراك:", lbl_choose_plan: "اختر الباقة الجديدة",
-    renew_inbody_title: "قياسات InBody التجديد لمتابعة التطور", ph_weight_now: "الوزن الحالي (kg)",
-    ph_fat_pct: "نسبة الدهون (%)", ph_muscle_mass: "الكتلة العضلية (kg)", btn_confirm_renew: "تأكيد التجديد ودفع الاشتراك",
-
-    qr_pass_title: "QR Pass —", qr_modal_sub: "امسح الكود عبر كاميرا الصالة لتسجيل الدخول السريع",
-
-    modal_add_tr_title: "إضافة كابتن جديد للفريق", lbl_tr_name: "اسم الكابتن", lbl_spec: "التخصص الرياضي",
-    lbl_salary: "الراتب الشهري ($)", btn_confirm_add_tr: "حفظ وتعيين الكابتن",
-    spec_iron: "حديد وبناء أجسام", spec_fitness: "لياقة بدنية", spec_cardio: "كارديو وتخسيس",
-    spec_crossfit: "كروس فيت", spec_boxing: "ملاكمة وفنون قتال",
-
-    tr_id_label: "كود الكابتن (ID)", tr_phone_label: "رقم الهاتف", tr_salary_label: "الراتب الشهري",
-    tr_att_days_label: "حضور الصالة", tr_current_status_label: "الحالة الحالية بالصالة:",
-    tr_checkin_btn: "تسجيل حضور الكابتن الآن", tr_trainees_title: "قائمة المتدربين مع الكابتن ونتائجهم (قبل وبعد)",
-    tr_trainee_col: "المتدرب", tr_commitment_col: "التزام 3 أشهر", tr_weight_col: "الوزن",
-    tr_fat_col: "الدهون", tr_muscle_col: "العضلات", no_trainees_yet: "لا يوجد متدربين لهذا الكابتن حالياً",
-
-    edit_pay_title_prefix: "تعديل إيصال الدفع #", lbl_amt: "المبلغ المحصل ($)", lbl_method: "وسيلة الدفع",
-    lbl_desc: "البيان / ملاحظات", btn_save_pay: "حفظ التعديلات المالية",
-
-    exit_confirm: "هل أنت متأكد من رغبتك في إغلاق الجلسة والخروج؟",
-    exit_title: "FitZone Pro Offline", exit_sub: "تم إغلاق الجلسة بنجاح. يمكنك إغلاق نافذة المتصفح بأمان.",
-    confirm_cancel: "إلغاء", confirm_ok: "تأكيد الحذف",
-    confirm_delete_member: "هل أنت متأكد من حذف هذا العضو نهائياً؟ لا يمكن التراجع عن هذا الإجراء.",
-    confirm_delete_payment: "هل أنت متأكد من حذف حركة الدفع هذه نهائياً؟",
-
-    toast_member_registered: "تم تسجيل العضو بنجاح", toast_member_updated: "تم تحديث بيانات العضو",
-    toast_member_deleted: "تم حذف العضو", toast_renewed: "تم تجديد الاشتراك بنجاح",
-    toast_frozen: "تم تجميد اشتراك العضو", toast_unfrozen: "تم فك تجميد الاشتراك",
-    toast_trainer_added: "تمت إضافة الكابتن بنجاح", toast_trainer_checkin: "تم تسجيل حضور الكابتن",
-    toast_checkin_success: "تم تسجيل الحضور بنجاح", toast_payment_recorded: "تم تسجيل الدفعة في الخزينة",
-    toast_payment_updated: "تم تعديل الإيصال بنجاح", toast_payment_deleted: "تم حذف حركة الدفع",
-    toast_generic_error: "حدث خطأ، حاول مرة أخرى", toast_enter_id: "يرجى إدخال الكود أولاً",
-    toast_fill_required: "يرجى ملء جميع الحقول المطلوبة", toast_no_qr_in_image: "لم يتم العثور على كود QR صالح في الصورة",
-    toast_camera_error: "تعذر تشغيل الكاميرا، تحقق من صلاحيات المتصفح",
-    member_verify_found: "موجود", member_verify_missing: "غير موجود",
-
-    tf_first_day: "📅 أول يوم بالصالة",
-    tf_latest_day: "⚡ الوضع الحالي",
-    tf_net_change: "📊 صافي التغير مع الكابتن:",
-    tf_view_comparison: "قبل وبعد 🔍",
-    tf_no_inbody: "لا يوجد فحص",
-    tf_duration_text: "المدة المسجلة:",
-    tf_total_scans_text: "إجمالي الفحوصات:",
-  },
-  en: {
-    sub_title: "Complete gym management & tracking platform",
-    live_floor: "Live floor:",
-    nav_dashboard: "Dashboard", nav_members: "Members", nav_trainers: "Trainers",
-    nav_memberships: "Memberships", nav_attendance: "Attendance", nav_payments: "Payments", nav_exit: "Exit system",
-
-    dash_title: "Gym activity overview", dash_sub: "Real-time tracking of attendance, revenue and retention",
-    stat_in_gym: "Currently in gym (2h)", stat_in_gym_sub: "Auto-clears after two hours",
-    stat_today_att: "Today's total check-ins", stat_today_att_sub: "Unique record over the last 24 hours",
-    stat_active: "Active members", stat_active_sub: "Valid plan with sessions remaining",
-    stat_revenue: "Total collected revenue", stat_revenue_sub: "Including memberships & trainer fees",
-    retention_label: "Retention rate",
-    live_gym_list: "Currently on the floor (coaches & members)", live_refresh_badge: "Live auto-refresh",
-    minutes_suffix: "min", days_suffix: "days", none_in_gym: "No one is currently in the gym",
-
-    th_member_id: "ID", th_name: "Name", th_role: "Role", th_checkin_time: "Check-in time",
-    th_duration: "Duration inside", th_status: "Status", th_code: "ID", th_member_name: "Member name",
-    th_phone: "Phone", th_plan: "Plan", th_rem_sessions: "Sessions left", th_coach: "Trainer",
-    th_actions: "Actions", th_sub_id: "Subscription #", th_plan_chosen: "Chosen plan",
-    th_start_d: "Start date", th_end_d: "End date", th_sessions_left: "Sessions (left/total)",
-    th_cost: "Cost", th_log_id: "Record #", th_time: "Time", th_receipt_id: "Receipt #",
-    th_trainee: "Member name", th_amount: "Amount", th_method: "Method", th_desc: "Note", th_date: "Date",
-
-    mem_title: "Member management & InBody checks", mem_sub: "Registration, freezing, renewal, and body progress tracking",
-    btn_add_member: "Register new member", search_placeholder: "Search by name, phone, or ID…",
-    filter_all: "All members", filter_active: "Active only", filter_expired: "Expired only", filter_frozen: "Frozen only",
-    no_members_found: "No matching members found", no_suggestions: "No matching results",
-    status_active: "Active", status_frozen: "Frozen", status_expired: "Expired",
-    btn_renew: "Renew", btn_unfreeze: "Unfreeze", btn_freeze: "Freeze", btn_inbody: "InBody",
-    btn_qr: "QR", btn_delete: "Delete", btn_edit: "Edit",
-
-    coach_title: "FitZone Pro training team", coach_sub: "Compact trainer cards — open any for the full profile",
-    btn_add_trainer: "Add new trainer", present_now: "On the floor now", not_present: "Not present",
-    trainer_code_label: "Code:", trainees_label: "Trainees:", champ_suffix: "",
-    btn_view_full_profile: "View full profile", btn_qr_code: "QR code",
-
-    ms_title: "Membership records & validity tracking", ms_sub: "Every membership with dates, sessions and amounts",
-    ms_search_ph: "Search memberships (name, ID, phone)…", no_memberships: "No memberships recorded yet",
-
-    att_title: "Member & trainer check-in", att_sub: "Enter an ID, open the camera, or upload a QR image",
-    btn_open_cam: "Start QR camera scan", btn_close_cam: "Close camera", btn_scan_file: "Scan from image",
-    cam_prompt: "Point the QR code inside the frame to scan automatically…", checkin_ph: "Enter member or trainer ID…",
-    btn_checkin: "Confirm check-in", audit_24h_title: "24-hour attendance log (today)",
-    no_attendance_today: "No check-ins recorded yet today", role_trainer: "Trainer", role_member: "Member",
-
-    pay_title: "Financial transactions", pay_sub: "Record, edit, and delete payment transactions",
-    pay_new_header: "Record a new payment", pay_member_id_ph: "Member ID", pay_amount_ph: "Amount ($)",
-    pay_ref_ph: "Note / reference", btn_record_pay: "Record payment",
-    method_cash: "Cash", method_visa: "Visa", method_instapay: "InstaPay", method_vodafone: "Vodafone Cash",
-
-    modal_reg_title: "Register a new member with InBody", lbl_name: "Full name", lbl_phone: "Phone (11 digits)",
-    lbl_plan: "Membership plan", lbl_coach: "Assign a trainer (extra fee)", no_trainer_opt: "No personal trainer",
-    inbody_box_title: "Initial InBody measurements", ph_weight: "Weight (kg)", ph_height: "Height (cm)",
-    ph_fat: "Fat (%)", ph_muscle: "Muscle (kg)", lbl_total_price: "Amount due",
-    btn_confirm_reg: "Save & activate membership", trainer_fee_note: "incl. trainer fee",
-
-    renew_title_prefix: "Renew membership:", lbl_choose_plan: "Choose a new plan",
-    renew_inbody_title: "Renewal InBody measurements", ph_weight_now: "Current weight (kg)",
-    ph_fat_pct: "Body fat (%)", ph_muscle_mass: "Muscle mass (kg)", btn_confirm_renew: "Confirm renewal & pay",
-
-    qr_pass_title: "QR Pass —", qr_modal_sub: "Scan at the gym camera for quick check-in",
-
-    modal_add_tr_title: "Add a new trainer", lbl_tr_name: "Trainer name", lbl_spec: "Specialization",
-    lbl_salary: "Monthly salary ($)", btn_confirm_add_tr: "Save trainer",
-    spec_iron: "Iron / Bodybuilding", spec_fitness: "Fitness", spec_cardio: "Cardio",
-    spec_crossfit: "Crossfit", spec_boxing: "Boxing",
-
-    tr_id_label: "Trainer ID", tr_phone_label: "Phone", tr_salary_label: "Monthly salary",
-    tr_att_days_label: "Gym attendance", tr_current_status_label: "Current floor status:",
-    tr_checkin_btn: "Check in trainer now", tr_trainees_title: "Trainees & their results (before / after)",
-    tr_trainee_col: "Trainee", tr_commitment_col: "3-month commitment", tr_weight_col: "Weight",
-    tr_fat_col: "Fat", tr_muscle_col: "Muscle", no_trainees_yet: "No trainees assigned to this trainer yet",
-
-    edit_pay_title_prefix: "Edit receipt #", lbl_amt: "Collected amount ($)", lbl_method: "Payment method",
-    lbl_desc: "Note / reference", btn_save_pay: "Save changes",
-
-    exit_confirm: "Are you sure you want to close this session and exit?",
-    exit_title: "FitZone Pro Offline", exit_sub: "Session closed successfully. You can safely close this window.",
-    confirm_cancel: "Cancel", confirm_ok: "Confirm delete",
-    confirm_delete_member: "Are you sure you want to permanently delete this member? This can't be undone.",
-    confirm_delete_payment: "Are you sure you want to permanently delete this payment?",
-
-    toast_member_registered: "Member registered successfully", toast_member_updated: "Member details updated",
-    toast_member_deleted: "Member deleted", toast_renewed: "Membership renewed successfully",
-    toast_frozen: "Membership frozen", toast_unfrozen: "Membership unfrozen",
-    toast_trainer_added: "Trainer added successfully", toast_trainer_checkin: "Trainer checked in",
-    toast_checkin_success: "Check-in recorded successfully", toast_payment_recorded: "Payment recorded",
-    toast_payment_updated: "Receipt updated successfully", toast_payment_deleted: "Payment deleted",
-    toast_generic_error: "Something went wrong, please try again", toast_enter_id: "Please enter an ID first",
-    toast_fill_required: "Please fill in all required fields", toast_no_qr_in_image: "No valid QR code found in the image",
-    toast_camera_error: "Couldn't access the camera — check browser permissions",
-    member_verify_found: "Found", member_verify_missing: "Not found",
-
-    tf_first_day: "📅 First Day",
-    tf_latest_day: "⚡ Current Status",
-    tf_net_change: "📊 Net Transformation:",
-    tf_view_comparison: "Before & After 🔍",
-    tf_no_inbody: "No InBody",
-    tf_duration_text: "Tracked period:",
-    tf_total_scans_text: "Total scans:",
-  }
-};
-
 const App = (() => {
 
   const state = {
@@ -1225,7 +1010,6 @@ const App = (() => {
       document.getElementById('renew_mid').value = id;
       document.getElementById('renewModalTitle').textContent = `${i18n.t('renew_title_prefix')} ${name} (#${id})`;
       
-      // تفريغ الحقول دائماً لمنع انتقال أرقام متدرب إلى آخر
       document.getElementById('renew_w').value = '';
       document.getElementById('renew_h').value = '';
       document.getElementById('renew_fat').value = '';
@@ -1273,8 +1057,13 @@ const App = (() => {
       catch (e) { ui.toast(e.message, 'error'); }
     },
     showQr(id, name) {
+      const member = state.members.find(x => String(x.id) === String(id));
+      const token = member ? (member.qr_token || member.id) : id;
+      const img = document.getElementById('qrModalImg');
+      img.dataset.token = token;
+      img.dataset.id = id;
       document.getElementById('qrModalTitle').textContent = `${i18n.t('qr_pass_title')} ${name} (#${id})`;
-      document.getElementById('qrModalImg').src = `/api/members/${id}/qr?t=${Date.now()}`;
+      img.src = `/api/members/${id}/qr?t=${Date.now()}`;
       ui.openModal('qrModal');
     },
     async openProfile(id) {
@@ -1346,7 +1135,6 @@ const App = (() => {
       state.currentTrainerId = id;
       state.currentTrainerTrainees = [];
 
-      // تصفير وتفريغ الحقول لحظياً قبل الجلب لمنع ظهور بيانات كابتن سابق
       document.getElementById('tr_prof_name').textContent = '—';
       document.getElementById('tr_prof_spec').textContent = '';
       document.getElementById('tr_prof_id').textContent = '';
@@ -1449,8 +1237,13 @@ const App = (() => {
       } catch (e) { ui.toast(e.message, 'error'); }
     },
     showQr(id, name) {
+      const trainer = state.trainers.find(x => String(x.id) === String(id));
+      const token = trainer ? (trainer.qr_token || trainer.id) : id;
+      const img = document.getElementById('qrModalImg');
+      img.dataset.token = token;
+      img.dataset.id = id;
       document.getElementById('qrModalTitle').textContent = `${i18n.t('qr_pass_title')} ${name} (#${id})`;
-      document.getElementById('qrModalImg').src = `/api/trainers/${id}/qr?t=${Date.now()}`;
+      img.src = `/api/trainers/${id}/qr?t=${Date.now()}`;
       ui.openModal('qrModal');
     }
   };
@@ -1727,7 +1520,6 @@ const App = (() => {
     });
     document.getElementById('tr_prof_checkin_btn').addEventListener('click', () => trainers.checkinCurrent());
 
-    // تفويض أحداث جدول متدربي الكابتن (مقارنة قبل وبعد + التجديد المباشر)
     document.getElementById('tr_prof_trainees_table').addEventListener('click', (e) => {
       const btn = e.target.closest('[data-act]'); if (!btn) return;
       const { act, idx, id, name } = btn.dataset;
