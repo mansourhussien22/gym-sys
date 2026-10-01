@@ -26,9 +26,6 @@
 </script>
 
 <style>
-/* ==========================================================
-   DESIGN TOKENS
-   ========================================================== */
 :root {
   --bg: #080b12;
   --surface: #0e1320;
@@ -73,7 +70,6 @@ body {
   overflow-x: hidden;
 }
 
-/* subtle ambient glow instead of heavy photo backgrounds — keeps it light & fast */
 .ambient {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background:
@@ -89,9 +85,6 @@ body {
 
 ::selection { background: var(--orange); color: #1a0d02; }
 
-/* ==========================================================
-   MOTION PRIMITIVES
-   ========================================================== */
 @keyframes fadeSlideUp { from { opacity:0; transform: translateY(14px); } to { opacity:1; transform:none; } }
 @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 @keyframes popIn { from { opacity:0; transform: scale(.94) translateY(6px);} to { opacity:1; transform:none; } }
@@ -106,9 +99,6 @@ body {
   .tab-content, .modal-panel, .toast-item { animation: none !important; }
 }
 
-/* ==========================================================
-   LAYOUT SHELL
-   ========================================================== */
 .glass {
   background: linear-gradient(180deg, rgba(20,26,42,.7), rgba(14,19,32,.7));
   backdrop-filter: blur(14px);
@@ -138,9 +128,6 @@ body {
   will-change: transform, height;
 }
 
-/* ==========================================================
-   CARDS / SURFACES
-   ========================================================== */
 .panel {
   background: var(--surface-2);
   border: 1px solid var(--border-soft);
@@ -174,9 +161,6 @@ tbody td { padding: .8rem 1rem; }
 .badge { display:inline-flex; align-items:center; gap:.32rem; padding:.28rem .68rem; border-radius:999px; font-size:.68rem; font-weight:800; white-space:nowrap; }
 .badge-dot { width:5px; height:5px; border-radius:50%; background:currentColor; }
 
-/* ==========================================================
-   FORM CONTROLS
-   ========================================================== */
 .field-label { display:block; font-size:.72rem; font-weight:700; color: var(--muted); margin-bottom:.4rem; }
 .input, select.input {
   width:100%; background: var(--bg); border:1px solid var(--border); color: var(--text);
@@ -207,12 +191,9 @@ tbody td { padding: .8rem 1rem; }
 .btn-xs { padding:.4rem .68rem; font-size:.68rem; border-radius:9px; }
 .btn:disabled { opacity:.55; cursor:not-allowed; transform:none; }
 
-/* ==========================================================
-   MODALS
-   ========================================================== */
 .modal-backdrop {
   position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:1rem;
-  background: rgba(4,6,11,.72); backdrop-filter: blur(6px);
+  background: rgba(4,6,11,.75); backdrop-filter: blur(8px);
   animation: fadeIn .2s var(--ease);
 }
 .modal-panel {
@@ -220,9 +201,6 @@ tbody td { padding: .8rem 1rem; }
   background: var(--surface-2); border:1px solid var(--border-soft); border-radius: var(--r-lg);
 }
 
-/* ==========================================================
-   TOASTS
-   ========================================================== */
 #toastStack {
   position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%);
   z-index: 100; display:flex; flex-direction:column; gap:.55rem; width: min(92vw, 380px);
@@ -242,23 +220,14 @@ tbody td { padding: .8rem 1rem; }
 .toast-item.info svg { color: var(--blue); }
 .toast-bar { position:absolute; bottom:0; right:0; left:0; height:2px; background: currentColor; opacity:.5; animation: barShrink linear forwards; }
 
-/* ==========================================================
-   SKELETON LOADERS
-   ========================================================== */
 .skel {
   background: linear-gradient(90deg, var(--surface-3) 25%, #232b42 37%, var(--surface-3) 63%);
   background-size: 400px 100%; animation: shimmer 1.4s ease-in-out infinite;
   border-radius: 8px;
 }
 
-/* ==========================================================
-   LIVE / PRESENCE
-   ========================================================== */
 .dot-live { width:9px; height:9px; border-radius:50%; background: var(--emerald); animation: pulseDot 2.2s infinite; }
 
-/* ==========================================================
-   LANG SWITCH
-   ========================================================== */
 .lang-switch { display:flex; background: var(--surface-3); border:1px solid var(--border); border-radius: 999px; padding: 3px; }
 .lang-switch button {
   padding: .38rem .85rem; border-radius:999px; font-size:.72rem; font-weight:800; color: var(--muted);
@@ -266,9 +235,6 @@ tbody td { padding: .8rem 1rem; }
 }
 .lang-switch button.is-active { background: var(--orange); color:#1a0d02; }
 
-/* ==========================================================
-   MISC
-   ========================================================== */
 .qr-frame { background:#fff; border-radius: var(--r-md); padding: 14px; display:inline-block; box-shadow: 0 20px 40px -20px rgba(0,0,0,.6); }
 .chip-search-suggest { animation: fadeSlideUp .25s var(--ease) both; }
 .hairline { border-color: var(--border-soft); }
@@ -282,10 +248,8 @@ tbody td { padding: .8rem 1rem; }
 <body class="min-h-screen flex flex-col">
 <div class="ambient"></div>
 
-<!-- ================= TOASTS ================= -->
 <div id="toastStack"></div>
 
-<!-- ================= GENERIC CONFIRM DIALOG ================= -->
 <div id="confirmBackdrop" class="modal-backdrop hidden">
   <div class="modal-panel w-full max-w-sm p-6 text-center space-y-4">
     <div class="w-12 h-12 rounded-2xl bg-rose-500/15 text-rose-400 mx-auto flex items-center justify-center">
@@ -299,7 +263,6 @@ tbody td { padding: .8rem 1rem; }
   </div>
 </div>
 
-<!-- ================= TOPBAR ================= -->
 <header id="topbar" class="glass border-b px-5 py-3 flex justify-between items-center relative z-10">
   <div class="flex items-center gap-3">
     <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-orange-500/25 to-amber-500/10 text-orange-500 border border-orange-500/25 flex items-center justify-center font-black text-xl shadow-inner">⚡</span>
@@ -324,7 +287,6 @@ tbody td { padding: .8rem 1rem; }
 
 <div class="flex-1 flex overflow-hidden relative z-10">
 
-  <!-- ================= SIDEBAR ================= -->
   <aside id="sidebar" class="w-64 border-l hairline glass flex flex-col justify-between p-4">
     <nav id="navList" class="relative space-y-1.5">
       <div id="navIndicator" style="height:0"></div>
@@ -353,10 +315,9 @@ tbody td { padding: .8rem 1rem; }
     </button>
   </aside>
 
-  <!-- ================= MAIN ================= -->
   <main class="flex-1 overflow-y-auto p-6 md:p-8">
 
-    <!-- ============ 1. DASHBOARD ============ -->
+    <!-- 1. DASHBOARD -->
     <section id="tab-dashboard" class="tab-content space-y-6">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 panel p-6">
         <div>
@@ -392,7 +353,7 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- ============ 2. MEMBERS ============ -->
+    <!-- 2. MEMBERS -->
     <section id="tab-members" class="tab-content hidden space-y-6">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 panel p-6">
         <div>
@@ -430,7 +391,7 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- ============ 3. TRAINERS ============ -->
+    <!-- 3. TRAINERS -->
     <section id="tab-trainers" class="tab-content hidden space-y-6">
       <div class="flex justify-between items-center panel p-6">
         <div>
@@ -444,7 +405,7 @@ tbody td { padding: .8rem 1rem; }
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="trainers_cards"></div>
     </section>
 
-    <!-- ============ 4. MEMBERSHIPS ============ -->
+    <!-- 4. MEMBERSHIPS -->
     <section id="tab-memberships" class="tab-content hidden space-y-6">
       <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 panel p-6">
         <div>
@@ -465,7 +426,7 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- ============ 5. ATTENDANCE ============ -->
+    <!-- 5. ATTENDANCE -->
     <section id="tab-attendance" class="tab-content hidden space-y-6">
       <div class="max-w-xl mx-auto panel p-8 text-center space-y-6">
         <div class="w-16 h-16 rounded-2xl bg-orange-600/15 text-orange-500 mx-auto flex items-center justify-center">
@@ -516,7 +477,7 @@ tbody td { padding: .8rem 1rem; }
       </div>
     </section>
 
-    <!-- ============ 6. PAYMENTS ============ -->
+    <!-- 6. PAYMENTS -->
     <section id="tab-payments" class="tab-content hidden space-y-6">
       <div class="panel p-6">
         <h2 class="text-2xl font-black" data-i18n="pay_title"></h2>
@@ -556,7 +517,7 @@ tbody td { padding: .8rem 1rem; }
 
 <!-- ================= MODAL: TRAINER PROFILE ================= -->
 <div id="trainerProfileModal" class="modal-backdrop hidden">
-  <div class="modal-panel w-full max-w-2xl p-7 max-h-[90vh] overflow-y-auto space-y-6">
+  <div class="modal-panel w-full max-w-3xl p-7 max-h-[90vh] overflow-y-auto space-y-6">
     <div class="flex justify-between items-start border-b hairline pb-4">
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-2xl bg-orange-600/15 text-orange-500 font-black flex items-center justify-center text-2xl border border-orange-500/20">🏋️</div>
@@ -602,11 +563,72 @@ tbody td { padding: .8rem 1rem; }
       <div class="overflow-x-auto rounded-xl border hairline bg-black/25">
         <table class="text-xs">
           <thead><tr>
-            <th data-i18n="tr_trainee_col"></th><th data-i18n="th_phone"></th><th data-i18n="tr_commitment_col"></th>
-            <th data-i18n="tr_weight_col"></th><th data-i18n="tr_fat_col"></th><th data-i18n="tr_muscle_col"></th>
+            <th data-i18n="tr_trainee_col"></th>
+            <th data-i18n="th_phone"></th>
+            <th data-i18n="tr_commitment_col"></th>
+            <th data-i18n="th_rem_sessions"></th>
+            <th class="text-center" data-i18n="tf_view_comparison"></th>
+            <th class="text-center" data-i18n="th_actions"></th>
           </tr></thead>
           <tbody id="tr_prof_trainees_table"></tbody>
         </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: TRAINEE TRANSFORMATION (BEFORE & AFTER) ================= -->
+<div id="traineeTransformationModal" class="modal-backdrop hidden">
+  <div class="modal-panel w-full max-w-xl p-6 space-y-6">
+    <div class="flex justify-between items-center border-b hairline pb-3">
+      <div>
+        <h3 class="text-lg font-black" id="tf_modal_trainee_name"></h3>
+        <p class="text-xs text-orange-400 font-semibold mt-0.5" id="tf_modal_duration"></p>
+      </div>
+      <button data-close-modal="traineeTransformationModal" class="p-2 text-slate-400 hover:text-white rounded-xl bg-white/5">✕</button>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div class="p-4 rounded-2xl bg-black/25 border hairline space-y-3">
+        <div class="flex items-center justify-between border-b hairline pb-2">
+          <span class="text-xs font-black text-slate-400" data-i18n="tf_first_day"></span>
+          <span class="text-[11px] font-bold text-amber-400 font-mono" id="tf_start_date">-</span>
+        </div>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_weight"></span> <strong class="font-mono text-white" id="tf_start_weight">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_fat"></span> <strong class="font-mono text-white" id="tf_start_fat">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_muscle"></span> <strong class="font-mono text-white" id="tf_start_muscle">-</strong></div>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-2xl bg-black/25 border hairline space-y-3">
+        <div class="flex items-center justify-between border-b hairline pb-2">
+          <span class="text-xs font-black text-emerald-400" data-i18n="tf_latest_day"></span>
+          <span class="text-[11px] font-bold text-emerald-400 font-mono" id="tf_latest_date">-</span>
+        </div>
+        <div class="space-y-1.5 text-xs">
+          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_weight"></span> <strong class="font-mono text-white" id="tf_latest_weight">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_fat"></span> <strong class="font-mono text-white" id="tf_latest_fat">-</strong></div>
+          <div class="flex justify-between"><span class="text-slate-400" data-i18n="ph_muscle"></span> <strong class="font-mono text-white" id="tf_latest_muscle">-</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 rounded-2xl bg-black/40 border hairline space-y-3">
+      <h4 class="text-xs font-black text-slate-300" data-i18n="tf_net_change"></h4>
+      <div class="grid grid-cols-3 gap-3 text-center">
+        <div class="p-2.5 rounded-xl bg-black/30 border hairline">
+          <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_weight_col"></p>
+          <p class="text-sm font-black mt-1 font-mono" id="tf_diff_weight">-</p>
+        </div>
+        <div class="p-2.5 rounded-xl bg-black/30 border hairline">
+          <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_fat_col"></p>
+          <p class="text-sm font-black mt-1 font-mono" id="tf_diff_fat">-</p>
+        </div>
+        <div class="p-2.5 rounded-xl bg-black/30 border hairline">
+          <p class="text-[11px] text-slate-400 font-semibold" data-i18n="tr_muscle_col"></p>
+          <p class="text-sm font-black mt-1 font-mono" id="tf_diff_muscle">-</p>
+        </div>
       </div>
     </div>
   </div>
@@ -716,17 +738,6 @@ tbody td { padding: .8rem 1rem; }
 </div>
 
 <script>
-/* ==========================================================================================
-   FitZone Pro — app.js (inline)
-   منظّمة كـ namespace واحد (App) بأقسام واضحة لكل ميزة، عشان أي تعديل مستقبلي
-   (إضافة endpoint، تغيير شكل بيانات، ميزة جديدة) يبقى معزول في قسمه من غير
-   ما يكسر باقي الأقسام. كل نص ظاهر للمستخدم بييجي من قاموس I18N — مفيش نص
-   عربي وإنجليزي مخلوطين في نفس السطر.
-   ========================================================================================== */
-
-/* ---------------------------------------------------------
-   1) I18N — قاموس الترجمة الكامل (كل نص ظاهر، ثابت أو متولّد)
-   --------------------------------------------------------- */
 const I18N = {
   ar: {
     sub_title: "بوابة الإدارة والتتبع الرياضي الشامل",
@@ -820,6 +831,14 @@ const I18N = {
     toast_fill_required: "يرجى ملء جميع الحقول المطلوبة", toast_no_qr_in_image: "لم يتم العثور على كود QR صالح في الصورة",
     toast_camera_error: "تعذر تشغيل الكاميرا، تحقق من صلاحيات المتصفح",
     member_verify_found: "موجود", member_verify_missing: "غير موجود",
+
+    tf_first_day: "📅 أول يوم بالصالة",
+    tf_latest_day: "⚡ الوضع الحالي",
+    tf_net_change: "📊 صافي التغير مع الكابتن:",
+    tf_view_comparison: "قبل وبعد 🔍",
+    tf_no_inbody: "لا يوجد فحص",
+    tf_duration_text: "المدة المسجلة:",
+    tf_total_scans_text: "إجمالي الفحوصات:",
   },
   en: {
     sub_title: "Complete gym management & tracking platform",
@@ -913,21 +932,26 @@ const I18N = {
     toast_fill_required: "Please fill in all required fields", toast_no_qr_in_image: "No valid QR code found in the image",
     toast_camera_error: "Couldn't access the camera — check browser permissions",
     member_verify_found: "Found", member_verify_missing: "Not found",
+
+    tf_first_day: "📅 First Day",
+    tf_latest_day: "⚡ Current Status",
+    tf_net_change: "📊 Net Transformation:",
+    tf_view_comparison: "Before & After 🔍",
+    tf_no_inbody: "No InBody",
+    tf_duration_text: "Tracked period:",
+    tf_total_scans_text: "Total scans:",
   }
 };
 
-/* ---------------------------------------------------------
-   2) APP NAMESPACE
-   --------------------------------------------------------- */
 const App = (() => {
 
   const state = {
     lang: localStorage.getItem('fz_lang') || 'ar',
     members: [], trainers: [], memberships: [], plans: {}, taxRate: 0.10,
     isCameraRunning: false, html5QrScanner: null, currentTrainerId: null,
+    currentTrainerTrainees: []
   };
 
-  /* ----- i18n ----- */
   const i18n = {
     t(key) { return I18N[state.lang][key] ?? key; },
     setLang(lang) {
@@ -937,7 +961,6 @@ const App = (() => {
       document.documentElement.setAttribute('lang', lang);
       this.apply();
       ui.rebuildIcons();
-      // إعادة رسم أي محتوى متولّد ديناميكيًا كان معروض بلغة قديمة
       members.render(members.currentList());
       trainers.render();
       memberships.render(memberships.currentList());
@@ -953,7 +976,6 @@ const App = (() => {
     }
   };
 
-  /* ----- API helpers ----- */
   const api = {
     async get(url) {
       const res = await fetch(url);
@@ -975,7 +997,6 @@ const App = (() => {
     }
   };
 
-  /* ----- UI helpers: toast / confirm / modal / skeleton ----- */
   const ui = {
     rebuildIcons() { if (window.lucide) lucide.createIcons(); },
 
@@ -1037,7 +1058,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Navigation ----- */
   const nav = {
     init() {
       document.querySelectorAll('.sidebar-nav-item').forEach(btn => btn.addEventListener('click', () => this.switchTab(btn.dataset.tab)));
@@ -1063,7 +1083,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Dashboard ----- */
   const dashboard = {
     cardsMeta: [
       { key: 'in_gym_now', accent: 'var(--amber)', accentSoft: 'rgba(245,158,11,.14)', icon: 'flame', titleKey: 'stat_in_gym', subKey: 'stat_in_gym_sub' },
@@ -1118,7 +1137,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Members ----- */
   const members = {
     _lastRendered: [],
     currentList() { return this._lastRendered; },
@@ -1206,23 +1224,38 @@ const App = (() => {
     openRenew(id, name) {
       document.getElementById('renew_mid').value = id;
       document.getElementById('renewModalTitle').textContent = `${i18n.t('renew_title_prefix')} ${name} (#${id})`;
+      
+      // تفريغ الحقول دائماً لمنع انتقال أرقام متدرب إلى آخر
+      document.getElementById('renew_w').value = '';
+      document.getElementById('renew_h').value = '';
+      document.getElementById('renew_fat').value = '';
+      document.getElementById('renew_mus').value = '';
+
       plans.fillSelect('renew_plan');
       ui.openModal('renewModal');
     },
     async submitRenew() {
       const id = document.getElementById('renew_mid').value;
+      const plan = document.getElementById('renew_plan').value;
+      if (!plan) { ui.toast(i18n.t('toast_fill_required'), 'error'); return; }
+
       const payload = {
-        plan: document.getElementById('renew_plan').value,
-        weight: document.getElementById('renew_w').value,
-        height: document.getElementById('renew_h').value,
-        fat: document.getElementById('renew_fat').value,
-        muscle: document.getElementById('renew_mus').value
+        plan: plan,
+        weight: document.getElementById('renew_w').value.trim() || null,
+        height: document.getElementById('renew_h').value.trim() || null,
+        fat: document.getElementById('renew_fat').value.trim() || null,
+        muscle: document.getElementById('renew_mus').value.trim() || null
       };
       try {
         await api.send(`/api/members/${id}/renew`, 'POST', payload);
         ui.toast(i18n.t('toast_renewed'), 'success');
         ui.closeModal('renewModal');
-        this.load(); memberships.load(); dashboard.load();
+        this.load(); 
+        memberships.load(); 
+        dashboard.load();
+        if (state.currentTrainerId) {
+          trainers.openProfile(state.currentTrainerId);
+        }
       } catch (e) { ui.toast(e.message, 'error'); }
     },
     async freeze(id) {
@@ -1256,7 +1289,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Trainers ----- */
   const trainers = {
     async load() {
       ui.skeletonCards('trainers_cards', 3);
@@ -1312,8 +1344,24 @@ const App = (() => {
     },
     async openProfile(id) {
       state.currentTrainerId = id;
+      state.currentTrainerTrainees = [];
+
+      // تصفير وتفريغ الحقول لحظياً قبل الجلب لمنع ظهور بيانات كابتن سابق
+      document.getElementById('tr_prof_name').textContent = '—';
+      document.getElementById('tr_prof_spec').textContent = '';
+      document.getElementById('tr_prof_id').textContent = '';
+      document.getElementById('tr_prof_phone').textContent = '—';
+      document.getElementById('tr_prof_salary').textContent = '$0.00';
+      document.getElementById('tr_prof_att_days').textContent = '—';
+      document.getElementById('tr_prof_presence_badge').textContent = '';
+      document.getElementById('tr_prof_trainees_table').innerHTML = `
+        <tr><td colspan="6" class="text-center py-6 text-slate-500 font-bold"><div class="skel" style="height:14px;width:50%;margin:auto"></div></td></tr>
+      `;
+
+      ui.openModal('trainerProfileModal');
+
       try {
-        const p = await api.get(`/api/trainers/${id}/profile`);
+        const p = await api.get(`/api/trainers/${id}/profile?t=${Date.now()}`);
         document.getElementById('tr_prof_name').textContent = p.name;
         document.getElementById('tr_prof_spec').textContent = p.specialization;
         document.getElementById('tr_prof_id').textContent = `#${p.id}`;
@@ -1327,22 +1375,69 @@ const App = (() => {
         badge.style.color = p.is_present_now ? '#6ee7a0' : 'var(--muted)';
         btn.classList.toggle('hidden', !!p.is_present_now);
 
+        state.currentTrainerTrainees = p.trainees || [];
         const tbody = document.getElementById('tr_prof_trainees_table');
-        tbody.innerHTML = (!p.trainees || !p.trainees.length)
-          ? `<tr><td colspan="6" class="text-center py-4 text-slate-500">${i18n.t('no_trainees_yet')}</td></tr>`
-          : p.trainees.map(tr => {
+        tbody.innerHTML = (!state.currentTrainerTrainees.length)
+          ? `<tr><td colspan="6" class="text-center py-4 text-slate-500 font-bold">${i18n.t('no_trainees_yet')}</td></tr>`
+          : state.currentTrainerTrainees.map((tr, idx) => {
               const pr = tr.progress_before_and_after || {};
+              const hasData = pr.has_data;
+
               return `<tr>
-                <td class="font-bold">${esc(tr.name)}</td><td class="text-slate-400">${esc(tr.phone)}</td>
+                <td class="font-bold">${esc(tr.name)}</td>
+                <td class="text-slate-400">${esc(tr.phone)}</td>
                 <td class="text-emerald-400 font-bold">${tr.attendance_last_3_months} ${i18n.t('days_suffix')}</td>
-                <td class="font-bold">${pr.weight_change !== undefined ? pr.weight_change + 'kg' : '-'}</td>
-                <td class="font-bold text-amber-400">${pr.fat_change !== undefined ? pr.fat_change + '%' : '-'}</td>
-                <td class="font-bold text-emerald-400">${pr.muscle_change !== undefined ? pr.muscle_change + 'kg' : '-'}</td>
+                <td class="font-black text-cyan-400">${tr.remaining_sessions}</td>
+                <td class="text-center">
+                  ${hasData 
+                    ? `<button class="btn btn-xs" style="background:var(--orange-soft);color:var(--orange);" data-act="tr-trainee-tf" data-idx="${idx}">
+                         ${i18n.t('tf_view_comparison')}
+                       </button>`
+                    : `<span class="text-slate-500 text-xs">${i18n.t('tf_no_inbody')}</span>`}
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-emerald btn-xs" data-act="tr-trainee-renew" data-id="${tr.member_id}" data-name="${escAttr(tr.name)}">
+                    ${i18n.t('btn_renew')}
+                  </button>
+                </td>
               </tr>`;
             }).join('');
-        ui.openModal('trainerProfileModal');
         ui.rebuildIcons();
       } catch (e) { ui.toast(e.message, 'error'); }
+    },
+    showTransformation(index) {
+      const trainee = state.currentTrainerTrainees[index];
+      if (!trainee || !trainee.progress_before_and_after || !trainee.progress_before_and_after.has_data) {
+        ui.toast(i18n.t('tf_no_inbody'), 'info');
+        return;
+      }
+      const p = trainee.progress_before_and_after;
+      document.getElementById('tf_modal_trainee_name').textContent = trainee.name;
+      document.getElementById('tf_modal_duration').textContent = `${i18n.t('tf_duration_text')} ${p.tracked_days} ${i18n.t('days_suffix')} · ${i18n.t('tf_total_scans_text')} ${p.total_scans}`;
+
+      document.getElementById('tf_start_date').textContent = p.first_day_date;
+      document.getElementById('tf_start_weight').textContent = `${p.initial.weight} kg`;
+      document.getElementById('tf_start_fat').textContent = `${p.initial.fat} %`;
+      document.getElementById('tf_start_muscle').textContent = `${p.initial.muscle} kg`;
+
+      document.getElementById('tf_latest_date').textContent = p.latest_date;
+      document.getElementById('tf_latest_weight').textContent = `${p.latest.weight} kg`;
+      document.getElementById('tf_latest_fat').textContent = `${p.latest.fat} %`;
+      document.getElementById('tf_latest_muscle').textContent = `${p.latest.muscle} kg`;
+
+      const diffW = document.getElementById('tf_diff_weight');
+      diffW.textContent = `${p.weight_change > 0 ? '+' : ''}${p.weight_change} kg`;
+      diffW.className = `text-sm font-black mt-1 font-mono ${p.weight_change <= 0 ? 'text-emerald-400' : 'text-amber-400'}`;
+
+      const diffF = document.getElementById('tf_diff_fat');
+      diffF.textContent = `${p.fat_change > 0 ? '+' : ''}${p.fat_change} %`;
+      diffF.className = `text-sm font-black mt-1 font-mono ${p.fat_change <= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      const diffM = document.getElementById('tf_diff_muscle');
+      diffM.textContent = `${p.muscle_change > 0 ? '+' : ''}${p.muscle_change} kg`;
+      diffM.className = `text-sm font-black mt-1 font-mono ${p.muscle_change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+
+      ui.openModal('traineeTransformationModal');
     },
     async checkinCurrent() {
       if (!state.currentTrainerId) return;
@@ -1360,7 +1455,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Memberships ----- */
   const memberships = {
     _lastRendered: [],
     currentList() { return this._lastRendered; },
@@ -1393,7 +1487,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Attendance ----- */
   const attendance = {
     toggleCamera() { state.isCameraRunning ? this.stopScan() : this.startScan(); },
     startScan() {
@@ -1461,7 +1554,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Payments ----- */
   const payments = {
     _lastRendered: [],
     currentList() { return this._lastRendered; },
@@ -1541,7 +1633,6 @@ const App = (() => {
     }
   };
 
-  /* ----- Plans (shared reference data + localized selects) ----- */
   const plans = {
     METHODS: [['cash','method_cash'],['visa','method_visa'],['instapay','method_instapay'],['vodafone_cash','method_vodafone']],
     SPECIALTIES: [['Iron / Bodybuilding','spec_iron'],['Fitness','spec_fitness'],['Cardio','spec_cardio'],['Crossfit','spec_crossfit'],['Boxing','spec_boxing']],
@@ -1581,7 +1672,6 @@ const App = (() => {
     }
   };
 
-  /* ----- small render helpers ----- */
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
   function escAttr(s) { return esc(s); }
   function statusBadge(status) {
@@ -1603,7 +1693,6 @@ const App = (() => {
     return entry ? i18n.t(entry[1]) : esc(method);
   }
 
-  /* ----- event wiring (delegation-based, resilient to re-renders) ----- */
   function wireEvents() {
     document.getElementById('langBtnAr').addEventListener('click', () => i18n.setLang('ar'));
     document.getElementById('langBtnEn').addEventListener('click', () => i18n.setLang('en'));
@@ -1638,6 +1727,14 @@ const App = (() => {
     });
     document.getElementById('tr_prof_checkin_btn').addEventListener('click', () => trainers.checkinCurrent());
 
+    // تفويض أحداث جدول متدربي الكابتن (مقارنة قبل وبعد + التجديد المباشر)
+    document.getElementById('tr_prof_trainees_table').addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-act]'); if (!btn) return;
+      const { act, idx, id, name } = btn.dataset;
+      if (act === 'tr-trainee-tf') trainers.showTransformation(parseInt(idx, 10));
+      if (act === 'tr-trainee-renew') members.openRenew(id, name);
+    });
+
     document.getElementById('membershipSearchInput').addEventListener('input', (e) => memberships.filter(e.target.value));
 
     document.getElementById('btnToggleCamera').addEventListener('click', () => attendance.toggleCamera());
@@ -1671,7 +1768,6 @@ const App = (() => {
     });
   }
 
-  /* ----- boot ----- */
   function init() {
     document.documentElement.setAttribute('data-lang', state.lang);
     document.getElementById('langBtnAr').classList.toggle('is-active', state.lang === 'ar');
