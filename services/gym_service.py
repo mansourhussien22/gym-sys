@@ -212,6 +212,7 @@ class Gym:
         if not trainer:
             raise ValueError(f"Trainer #{trainer_id} not found.")
 
+        # تأكيد المقارنة بالأرقام الصريحة لمنع تداخل المتدربين بين الكباتن
         trainees = [
             m for m in self.members 
             if m.trainer_id is not None and int(m.trainer_id) == int(trainer_id)
@@ -227,6 +228,7 @@ class Gym:
             ]
             sub = self.get_latest_membership(m.person_id)
 
+            # تفاصيل أول فحص وآخر فحص لمقارنة التطور الفعلي
             prog = {"has_data": False}
             if hasattr(m, "inbody_history") and m.inbody_history:
                 initial = m.inbody_history[0]
@@ -349,6 +351,7 @@ class Gym:
         if plan_name not in MEMBERSHIP_PLANS:
             raise ValueError(f"Invalid plan selected: '{plan_name}'")
 
+        # معالجة الـ InBody بمرونة: استرجاع الطول السابق تلقائياً لو تُرك فارغاً
         if weight is not None and float(weight) > 0:
             h_val = float(height) if height and float(height) > 0 else None
             if not h_val:
@@ -372,6 +375,7 @@ class Gym:
         has_trainer = member.trainer_id is not None
         cost = self.calculate_plan_cost(plan_name, has_trainer)
 
+        # التجديد الآمن: إذا كان الاشتراك منتهياً يبدأ فوراً من تاريخ اليوم
         today = datetime.now().date()
         active_sub = self.get_active_membership(member_id)
 

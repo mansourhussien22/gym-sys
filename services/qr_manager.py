@@ -1,34 +1,21 @@
 import os
-import io
 import qrcode
 from typing import Optional
 
 
 class QRManager:
-    QR_FOLDER = os.path.abspath("data/qrcodes")
+    QR_FOLDER = "data/qrcodes"
 
     @classmethod
-    def generate_qr(cls, user_id: int, token: str, role: str = "member") -> str:
+    def generate_qr(cls, user_id: int, token: str, role: str = "user") -> str:
         os.makedirs(cls.QR_FOLDER, exist_ok=True)
         file_path = os.path.join(cls.QR_FOLDER, f"{role}_{user_id}.png")
         qr = qrcode.QRCode(box_size=10, border=2)
-        qr.add_data(str(token))
+        qr.add_data(token)
         qr.make(fit=True)
         img = qr.make_image(fill_color="black", back_color="white")
         img.save(file_path)
         return file_path
-
-    @classmethod
-    def get_qr_bytes(cls, token: str) -> io.BytesIO:
-        """توليد الصورة مباشرة في الذاكرة لضمان سرعة الإرسال ومنع أخطاء مسارات الملفات"""
-        qr = qrcode.QRCode(box_size=10, border=2)
-        qr.add_data(str(token))
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="black", back_color="white")
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        buf.seek(0)
-        return buf
 
     @classmethod
     def decode_qr_image(cls, image_path: str) -> str:
